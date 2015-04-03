@@ -1,0 +1,26 @@
+Index: project.xml
+===================================================================
+RCS file: /cvs/qdox/qdox/project.xml,v
+retrieving revision 1.46
+diff -u -r1.46 project.xml
+--- project.xml	14 Aug 2006 23:43:43 -0000	1.46
++++ project.xml	15 Aug 2006 18:45:03 -0000
+@@ -4,7 +4,8 @@
+     <!ENTITY oslash "&#248;">
+ ]>
+ 
+-<project>
++<project xmlns="http://maven.apache.org/POM/3.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++    xsi:schemaLocation="http://maven.apache.org/POM/3.0.0 http://maven.apache.org/maven-v3_0_0.xsd">
+ 
+   <pomVersion>3</pomVersion>
+ 
+@@ -150,8 +151,6 @@
+       </excludes>
+     </unitTest>
+ 
+-    <jars/>
+-
+   </build>
+ 
+   <reports>

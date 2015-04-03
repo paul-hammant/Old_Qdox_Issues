@@ -1,0 +1,18 @@
+Index: maven.xml
+===================================================================
+RCS file: /cvs/qdox/qdox/maven.xml,v
+retrieving revision 1.16
+diff -r1.16 maven.xml
+36a37,40
+>         <j:when test="${os.startsWith('Mac OS X')}">
+>           <property name="qdox.byaccj.executable" 
+>                     value="${basedir}/bootstrap/yacc.macosx" />
+>         </j:when>
+Index: project.xml
+===================================================================
+RCS file: /cvs/qdox/qdox/project.xml,v
+retrieving revision 1.43
+diff -r1.43 project.xml
+179,180d178
+<     <jars/>
+< 

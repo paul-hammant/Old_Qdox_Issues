@@ -1,0 +1,40 @@
+? QDOX-100.patch
+Index: project.xml
+===================================================================
+RCS file: /cvs/qdox/qdox/project.xml,v
+retrieving revision 1.43
+diff -u -r1.43 project.xml
+--- project.xml	2 Nov 2004 01:57:43 -0000	1.43
++++ project.xml	13 Aug 2006 21:05:46 -0000
+@@ -4,7 +4,8 @@
+     <!ENTITY oslash "&#248;">
+ ]>
+ 
+-<project>
++<project xmlns="http://maven.apache.org/POM/3.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++    xsi:schemaLocation="http://maven.apache.org/POM/3.0.0 http://maven.apache.org/maven-v3_0_0.xsd">
+ 
+   <pomVersion>3</pomVersion>
+ 
+@@ -38,9 +39,9 @@
+   <distributionSite>beaver.codehaus.org</distributionSite>
+ 
+   <repository>
+-    <connection>scm:cvs:pserver:anonymous@cvs.qdox.codehaus.org:/home/projects/qdox/scm:qdox</connection>
+-    <developerConnection>scm:cvs:ext:${maven.username}@cvs.qdox.codehaus.org:/home/projects/qdox/scm:qdox</developerConnection>
+-    <url>http://cvs.qdox.codehaus.org/viewrep/qdox</url>   
++    <connection>scm:cvs:pserver:anonymous@cvs.qdox.codehaus.org:/cvs/qdox:qdox</connection>
++    <developerConnection>scm:cvs:ext:${maven.username}@cvs.qdox.codehaus.org:/cvs/qdox:qdox</developerConnection>
++    <url>http://cvs.qdox.codehaus.org/browse/qdox</url>
+   </repository>
+   
+   <mailingLists>
+@@ -176,8 +177,6 @@
+       </excludes>
+     </unitTest>
+ 
+-    <jars/>
+-
+   </build>
+ 
+   <reports>

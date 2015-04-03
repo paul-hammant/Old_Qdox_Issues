@@ -1,0 +1,812 @@
+Index: src/grammar/parser.y
+===================================================================
+--- src/grammar/parser.y	(revision 545)
++++ src/grammar/parser.y	(working copy)
+@@ -56,10 +56,10 @@
+ file: | file { line = lexer.getLine(); } filepart;
+ 
+ // And a filepart is a package/import statement, javadoc comment, or class declaration.
+-filepart: package | import | javadoc | class | enum | SEMI;
++filepart: annotation { builder.addAnnotation((Annotation) $1); } | package | import | javadoc | class | enum | SEMI;
+ 
+ // Package statement
+-package: PACKAGE fullidentifier SEMI { builder.addPackage($2); };
++package: PACKAGE fullidentifier SEMI { builder.addPackage(new PackageDef($2, line)); };
+ 
+ // Import statement
+ import: IMPORT fullidentifier SEMI { builder.addImport($2); } |
+Index: src/java/com/thoughtworks/qdox/JavaDocBuilder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/JavaDocBuilder.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/JavaDocBuilder.java	(working copy)
+@@ -17,6 +17,7 @@
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
++import com.thoughtworks.qdox.parser.structs.PackageDef;
+ import com.thoughtworks.qdox.parser.structs.TypeDef;
+ 
+ import java.io.File;
+@@ -157,7 +158,7 @@
+ 
+             // Set the package name and class name
+             String packageName = getPackageName(name);
+-            binaryBuilder.addPackage(packageName);
++            binaryBuilder.addPackage(new PackageDef(packageName));
+ 
+             ClassDef classDef = new ClassDef();
+             classDef.name = getClassName(name);
+Index: src/java/com/thoughtworks/qdox/junit/APITestCase.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/junit/APITestCase.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/junit/APITestCase.java	(working copy)
+@@ -1,6 +1,7 @@
+ package com.thoughtworks.qdox.junit;
+ 
+ import com.thoughtworks.qdox.JavaDocBuilder;
++import com.thoughtworks.qdox.model.AbstractBaseJavaEntity;
+ import com.thoughtworks.qdox.model.AbstractJavaEntity;
+ import com.thoughtworks.qdox.model.JavaClass;
+ import com.thoughtworks.qdox.model.JavaField;
+@@ -37,8 +38,8 @@
+      */
+     private static Comparator ENTITY_COMPARATOR = new Comparator() {
+         public int compare(Object o1, Object o2) {
+-            AbstractJavaEntity entity1 = (AbstractJavaEntity) o1;
+-            AbstractJavaEntity entity2 = (AbstractJavaEntity) o2;
++            AbstractBaseJavaEntity entity1 = (AbstractBaseJavaEntity) o1;
++            AbstractBaseJavaEntity entity2 = (AbstractBaseJavaEntity) o2;
+             return entity1.getName().compareTo(entity2.getName());
+         }
+     };
+Index: src/java/com/thoughtworks/qdox/model/AbstractBaseJavaEntity.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/AbstractBaseJavaEntity.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/AbstractBaseJavaEntity.java	(revision 0)
+@@ -0,0 +1,48 @@
++package com.thoughtworks.qdox.model;
++
++import java.io.Serializable;
++
++public class AbstractBaseJavaEntity implements Serializable {
++
++	protected String name;
++	private Annotation[] annotations = new Annotation[0];
++	private int lineNumber = -1;
++	protected JavaClassParent parent;
++
++	public AbstractBaseJavaEntity() {
++		super();
++	}
++
++	public int getLineNumber() {
++		return lineNumber;
++	}
++
++	public String getName() {
++	    return name;
++	}
++
++	public Annotation[] getAnnotations() {
++	    return annotations;
++	}
++
++	public void setName(String name) {
++	    this.name = name;
++	}
++
++	public void setAnnotations(Annotation[] annotations) {
++	    this.annotations = annotations;
++	}
++
++	public void setLineNumber(int lineNumber) {
++	    this.lineNumber = lineNumber;
++	}
++
++	public JavaClassParent getParent() { 
++	    return parent; 
++	}
++
++	public void setParent(JavaClassParent parent) { 
++	    this.parent = parent;
++	}
++
++}
+\ No newline at end of file
+Index: src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java	(working copy)
+@@ -1,29 +1,15 @@
+ package com.thoughtworks.qdox.model;
+ 
+-import java.io.Serializable;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.Iterator;
+ import java.util.List;
+ 
+-public abstract class AbstractJavaEntity implements Serializable, Comparable {
++public abstract class AbstractJavaEntity extends AbstractBaseJavaEntity implements Comparable {
+ 
+-    protected String name;
+     protected List modifiers = new ArrayList();
+     private String comment;
+     private DocletTag[] tags = new DocletTag[0];
+-    private Annotation[] annotations = new Annotation[0];
+-    private JavaClassParent parent;
+-    private int lineNumber = -1;
+-
+-    public int getLineNumber() {
+-    	return lineNumber;
+-    }
+-
+-    public String getName() {
+-        return name;
+-    }
+-
+     /**
+      * Return list of modifiers as Strings.
+      * (public, private, protected, final, abstract, static)
+@@ -40,11 +26,6 @@
+         return tags;
+     }
+ 
+-    public Annotation[] getAnnotations()
+-    {
+-        return annotations;
+-    }
+-
+     public DocletTag[] getTagsByName(String name) {
+         List specifiedTags = new ArrayList();
+         for (int i = 0; i < tags.length; i++) {
+@@ -128,10 +109,6 @@
+ 
+     protected abstract void writeBody(IndentBuffer result);
+ 
+-    public void setName(String name) {
+-        this.name = name;
+-    }
+-
+     public void setModifiers(String[] modifiers) {
+         this.modifiers = Arrays.asList(modifiers);
+     }
+@@ -145,10 +122,6 @@
+         tagList.toArray(this.tags);
+     }
+ 
+-    public void setAnnotations(Annotation[] annotations) {
+-        this.annotations = annotations;
+-    }
+-
+     //helper methods for querying the modifiers
+     public boolean isAbstract() {
+         return isModifierPresent("abstract");
+@@ -236,20 +209,8 @@
+         }
+     }
+     
+-    public JavaClassParent getParent() { 
+-        return parent; 
+-    } 
+- 
+     public JavaSource getSource() { 
+         return parent.getParentSource(); 
+     }
+ 
+-    public void setLineNumber(int lineNumber) {
+-        this.lineNumber = lineNumber;
+-    }
+-    
+-    public void setParent(JavaClassParent parent) { 
+-        this.parent = parent;
+-    }
+-
+ }
+Index: src/java/com/thoughtworks/qdox/model/Annotation.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/Annotation.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/model/Annotation.java	(working copy)
+@@ -31,10 +31,10 @@
+      */
+     private final Map namedParameters = new LinkedHashMap();
+ 
+-    private AbstractJavaEntity context;
++    private AbstractBaseJavaEntity context;
+ 
+     public Annotation(Type type,
+-            AbstractJavaEntity context,
++            AbstractBaseJavaEntity context,
+             Map namedParameters,
+             int lineNumber)
+ 	{
+@@ -85,7 +85,7 @@
+     	return namedParameters;
+     }
+ 
+-    public final AbstractJavaEntity getContext() {
++    public final AbstractBaseJavaEntity getContext() {
+         return context;
+     }
+ 
+@@ -109,7 +109,7 @@
+         return (AnnotationValue) properties.get( name );
+     }
+ 
+-    public void setContext( AbstractJavaEntity context ) {
++    public void setContext( AbstractBaseJavaEntity context ) {
+         this.context = context;
+     }
+ 
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationFieldRef.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationFieldRef.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationFieldRef.java	(working copy)
+@@ -2,6 +2,7 @@
+ 
+ import java.util.StringTokenizer;
+ 
++import com.thoughtworks.qdox.model.AbstractBaseJavaEntity;
+ import com.thoughtworks.qdox.model.AbstractJavaEntity;
+ import com.thoughtworks.qdox.model.JavaClass;
+ import com.thoughtworks.qdox.model.JavaField;
+@@ -13,7 +14,7 @@
+ 
+     private final String name;
+ 
+-    private AbstractJavaEntity context;
++    private AbstractBaseJavaEntity context;
+ 
+     private JavaField field;
+ 
+@@ -61,11 +62,11 @@
+         return getName();
+     }
+ 
+-    public AbstractJavaEntity getContext() {
++    public AbstractBaseJavaEntity getContext() {
+         return this.context;
+     }
+ 
+-    public void setContext( AbstractJavaEntity context ) {
++    public void setContext( AbstractBaseJavaEntity context ) {
+         this.context = context;
+     }
+ 
+Index: src/java/com/thoughtworks/qdox/model/DefaultDocletTag.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/DefaultDocletTag.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/model/DefaultDocletTag.java	(working copy)
+@@ -12,10 +12,10 @@
+ 
+     private String[] parameters;
+     private Map namedParameters;
+-    private AbstractJavaEntity context;
++    private AbstractBaseJavaEntity context;
+ 
+     public DefaultDocletTag(String name, String value, 
+-                            AbstractJavaEntity context, 
++                            AbstractBaseJavaEntity context, 
+                             int lineNumber) 
+     {
+         this.name = name;
+@@ -54,7 +54,7 @@
+         return (String) getNamedParameterMap().get(key);
+     }
+ 
+-    public final AbstractJavaEntity getContext() {
++    public final AbstractBaseJavaEntity getContext() {
+         return context;
+     }
+ 
+Index: src/java/com/thoughtworks/qdox/model/DefaultDocletTagFactory.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/DefaultDocletTagFactory.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/model/DefaultDocletTagFactory.java	(working copy)
+@@ -8,7 +8,7 @@
+ 
+     public DocletTag createDocletTag(
+         String tag, String text, 
+-        AbstractJavaEntity context, int lineNumber
++        AbstractBaseJavaEntity context, int lineNumber
+     ) {
+         return new DefaultDocletTag(tag, text, context, lineNumber);
+     }
+Index: src/java/com/thoughtworks/qdox/model/DocletTag.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/DocletTag.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/model/DocletTag.java	(working copy)
+@@ -46,6 +46,6 @@
+      * @return the language element to which this tag applies
+      * @since 1.4
+      */
+-    AbstractJavaEntity getContext();
++    AbstractBaseJavaEntity getContext();
+ 
+ }
+Index: src/java/com/thoughtworks/qdox/model/DocletTagFactory.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/DocletTagFactory.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/model/DocletTagFactory.java	(working copy)
+@@ -13,7 +13,7 @@
+      */ 
+     DocletTag createDocletTag(
+         String tag, String text, 
+-        AbstractJavaEntity context, int lineNumber
++        AbstractBaseJavaEntity context, int lineNumber
+     );
+ 
+     DocletTag createDocletTag(String tag, String text);
+Index: src/java/com/thoughtworks/qdox/model/JavaClass.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/JavaClass.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/model/JavaClass.java	(working copy)
+@@ -205,7 +205,7 @@
+         return ((parent == null) ? null : parent.getParentSource());
+     }
+ 
+-    public String getPackage() {
++    public JavaPackage getPackage() {
+         return getParentSource().getPackage();
+     }
+ 
+Index: src/java/com/thoughtworks/qdox/model/JavaPackage.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/JavaPackage.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/JavaPackage.java	(revision 0)
+@@ -0,0 +1,40 @@
++package com.thoughtworks.qdox.model;
++
++
++public class JavaPackage extends AbstractBaseJavaEntity {
++
++	private String name;
++	private Annotation[] annotations = new Annotation[0];
++	private int lineNumber = -1;
++
++	public JavaPackage() {
++	}
++
++	public JavaPackage(String name) {
++		this.name= name;
++	}
++
++	public String getName() {
++		return name;
++	}
++
++	public void setName(String name) {
++		this.name = name;
++	}
++
++	public Annotation[] getAnnotations() {
++		return annotations;
++	}
++
++	public void setAnnotations(Annotation[] annotations) {
++		this.annotations = annotations;
++	}
++
++	public int getLineNumber() {
++		return lineNumber;
++	}
++
++	public void setLineNumber(int lineNumber) {
++		this.lineNumber = lineNumber;
++	}
++}
+Index: src/java/com/thoughtworks/qdox/model/JavaSource.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/JavaSource.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/model/JavaSource.java	(working copy)
+@@ -28,7 +28,7 @@
+         PRIMITIVE_TYPES.add("void");
+     }
+ 
+-    private String packge;
++    private JavaPackage packge;
+     private List imports = new LinkedList();
+     private String[] importsArray;
+     private List classes = new LinkedList();
+@@ -69,11 +69,11 @@
+         return new File(url.getFile());
+     }
+ 
+-    public String getPackage() {
++    public JavaPackage getPackage() {
+         return packge;
+     }
+ 
+-    public void setPackage(String packge) {
++    public void setPackage(JavaPackage packge) {
+         this.packge = packge;
+     }
+ 
+@@ -118,7 +118,7 @@
+         // package statement
+         if (packge != null) {
+             result.write("package ");
+-            result.write(packge);
++            result.write(packge.getName());
+             result.write(';');
+             result.newline();
+             result.newline();
+@@ -284,7 +284,7 @@
+ 
+     public String getClassNamePrefix() {
+         if (getPackage() == null) return "";
+-        return getPackage() + ".";
++        return getPackage().getName() + ".";
+     }
+ 
+     public JavaSource getParentSource() {
+Index: src/java/com/thoughtworks/qdox/model/ModelBuilder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(working copy)
+@@ -14,6 +14,7 @@
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
++import com.thoughtworks.qdox.parser.structs.PackageDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
+ import com.thoughtworks.qdox.parser.structs.TypeDef;
+ 
+@@ -45,8 +46,11 @@
+         currentAnnoDefs = new ArrayList();
+     }
+ 
+-    public void addPackage(String packageName) {
+-        source.setPackage(packageName);
++    public void addPackage(PackageDef packageDef) {
++    	JavaPackage jPackage = new JavaPackage(packageDef.name);
++    	jPackage.setLineNumber(packageDef.lineNumber);
++    	setAnnotations(jPackage);
++        source.setPackage(jPackage); //@todo introduce PackageDef?
+     }
+ 
+     public void addImport(String importName) {
+@@ -249,7 +253,7 @@
+         currentClass.addField(currentField);
+     }
+ 
+-    private void setAnnotations( final AbstractJavaEntity entity ) {
++    private void setAnnotations( final AbstractBaseJavaEntity entity ) {
+         if( !currentAnnoDefs.isEmpty() ) {
+             AnnotationVisitor visitor = new RecursiveAnnotationVisitor() {
+                 public Object visitAnnotation( Annotation annotation ) {
+Index: src/java/com/thoughtworks/qdox/parser/Builder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/parser/Builder.java	(revision 545)
++++ src/java/com/thoughtworks/qdox/parser/Builder.java	(working copy)
+@@ -5,12 +5,13 @@
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
++import com.thoughtworks.qdox.parser.structs.PackageDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
+ import com.thoughtworks.qdox.parser.structs.TypeDef;
+ 
+ public interface Builder {
+ 
+-    void addPackage(String packageName);
++    void addPackage(PackageDef packageDef);
+ 
+     void addImport(String importName);
+ 
+Index: src/java/com/thoughtworks/qdox/parser/structs/PackageDef.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/parser/structs/PackageDef.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/parser/structs/PackageDef.java	(revision 0)
+@@ -0,0 +1,20 @@
++package com.thoughtworks.qdox.parser.structs;
++
++public class PackageDef extends LocatedDef {
++
++	public String name = "";
++	
++	public PackageDef(String name) {
++		this.name = name;
++	}
++	
++	public PackageDef(String name, int lineNumber) {
++		this.name = name;
++		this.lineNumber = lineNumber;
++	}
++	
++	public boolean equals(Object obj) {
++		PackageDef packageDef = (PackageDef) obj;
++		return packageDef.name.equals(name);
++	}
++}
+Index: src/test/com/thoughtworks/qdox/AnnotationsModelTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/AnnotationsModelTest.java	(revision 545)
++++ src/test/com/thoughtworks/qdox/AnnotationsModelTest.java	(working copy)
+@@ -9,6 +9,7 @@
+ import com.thoughtworks.qdox.model.JavaClass;
+ import com.thoughtworks.qdox.model.JavaField;
+ import com.thoughtworks.qdox.model.JavaMethod;
++import com.thoughtworks.qdox.model.JavaPackage;
+ import com.thoughtworks.qdox.model.annotation.AnnotationAdd;
+ import com.thoughtworks.qdox.model.annotation.AnnotationConstant;
+ import com.thoughtworks.qdox.model.annotation.AnnotationFieldRef;
+@@ -297,6 +298,20 @@
+         assertAnnotationExpression( "(long)(short)1", new Long( 1 ) );
+         assertAnnotationExpression( "(int)((short)1 + (long)3)", new Integer( 4 ) );
+     }
++    
++    //from Qdox-98
++    public void testPackageWithAnnotation() throws Exception {
++    	String source = "@javax.xml.bind.annotation.XmlSchema(namespace = \"http://docs.oasis-open.org/wsn/br-2\")\n" +
++    			"package org.oasis_open.docs.wsn.br_2;\n" +
++    			"public class Foo {}";
++    	builder.addSource(new StringReader(source));
++    	JavaPackage jPackage = builder.getClasses()[0].getPackage();
++    	assertEquals("org.oasis_open.docs.wsn.br_2", jPackage.getName());
++    	assertEquals("javax.xml.bind.annotation.XmlSchema", jPackage.getAnnotations()[0].getType().getValue());
++    	assertEquals(2, jPackage.getLineNumber());
++    	
++    	
++    }
+ 
+     // http://jira.codehaus.org/browse/QDOX-135
+     public void testAnnotationInMethodParamList() {
+Index: src/test/com/thoughtworks/qdox/ant/AbstractQdoxTaskTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/ant/AbstractQdoxTaskTest.java	(revision 545)
++++ src/test/com/thoughtworks/qdox/ant/AbstractQdoxTaskTest.java	(working copy)
+@@ -45,7 +45,7 @@
+             // Tag factory that returns tags with "aslak." prefixed to their "original" name.
+             // Not useful at all, only to test that we can actually plug in any tag factory.
+             return new DocletTagFactory() {
+-                public DocletTag createDocletTag(String tag, String text, AbstractJavaEntity context, int lineNumber) {
++                public DocletTag createDocletTag(String tag, String text, AbstractBaseJavaEntity context, int lineNumber) {
+                     return new DefaultDocletTag("aslak." + tag, text);
+                 }
+                 public DocletTag createDocletTag(String tag, String text) {
+Index: src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	(revision 545)
++++ src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	(working copy)
+@@ -142,7 +142,7 @@
+ 
+         List results = builder.search(new Searcher() {
+             public boolean eval(JavaClass cls) {
+-                return cls.getPackage().equals("com.blah");
++                return cls.getPackage().getName().equals("com.blah");
+             }
+         });
+ 
+Index: src/test/com/thoughtworks/qdox/model/JavaClassTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/model/JavaClassTest.java	(revision 545)
++++ src/test/com/thoughtworks/qdox/model/JavaClassTest.java	(working copy)
+@@ -342,12 +342,12 @@
+     }
+ 
+     public void testQualifiedType() throws Exception {
+-        src.setPackage("com.thoughtworks.qdox");
++        src.setPackage(new JavaPackage("com.thoughtworks.qdox"));
+ 
+         cls.setName("MyClass");
+ 
+         assertEquals("MyClass", cls.getName());
+-        assertEquals("com.thoughtworks.qdox", cls.getPackage());
++        assertEquals("com.thoughtworks.qdox", cls.getPackage().getName());
+         assertEquals("com.thoughtworks.qdox.MyClass",
+                 cls.getFullyQualifiedName());
+         assertTrue(cls.asType().isResolved());
+@@ -355,13 +355,13 @@
+     }
+ 
+     public void testGetClassNamePrefix() {
+-        src.setPackage("foo.bar");
++        src.setPackage(new JavaPackage("foo.bar"));
+         cls.setName("Stanley");
+         assertEquals("foo.bar.Stanley$", cls.getClassNamePrefix());
+     }
+     
+     public void testInnerClass() throws Exception {
+-        src.setPackage("foo.bar");
++        src.setPackage(new JavaPackage("foo.bar"));
+ 
+         JavaClass outer = new JavaClass();
+         outer.setName("Outer");
+@@ -372,7 +372,7 @@
+         outer.addClass(inner);
+ 
+         assertEquals("Inner", inner.getName());
+-        assertEquals("foo.bar", inner.getPackage());
++        assertEquals("foo.bar", inner.getPackage().getName());
+         assertEquals("foo.bar.Outer$Inner",
+                 inner.getFullyQualifiedName());
+     }
+@@ -460,7 +460,7 @@
+     }
+     
+     public void testResolveTypeInnerClass() throws Exception {
+-        src.setPackage("p");
++        src.setPackage(new JavaPackage("p"));
+         cls.setName("X");
+         JavaClass innerClass = new JavaClass();
+         innerClass.setName("DogFood");
+Index: src/test/com/thoughtworks/qdox/model/JavaSourceTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/model/JavaSourceTest.java	(revision 545)
++++ src/test/com/thoughtworks/qdox/model/JavaSourceTest.java	(working copy)
+@@ -57,7 +57,7 @@
+         JavaClass cls = new JavaClass();
+         cls.setName("MyClass");
+         source.addClass(cls);
+-        source.setPackage("com.thing");
++        source.setPackage(new JavaPackage("com.thing"));
+         String expected = ""
+                 + "package com.thing;\n"
+                 + "\n"
+@@ -104,7 +104,7 @@
+         cls.setName("MyClass");
+         source.addClass(cls);
+         source.addImport("java.util.*");
+-        source.setPackage("com.moo");
++        source.setPackage(new JavaPackage("com.moo"));
+         String expected = ""
+                 + "package com.moo;\n"
+                 + "\n"
+@@ -118,7 +118,7 @@
+ 
+     public void testGetClassNamePrefix() {
+         assertEquals("", source.getClassNamePrefix());
+-        source.setPackage("foo.bar");
++        source.setPackage(new JavaPackage("foo.bar"));
+         assertEquals("foo.bar.", source.getClassNamePrefix());
+        }
+     
+@@ -160,13 +160,13 @@
+     }
+ 
+     public void testResolveSamePackage() throws Exception {
+-        source.setPackage("foo");
++        source.setPackage(new JavaPackage("foo"));
+         source.getClassLibrary().add("foo.Bar");
+         assertEquals("foo.Bar", source.resolveType("Bar"));
+     }
+ 
+     public void testResolveFullyQualifiedTrumpsSamePackage() throws Exception {
+-        source.setPackage("foo");
++        source.setPackage(new JavaPackage("foo"));
+         source.getClassLibrary().add("foo.Bar");
+         source.getClassLibrary().add("open.Bar");
+         assertEquals("open.Bar", source.resolveType("open.Bar"));
+@@ -200,13 +200,13 @@
+     }
+ 
+     public void testResolveFullyQualifiedInnerClass() throws Exception {
+-        source.setPackage("foo");
++        source.setPackage(new JavaPackage("foo"));
+         source.getClassLibrary().add("foo.Bar$Fnord");
+         assertEquals("foo.Bar$Fnord", source.resolveType("foo.Bar.Fnord"));
+     }
+ 
+     public void testResolvePartiallySpecifiedInnerClass() throws Exception {
+-        source.setPackage("foo");
++        source.setPackage(new JavaPackage("foo"));
+         source.addImport("java.util.*");
+         source.getClassLibrary().add("foo.Bar$Fnord");
+         source.getClassLibrary().addDefaultLoader();
+Index: src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java	(revision 545)
++++ src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java	(working copy)
+@@ -1,14 +1,16 @@
+ package com.thoughtworks.qdox.model;
+ 
++import java.util.Arrays;
++
++import junit.framework.TestCase;
++
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
++import com.thoughtworks.qdox.parser.structs.PackageDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
+ import com.thoughtworks.qdox.parser.structs.TypeDef;
+ 
+-import java.util.Arrays;
+-import junit.framework.TestCase;
+-
+ public class ModelBuilderTest extends TestCase {
+ 
+     private ModelBuilder builder;
+@@ -113,7 +115,7 @@
+         assertEquals(0, source.getClasses()[1].getImplements().length);
+ 
+         //Add another class and see if Another gets resolved
+-        builder.addPackage("com.thoughtworks");
++        builder.addPackage(new PackageDef("com.thoughtworks"));
+         ClassDef anotherCls = new ClassDef();
+         anotherCls.name = "Another";
+         builder.beginClass(anotherCls);
+@@ -266,7 +268,7 @@
+     }
+ 
+     public void testInnerClass() throws Exception {
+-        builder.addPackage("xyz");
++        builder.addPackage(new PackageDef("xyz"));
+ 
+         ClassDef outerDef = new ClassDef();
+         outerDef.name = "Outer";
+@@ -750,9 +752,9 @@
+     }
+ 
+     public void testJavaSourceWithPackage() throws Exception {
+-        builder.addPackage("com.blah.thing");
++        builder.addPackage(new PackageDef("com.blah.thing"));
+         JavaSource result = builder.getSource();
+-        assertEquals("com.blah.thing", result.getPackage());
++        assertEquals("com.blah.thing", result.getPackage().getName());
+     }
+ 
+     public void testJavaSourceNoImports() throws Exception {
+Index: src/test/com/thoughtworks/qdox/parser/MockBuilder.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/parser/MockBuilder.java	(revision 545)
++++ src/test/com/thoughtworks/qdox/parser/MockBuilder.java	(working copy)
+@@ -8,6 +8,7 @@
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
++import com.thoughtworks.qdox.parser.structs.PackageDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
+ import com.thoughtworks.qdox.parser.structs.TypeDef;
+ 
+@@ -33,11 +34,11 @@
+         myAddPackageCalls.setExpected(calls);
+     }
+ 
+-    public void addExpectedAddPackageValues(String arg0) {
++    public void addExpectedAddPackageValues(PackageDef arg0) {
+         myAddPackageParameter0Values.addExpected(arg0);
+     }
+ 
+-    public void addPackage(String arg0) {
++    public void addPackage(PackageDef arg0) {
+         myAddPackageCalls.inc();
+         myAddPackageParameter0Values.addActual(arg0);
+     }
+@@ -158,4 +159,5 @@
+     public Type createType(TypeDef name) {
+     	return null;
+     }
++
+ }
+Index: src/test/com/thoughtworks/qdox/parser/ParserTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/parser/ParserTest.java	(revision 545)
++++ src/test/com/thoughtworks/qdox/parser/ParserTest.java	(working copy)
+@@ -7,6 +7,7 @@
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
++import com.thoughtworks.qdox.parser.structs.PackageDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
+ import com.thoughtworks.qdox.parser.structs.TypeDef;
+ import com.thoughtworks.qdox.parser.structs.WildcardTypeDef;
+@@ -35,7 +36,7 @@
+         setupLex(0);
+ 
+         // expectations
+-        builder.addExpectedAddPackageValues("mypackage");
++        builder.addExpectedAddPackageValues(new PackageDef("mypackage"));
+ 
+         // execute
+         Parser parser = new Parser(lexer, builder);
+@@ -61,7 +62,7 @@
+         setupLex(0);
+ 
+         // expectations
+-        builder.addExpectedAddPackageValues("com.blah.thingy.x");
++        builder.addExpectedAddPackageValues(new PackageDef("com.blah.thingy.x"));
+ 
+         // execute
+         Parser parser = new Parser(lexer, builder);

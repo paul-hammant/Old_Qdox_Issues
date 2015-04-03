@@ -1,0 +1,29 @@
+Index: src/grammar/lexer.flex
+===================================================================
+--- src/grammar/lexer.flex	(revision 510)
++++ src/grammar/lexer.flex	(working copy)
+@@ -16,6 +16,7 @@
+ 
+     private int classDepth = 0;
+     private int nestingDepth = 0;
++    private int annotationDepth = 0;
+     private int assignmentDepth = 0;
+     private int stateDepth = 0;
+     private int[] stateStack = new int[10];
+@@ -119,6 +120,7 @@
+         nestingDepth++;
+ 		
+         if( annotation ) {
++        	annotationDepth = nestingDepth;
+             pushState(ANNOTATION);
+         }
+ 
+@@ -241,7 +243,7 @@
+ 
+ <ANNOTATION> {
+ 	"("                 { ++ nestingDepth; return Parser.PARENOPEN; }
+-    ")"                 { if( --nestingDepth == classDepth) { popState(); } return Parser.PARENCLOSE; }
++    ")"                 { if( nestingDepth-- == annotationDepth) { popState(); } return Parser.PARENCLOSE; }
+ 
+ 	","                 { return Parser.COMMA; }
+     "="                 { return Parser.EQUALS; }

@@ -1,0 +1,15 @@
+Index: pom.xml
+===================================================================
+--- pom.xml	(revision 612)
++++ pom.xml	(working copy)
+@@ -12,6 +12,10 @@
+   </description>
+   <inceptionYear>2002</inceptionYear>
+ 
++  <prerequisites>
++    <maven>2.0.10</maven>
++  </prerequisites>
++
+   <licenses>
+     <license>
+       <name>The Apache Software License, Version 2.0</name>

@@ -1,0 +1,408 @@
+Index: src/grammar/lexer.flex
+===================================================================
+--- src/grammar/lexer.flex	(revision 609)
++++ src/grammar/lexer.flex	(working copy)
+@@ -89,8 +89,10 @@
+ Id						= ([:jletter:]|{UnicodeChar}) ([:jletterdigit:]|{UnicodeChar})*
+ Annotation = "@" {WhiteSpace}* {Id} ("."{Id})* {WhiteSpace}*
+ 
+-%state JAVADOC CODEBLOCK PARENBLOCK ASSIGNMENT STRING CHAR SINGLELINECOMMENT MULTILINECOMMENT ANNOTATION ANNOSTRING ANNOCHAR ENUM
++JavaDocEnd = [ \t]* "*"+ "/" [ \t\r\n]*
+ 
++%state JAVADOC JAVADOCTAG JAVADOCLINE JAVADOCMIDDLELINE JAVADOCENDLINE CODEBLOCK PARENBLOCK ASSIGNMENT STRING CHAR SINGLELINECOMMENT MULTILINECOMMENT ANNOTATION ANNOSTRING ANNOCHAR ENUM
++
+ %%
+ 
+ <YYINITIAL, ENUM> {
+@@ -184,9 +186,16 @@
+ 
+     "/*" "*"+           { 
+         pushState(JAVADOC); 
+-        javaDocNewLine = true; 
++        pushState(JAVADOCLINE); 
+         return Parser.JAVADOCSTART;
+     }
++    "/**" [* \t]* "@" {
++        yypushback(1); 
++        pushState(JAVADOC); 
++        pushState(JAVADOCTAG);
++        return Parser.JAVADOCSTART;
++    }
++    
+ 
+     "=" {WhiteSpace}* { 
+         assignmentDepth = nestingDepth;
+@@ -237,21 +246,30 @@
+           }
+ }
+ <JAVADOC> {
+-    "*"+ "/"            { popState(); return Parser.JAVADOCEND; }
+-    ^ [ \t]* "*"+ / [^/*] { /* ignore */ }
+-    {Eol}               { javaDocNewLine = true; return Parser.JAVADOCEOL; }
+-    {CommentChar}* "*"+ / [ \t\r\n] {
+-        return Parser.JAVADOCTOKEN;
+-    }
+-    {CommentChar}+ { 
+-        int token = Parser.JAVADOCTOKEN;
+-        if (javaDocNewLine && yycharat(0) == '@') {
+-                token = Parser.JAVADOCTAG;
+-        }
+-        javaDocNewLine = false;
+-        return token;
+-    }
++    {JavaDocEnd}       { popState(); return Parser.JAVADOCEND; }
++    ^ [ \t]* "*"+ [ \t]*  { pushState(JAVADOCLINE);  }
++    ^ [ \t]* "*"+ [* \t]* / "@" { pushState(JAVADOCTAG);  }
+ }
++<JAVADOCLINE> {
++  {JavaDocEnd}     { popState();popState();  return Parser.JAVADOCEND; }
++  .* {JavaDocEnd}  { yypushback(text().length()); popState(); pushState(JAVADOCENDLINE); }
++  ~{JavaDocEnd}    { yypushback(text().length()); popState(); pushState(JAVADOCMIDDLELINE); }
++}
++<JAVADOCTAG> {
++  "@" [^ \t\n\r]+ { return Parser.JAVADOCTAG; }
++  [ \t]+      { popState(); pushState(JAVADOCLINE); }
++  {Eol}       { popState(); return Parser.JAVADOCLINE; }
++}
++<JAVADOCMIDDLELINE> {
++  ~{Eol} { popState(); return Parser.JAVADOCLINE; }      
++}
++<JAVADOCENDLINE> {
++ ~{JavaDocEnd} {  java.util.regex.Matcher m = java.util.regex.Pattern.compile( "[ \\t]*[*]+/" ).matcher( text() );
++                  m.find();
++                  yypushback(yylength() - m.start());
++                  popState(); return Parser.JAVADOCLINE;
++               }
++}
+ 
+ <CODEBLOCK> {
+      "{"  { 
+Index: src/grammar/parser.y
+===================================================================
+--- src/grammar/parser.y	(revision 609)
++++ src/grammar/parser.y	(working copy)
+@@ -20,12 +20,12 @@
+ %token TILDE AMPERSAND VERTLINE CIRCUMFLEX
+ %token VOID
+ %token QUERY COLON AT
+-%token JAVADOCSTART JAVADOCEND JAVADOCEOL
++%token JAVADOCSTART JAVADOCEND
+ %token CODEBLOCK PARENBLOCK
+ %token BYTE SHORT INT LONG CHAR FLOAT DOUBLE BOOLEAN
+ 
+ // strongly typed tokens/types
+-%token <sval> IDENTIFIER JAVADOCTAG JAVADOCTOKEN
++%token <sval> IDENTIFIER JAVADOCTAG JAVADOCLINE 
+ %token <sval> BOOLEAN_LITERAL
+ %token <sval> INTEGER_LITERAL
+ %token <sval> LONG_LITERAL
+@@ -78,11 +78,8 @@
+ javadoctokens: | javadoctokens javadoctoken;
+ 
+ javadoctoken: 
+-    JAVADOCTOKEN {
++    JAVADOCLINE {
+         appendToBuffer($1);
+-    } |
+-    JAVADOCEOL {
+-        textBuffer.append('\n');
+     };
+ 
+ javadoctags: | javadoctags javadoctag;
+Index: src/test/com/thoughtworks/qdox/parser/LexerTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/parser/LexerTest.java	(revision 609)
++++ src/test/com/thoughtworks/qdox/parser/LexerTest.java	(working copy)
+@@ -313,22 +313,18 @@
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+ 
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n",lexer);
+         assertLex(Parser.JAVADOCTAG, "@hello", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "world", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "world\n", lexer);
+ 
+         assertLex(Parser.JAVADOCTAG, "@a", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "b", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "c", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "d", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "b c d\n", lexer);
+ 
+         assertLex(Parser.JAVADOCTAG, "@bye", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n",lexer);
+ 
+         assertLex(Parser.JAVADOCTAG, "@bye:bye", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n",lexer);
+ 
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+@@ -340,7 +336,7 @@
+         assertLex(Parser.JAVADOCSTART, lexer);
+ 
+         assertLex(Parser.JAVADOCTAG, "@hello", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "world", lexer);
++        assertLex(Parser.JAVADOCLINE, "world", lexer);
+ 
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+@@ -352,12 +348,25 @@
+         assertLex(Parser.JAVADOCSTART, lexer);
+         
+         assertLex(Parser.JAVADOCTAG, "@foo", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "bar", lexer);
++        assertLex(Parser.JAVADOCLINE, "bar", lexer);
+         
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+     }
+ 
++    public void testDeepJavadocTag() throws Exception {
++        String in = "  /** *  *** * @m x \n" +
++        		"*/";
++        Lexer lexer = new JFlexLexer(new StringReader(in));
++        assertLex(Parser.JAVADOCSTART, lexer);
++        
++        assertLex(Parser.JAVADOCTAG, "@m", lexer);
++        assertLex(Parser.JAVADOCLINE, "x \n", lexer);
++        
++        assertLex(Parser.JAVADOCEND, lexer);
++        assertLex(0, lexer); 
++    }
++
+     public void testDocCommentContainingAtSymbols() throws Exception {
+         String in = ""
+             + "/**\n"
+@@ -369,19 +378,11 @@
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+ 
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "joe@truemesh.com", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "{@link", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "here}.", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "me", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "@home", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "geeks", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "@", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "play", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "joe@truemesh.com\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "{@link here}.\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "me @home\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "geeks @ play\n", lexer);
+ 
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+@@ -397,16 +398,10 @@
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+ 
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "5", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "*", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "4", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "SELECT", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "COUNT(*)", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "**stars**everywhere**", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "5 * 4\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "SELECT COUNT(*)\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "**stars**everywhere** \n", lexer);
+ 
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+@@ -419,9 +414,8 @@
+                 + " *****/";
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "blah", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "blah\n", lexer);
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+     }
+@@ -431,7 +425,7 @@
+                 + "/***blah***/public";
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "blah", lexer);
++        assertLex(Parser.JAVADOCLINE, "blah", lexer);
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(Parser.PUBLIC, lexer);
+         assertLex(0, lexer);
+@@ -449,16 +443,12 @@
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+         
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "simple", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "indented", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "nospace", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "multistar", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "simple\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "indented\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "nospace\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "multistar\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "\n", lexer);
+         
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+Index: src/test/com/thoughtworks/qdox/parser/ParserTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/parser/ParserTest.java	(revision 609)
++++ src/test/com/thoughtworks/qdox/parser/ParserTest.java	(working copy)
+@@ -171,9 +171,7 @@
+ 
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "This");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "great!");
++        setupLex(Parser.JAVADOCLINE, "This is great!");
+         setupLex(Parser.JAVADOCEND);
+         setupLex(0);
+ 
+@@ -194,8 +192,7 @@
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+         setupLex(Parser.JAVADOCTAG, "@This");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "great!");
++        setupLex(Parser.JAVADOCLINE, "is great!");
+         setupLex(Parser.JAVADOCEND);
+         setupLex(0);
+ 
+@@ -236,9 +233,7 @@
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+         setupLex(Parser.JAVADOCTAG, "@This");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "great!");
+-        setupLex(Parser.JAVADOCTOKEN, "Mmmkay.");
++        setupLex(Parser.JAVADOCLINE, "is great! Mmmkay.");
+         setupLex(Parser.JAVADOCEND);
+         setupLex(0);
+ 
+@@ -262,10 +257,9 @@
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+         setupLex(Parser.JAVADOCTAG, "@This");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "great!");
++        setupLex(Parser.JAVADOCLINE, "is great!");
+         setupLex(Parser.JAVADOCTAG, "@mock");
+-        setupLex(Parser.JAVADOCTOKEN, "generate");
++        setupLex(Parser.JAVADOCLINE, "generate");
+         setupLex(Parser.JAVADOCEND);
+         setupLex(0);
+ 
+@@ -287,16 +281,11 @@
+ 
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "Welcome!");
+-        setupLex(Parser.JAVADOCTOKEN, "Here");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "my");
+-        setupLex(Parser.JAVADOCTOKEN, "class.");
++        setupLex(Parser.JAVADOCLINE, "Welcome! Here is my class.");
+         setupLex(Parser.JAVADOCTAG, "@This");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "great!");
++        setupLex(Parser.JAVADOCLINE, "is great!");
+         setupLex(Parser.JAVADOCTAG, "@mock");
+-        setupLex(Parser.JAVADOCTOKEN, "generate");
++        setupLex(Parser.JAVADOCLINE, "generate");
+         setupLex(Parser.JAVADOCEND);
+         setupLex(0);
+ 
+@@ -789,11 +778,11 @@
+ 
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc1");
++        setupLex(Parser.JAVADOCLINE, "javadoc1");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc2");
++        setupLex(Parser.JAVADOCLINE, "javadoc2");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.PACKAGE);
+@@ -801,11 +790,11 @@
+         setupLex(Parser.SEMI);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc3");
++        setupLex(Parser.JAVADOCLINE, "javadoc3");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc4");
++        setupLex(Parser.JAVADOCLINE, "javadoc4");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.IMPORT);
+@@ -815,11 +804,11 @@
+         setupLex(Parser.SEMI);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc5");
++        setupLex(Parser.JAVADOCLINE, "javadoc5");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc6");
++        setupLex(Parser.JAVADOCLINE, "javadoc6");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.IMPORT);
+@@ -829,11 +818,11 @@
+         setupLex(Parser.SEMI);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc7");
++        setupLex(Parser.JAVADOCLINE, "javadoc7");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc8");
++        setupLex(Parser.JAVADOCLINE, "javadoc8");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.PUBLIC);
+@@ -843,11 +832,11 @@
+         setupLex(Parser.BRACECLOSE);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc9");
++        setupLex(Parser.JAVADOCLINE, "javadoc9");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc10");
++        setupLex(Parser.JAVADOCLINE, "javadoc10");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(0);

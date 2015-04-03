@@ -1,0 +1,78 @@
+Index: qdox/project.xml
+===================================================================
+--- qdox/project.xml	(revision 439)
++++ qdox/project.xml	(working copy)
+@@ -21,12 +21,10 @@
+   </organization>
+ 
+   <shortDescription>QDox - Quick JavaDoc Scanner</shortDescription>
+-  <description>
+-    QDox is a high speed, small footprint parser for extracting
++  <description>QDox is a high speed, small footprint parser for extracting
+     class/interface/method definitions from source files complete with
+     JavaDoc @tags. It is designed to be used by active code generators or
+-    documentation tools.
+-  </description>
++    documentation tools.</description>
+ 
+   <url>http://qdox.codehaus.org/</url>
+   <issueTrackingUrl>http://jira.codehaus.org/browse/QDOX</issueTrackingUrl>
+Index: qdox/src/grammar/parser.y
+===================================================================
+--- qdox/src/grammar/parser.y	(revision 439)
++++ qdox/src/grammar/parser.y	(working copy)
+@@ -286,11 +286,11 @@
+     paramlist COMMA param;
+ 
+ param: 
+-    opt_parammodifiers type varargs arrayidentifier {
+-        param.name = $4.name;
+-        param.type = $2.name; 
+-        param.dimensions = $2.dimensions + $4.dimensions;
+-        param.isVarArgs = $3;
++    opt_annotations opt_parammodifiers type varargs arrayidentifier {
++        param.name = $5.name;
++        param.type = $3.name;
++        param.dimensions = $3.dimensions + $5.dimensions;
++        param.isVarArgs = $4;
+         mth.params.add(param);
+         param = new FieldDef();
+     };
+@@ -299,10 +299,11 @@
+     /* empty */ { $$ = false; } |
+     DOTDOTDOT   { $$ = true; } ;
+ 
+-opt_parammodifiers: | 
++opt_annotations: | opt_annotations annotation;
++
++opt_parammodifiers: |
+     opt_parammodifiers modifier { param.modifiers.add($2); };
+ 
+-
+ %%
+ 
+ private Lexer lexer;
+Index: qdox/src/test/com/thoughtworks/qdox/AnnotationsTest.java
+===================================================================
+--- qdox/src/test/com/thoughtworks/qdox/AnnotationsTest.java	(revision 439)
++++ qdox/src/test/com/thoughtworks/qdox/AnnotationsTest.java	(working copy)
+@@ -30,6 +30,19 @@
+         assertEquals("snort", fooClass.getMethods()[0].getName());
+     }
+ 
++    public void testShouldIgnoreMethodParameterAnnotation() {
++        String source = ""
++            + "public class X {\n"
++            + "    public void setX(@name String x) {}\n"
++            + "}\n";
++
++        builder.addSource(new StringReader(source));
++        JavaClass fooClass = builder.getClassByName("X");
++        assertEquals("X", fooClass.getName());
++        assertEquals(1, fooClass.getMethods().length);
++        assertEquals("setX", fooClass.getMethods()[0].getName());
++    }
++
+     public void testShouldIgnoreComplexClassAnnotations() {
+         String source = "" 
+             + "@Fnord(pi = 3.14, e = m*c*c)\n"

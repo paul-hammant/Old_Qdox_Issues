@@ -1,0 +1,19 @@
+Index: qdox-1.6.3/src/grammar/parser.y
+===================================================================
+--- qdox-1.6.3/src/grammar/parser.y	(revision 483)
++++ qdox-1.6.3/src/grammar/parser.y	(working copy)
+@@ -118,12 +118,12 @@
+ 	fullidentifier DOT CLASS { $$ = $1 + ".class"; } |
+ 	ANNOSTRING			{
+ 		// would prefer to set this as a returned token in flex... how?
+-		String str = lexer.getCodeBody();
++		String str = lexer.getCodeBody().trim();
+ 		str = str.substring( 1, str.length() - 1 );
+ 		$$ = str;
+ 	} |
+ 	ANNOCHAR			{
+-		String str = lexer.getCodeBody();
++		String str = lexer.getCodeBody().trim();
+ 		str = str.substring( 1, str.length() - 1 );
+ 		$$ = str;
+ 	};

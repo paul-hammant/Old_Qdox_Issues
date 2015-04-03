@@ -1,0 +1,19 @@
+Index: src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java,v
+retrieving revision 1.41
+diff -r1.41 JavaDocBuilderTest.java
+621a622,634
+> 	public void testJiraQdox40() {
+> 		String sourceCode = ""
+> 			+ "package foo.bar;\n"
+> 			+ "public class Outer {\n"
+> 			+ "class WrappedInternalContextAdapter implements InternalContextAdapter {\n"
+> 			+ "}"
+> 			+ "}";
+>         JavaDocBuilder builder = new JavaDocBuilder();
+>         builder.addSource(new StringReader(sourceCode));
+>         JavaClass clazz = builder.getClassByName("foo.bar.Outer");
+> 
+> 		JavaClass[] subclasses = clazz.getDerivedClasses();
+> 	}

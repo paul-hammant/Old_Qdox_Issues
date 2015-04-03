@@ -1,0 +1,37 @@
+Index: src/java/com/thoughtworks/qdox/model/JavaClass.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/JavaClass.java	(revision 632)
++++ src/java/com/thoughtworks/qdox/model/JavaClass.java	(working copy)
+@@ -215,6 +215,12 @@
+         return (getParentSource() != null ? getParentSource().getPackage() : javaPackage);
+     }
+ 
++    public String getPackageName() {
++        JavaPackage javaPackage = getPackage();
++        String packageName = (javaPackage != null && javaPackage.getName() != null) ? javaPackage.getName() : "";
++        return packageName;
++    }
++
+     public String getFullyQualifiedName() {
+         return (getParent() != null ? (getParent().getClassNamePrefix()) : javaPackage != null ? (javaPackage.getName()+".") : "") + getName();
+     }
+Index: src/test/com/thoughtworks/qdox/model/JavaClassTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/model/JavaClassTest.java	(revision 632)
++++ src/test/com/thoughtworks/qdox/model/JavaClassTest.java	(working copy)
+@@ -350,6 +350,7 @@
+ 
+         assertEquals("MyClass", cls.getName());
+         assertEquals("com.thoughtworks.qdox", cls.getPackage().getName());
++        assertEquals("com.thoughtworks.qdox", cls.getPackageName());
+         assertEquals("com.thoughtworks.qdox.MyClass",
+                 cls.getFullyQualifiedName());
+         assertTrue(cls.asType().isResolved());
+@@ -375,6 +376,7 @@
+ 
+         assertEquals("Inner", inner.getName());
+         assertEquals("foo.bar", inner.getPackage().getName());
++        assertEquals("foo.bar", inner.getPackageName());
+         assertEquals("foo.bar.Outer$Inner",
+                 inner.getFullyQualifiedName());
+     }

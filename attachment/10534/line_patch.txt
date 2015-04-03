@@ -1,0 +1,43 @@
+Index: Lexer.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/parser/Lexer.java,v
+retrieving revision 1.4
+diff -u -r1.4 Lexer.java
+--- Lexer.java	22 Jul 2003 00:37:33 -0000	1.4
++++ Lexer.java	31 Jul 2003 04:42:51 -0000
+@@ -7,5 +7,7 @@
+     int lex() throws IOException;
+ 
+     String text();
++    
++    int getLine();
+ 
+ }
+
+
+Index: lexer.flex
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/grammar/lexer.flex,v
+retrieving revision 1.19
+diff -u -r1.19 lexer.flex
+--- lexer.flex	10 Mar 2003 21:22:37 -0000	1.19
++++ lexer.flex	31 Jul 2003 04:43:11 -0000
+@@ -9,6 +9,7 @@
+ %implements Lexer
+ %byaccj
+ %unicode
++%line
+ 
+ %{
+ 
+@@ -25,6 +26,10 @@
+ 
+ 	public int lex() throws java.io.IOException {
+ 		return yylex();
++	}
++	
++	public int getLine() {
++		return yyline;
+ 	}
+ 
+ 	private void pushState(int newState) {

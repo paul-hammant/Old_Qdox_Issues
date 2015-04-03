@@ -1,0 +1,74 @@
+Index: qdox/src/test-resources/build.xml
+===================================================================
+--- qdox/src/test-resources/build.xml	(revision 0)
++++ qdox/src/test-resources/build.xml	(revision 0)
+@@ -0,0 +1,39 @@
++<project default="all">
++  <target name="qdox148">
++    <mkdir dir="qdox148"/>
++    <echo file="qdox148/SuperClass.java">
++package qdox148;
++
++public class SuperClass
++{
++
++    public SuperClass()
++    {
++    }
++
++    /*
++     * Public API clients are not supposed to call this directly and this method might even never be called
++     * indirectly depending on the client's use case. As such, OptionalClass is an optional dependency that
++     * could be excluded from the class path.
++     */
++    SuperClass( OptionalClass arg )
++    {
++    }
++
++}
++    </echo>
++    <echo file="qdox148/OptionalClass.java">
++package qdox148;
++
++public class OptionalClass
++{
++
++}
++    </echo>
++    <javac srcdir="${basedir}" destdir="${basedir}" debug="on" source="1.4" encoding="UTF-8"/>
++    <delete file="qdox148/SuperClass.java"/>
++    <delete file="qdox148/OptionalClass.java"/>
++    <delete file="qdox148/OptionalClass.class"/>
++  </target>
++  <target name="all" depends="qdox148"/>
++</project>
+
+Property changes on: qdox\src\test-resources\build.xml
+___________________________________________________________________
+Added: svn:keywords
+   + Author Date Id Revision
+Added: svn:eol-style
+   + native
+
+Index: qdox/src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java
+===================================================================
+--- qdox/src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	(revision 562)
++++ qdox/src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	(working copy)
+@@ -1024,4 +1024,17 @@
+         JavaMethod javaMethod = javaClass.getMethods()[0];
+         assertEquals("\"test blah blah\"", javaMethod.getAnnotations()[0].getNamedParameter("description").toString());
+     }
++
++    public void testJiraQdox148() throws Exception {
++        // TODO: Add a flag/method to the builder to remove the default class loaders from the class library
++        JavaDocBuilder builder = new JavaDocBuilder();
++        String sourceCode = "" +
++                "public class Foo extends qdox148.SuperClass {\n" +
++                "}";
++        JavaSource javaSource = builder.addSource(new StringReader(sourceCode));
++        JavaClass javaClass = javaSource.getClasses()[0];
++        assertNotNull(javaClass.getSuperJavaClass());
++        // if we made it this far, we didn't die due to a LinkageError on qdox148.OptionalClass :-) 
++    }
++
+ }

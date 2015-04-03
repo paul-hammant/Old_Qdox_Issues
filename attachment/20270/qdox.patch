@@ -1,0 +1,48 @@
+Index: src/grammar/parser.y
+===================================================================
+RCS file: /home/projects/qdox/scm/qdox/src/grammar/parser.y,v
+retrieving revision 1.61
+diff -u -r1.61 parser.y
+--- src/grammar/parser.y	15 Aug 2005 14:30:46 -0000	1.61
++++ src/grammar/parser.y	27 Apr 2006 00:51:16 -0000
+@@ -300,7 +300,8 @@
+     DOTDOTDOT   { $$ = true; } ;
+ 
+ opt_parammodifiers: | 
+-    opt_parammodifiers modifier { param.modifiers.add($2); };
++    opt_parammodifiers modifier { param.modifiers.add($2); } |
++    opt_parammodifiers annotation;
+ 
+ 
+ %%
+Index: src/test/com/thoughtworks/qdox/AnnotationsTest.java
+===================================================================
+RCS file: /home/projects/qdox/scm/qdox/src/test/com/thoughtworks/qdox/AnnotationsTest.java,v
+retrieving revision 1.4
+diff -u -r1.4 AnnotationsTest.java
+--- src/test/com/thoughtworks/qdox/AnnotationsTest.java	15 Aug 2005 14:30:47 -0000	1.4
++++ src/test/com/thoughtworks/qdox/AnnotationsTest.java	27 Apr 2006 00:45:32 -0000
+@@ -1,6 +1,8 @@
+ package com.thoughtworks.qdox;
+ 
+ import com.thoughtworks.qdox.model.JavaClass;
++
++import java.io.FileReader;
+ import java.io.StringReader;
+ import junit.framework.TestCase;
+ 
+@@ -98,4 +100,14 @@
+         builder.addSource(new StringReader(source));
+         assertEquals("Foo", builder.getClassByName("Foo").getName());
+     }    
++    
++    public void testShouldIgnoreAttributeAnnotation() {
++        String source = ""
++            + "public interface Foo {\n"
++            + "   String echo(@WebParam java.lang.String msg);\n"
++            + "}\n";
++        builder.addSource(new StringReader(source));
++        assertEquals("Foo", builder.getClassByName("Foo").getName());
++    }
++    
+ }

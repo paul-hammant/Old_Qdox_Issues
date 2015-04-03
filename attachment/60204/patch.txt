@@ -1,0 +1,13 @@
+Index: src/grammar/lexer.flex
+===================================================================
+--- src/grammar/lexer.flex	(revision 1516)
++++ src/grammar/lexer.flex	(working copy)
+@@ -44,7 +44,7 @@
+     private int assignmentDepth = 0;
+     private int stateDepth = 0;
+     private int codeblockDepth = 0;
+-    private int[] stateStack = new int[10];
++    private int[] stateStack = new int[50];
+     private int braceMode = CODEBLOCK;
+     private int parenMode = -1;
+     private StringBuffer codeBody = new StringBuffer(8192);

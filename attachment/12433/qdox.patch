@@ -1,0 +1,11 @@
+Index: src/java/com/thoughtworks/qdox/model/JavaClass.java
+===================================================================
+RCS file: /home/projects/qdox/scm/qdox/src/java/com/thoughtworks/qdox/model/JavaClass.java,v
+retrieving revision 1.41
+diff -r1.41 JavaClass.java
+7a8
+> import java.util.TreeMap;
+452c453
+<         Map beanPropertyMap = new HashMap();
+---
+>         Map beanPropertyMap = new TreeMap();

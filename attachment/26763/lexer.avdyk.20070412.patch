@@ -1,0 +1,11 @@
+--- lexer.flex~	2006-10-28 15:01:38.000000000 +0000
++++ lexer.flex	2007-04-12 07:58:26.000000000 +0000
+@@ -48,7 +48,7 @@
+     }
+ 
+     private void pushState(int newState) {
+-        stateStack[stateDepth++] = yy_lexical_state;
++        stateStack[stateDepth++] = zzLexicalState;
+         yybegin(newState);
+     }
+ 

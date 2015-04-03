@@ -1,0 +1,22 @@
+168a169
+> 
+186a188,197
+>     String parent = null;
+>     String dotParent = null;
+>     String child = null;
+>     int dollarIdx = 0;
+>     if ((dollarIdx = typeName.indexOf('$')) > 0) {
+>       parent = typeName.substring(0, dollarIdx);
+>       dotParent = "." + parent;
+>       child = typeName.substring(dollarIdx);
+>     }
+> 
+195a207,214
+>       else {
+>         if (parent != null && (imports[i].equals(parent) || imports[i].endsWith(dotParent))) {
+>           String fqn = imports[i] + child;
+>           if (getClassLibrary().contains(fqn)) {
+>             return fqn;
+>           }
+>         }
+>       }

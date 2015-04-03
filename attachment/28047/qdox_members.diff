@@ -1,0 +1,28 @@
+Index: qdox/src/java/com/thoughtworks/qdox/JavaDocBuilder.java
+===================================================================
+--- qdox/src/java/com/thoughtworks/qdox/JavaDocBuilder.java	(Revision 483)
++++ qdox/src/java/com/thoughtworks/qdox/JavaDocBuilder.java	(Arbeitskopie)
+@@ -186,19 +186,15 @@
+             }
+ 
+             // add the methods
+-            Method[] methods = clazz.getMethods();
++            Method[] methods = clazz.getDeclaredMethods();
+             for (int i = 0; i < methods.length; i++) {
+                 // Ignore methods defined in superclasses
+-                if (methods[i].getDeclaringClass() == clazz) {
+-                    addMethodOrConstructor(methods[i], binaryBuilder);
+-                }
++                addMethodOrConstructor(methods[i], binaryBuilder);
+             }
+ 
+-            Field[] fields = clazz.getFields();
++            Field[] fields = clazz.getDeclaredFields();
+             for (int i = 0; i < fields.length; i++) {
+-                if (fields[i].getDeclaringClass() == clazz) {
+-                    addField(fields[i], binaryBuilder);
+-                }
++                addField(fields[i], binaryBuilder);
+             }
+ 
+             binaryBuilder.endClass();

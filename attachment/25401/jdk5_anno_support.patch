@@ -1,0 +1,867 @@
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/grammar/lexer.flex
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/grammar/lexer.flex	(revision 457)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/grammar/lexer.flex	(working copy)
+@@ -22,6 +22,7 @@
+     private boolean javaDocNewLine;
+     private boolean javaDocStartedContent;
+     private StringBuffer codeBody = new StringBuffer(8192);
++	private boolean annoExpected;
+     private boolean newMode;
+     private boolean enumMode;
+     private boolean appendingToCodeBody;
+@@ -67,8 +68,15 @@
+ Eol                     = \r|\n|\r\n
+ WhiteSpace              = {Eol} | [ \t\f]
+ CommentChar             = ( [^ \t\r\n*] | "*"+ [^ \t\r\n/*] )
++IntegerLiteral			= (( [1-9] ([0-9])* ) | ( "0" [xX] ([0-9]|[a-f]|[A-F])+ ) | ( "0" ([0-7])* )) ([lL])?
++Exponent				= [eE] [+-]? ([0-9])+
++FloatLiteral			= ( [0-9]+ ("." [0-9]+)? ({Exponent})? ([fFdD])? ) |
++						  ( "." [0-9]+ ({Exponent})? ([fFdD])? ) |
++						  ( ([0-9])+ {Exponent} ([fFdD])? ) |
++						  ( ([0-9])+ ({Exponent})? [fFdD] )
++Id						= [:jletter:] [:jletterdigit:]*
+ 
+-%state JAVADOC CODEBLOCK PARENBLOCK ASSIGNMENT STRING CHAR SINGLELINECOMMENT MULTILINECOMMENT
++%state JAVADOC CODEBLOCK PARENBLOCK ASSIGNMENT STRING CHAR SINGLELINECOMMENT MULTILINECOMMENT ANNOTATION ANNOSTRING ANNOCHAR
+ 
+ %%
+ 
+@@ -101,6 +109,7 @@
+     "]"                 { nestingDepth--; return Parser.SQUARECLOSE; }
+     "("                 {
+         nestingDepth++;
++		if( annoExpected ) { pushState(ANNOTATION); }
+         if (enumMode) {
+           pushState(PARENBLOCK);
+         } else {
+@@ -113,21 +122,28 @@
+     ">"                 { return Parser.GREATERTHAN; }
+     "&"                 { return Parser.AMPERSAND; }
+     "?"                 { return Parser.QUERY; }
+-    "@"                 { return Parser.AT; }
+ 
++    "@"                 {
++		return Parser.AT;
++	}
++
+     "class"             {
+         classDepth++;
+         return Parser.CLASS; 
+     }
+     "interface"         { 
+         classDepth++;
+-        return Parser.INTERFACE; 
++        return Parser.INTERFACE;
+     }
+     "enum"              {
+         classDepth++;
+         enumMode = true;
+         return Parser.ENUM;
+     }
++	"@" {WhiteSpace}* "interface"		{
++        classDepth++;
++        return Parser.ANNOINTERFACE;
++	}
+ 
+     "{"                 {
+         nestingDepth++;
+@@ -165,10 +181,15 @@
+         pushState(ASSIGNMENT);
+     }
+ 
+-    [:jletter:] [:jletterdigit:]* { 
+-        return Parser.IDENTIFIER; 
++    [:jletter:] [:jletterdigit:]* {
++		annoExpected = false;
++        return Parser.IDENTIFIER;
+     }
+ 
++	"@" {WhiteSpace}* {Id} ( {WhiteSpace}* "." {WhiteSpace}* {Id} )* {
++		annoExpected = true;
++		return Parser.ANNOTATION;
++	}
+ }
+ 
+ <JAVADOC> {
+@@ -202,13 +223,60 @@
+     }
+ }
+ 
++<ANNOTATION> {
++	"("                 { nestingDepth++; return Parser.PARENOPEN; }
++    ")"                 { if( --nestingDepth == classDepth) { popState(); } return Parser.PARENCLOSE; }
++
++	","                 { return Parser.COMMA; }
++    "="                 { return Parser.EQUALS; }
++
++	"{"                 { nestingDepth++; return Parser.BRACEOPEN; }
++    "}"                 { nestingDepth--; return Parser.BRACECLOSE; }
++
++	"\""                { appendingToCodeBody=true; codeBody.append("\""); pushState(ANNOSTRING); }
++    \'                  { appendingToCodeBody=true; codeBody.append("\'"); pushState(ANNOCHAR); }
++
++	"."                 { return Parser.DOT; }
++
++    "<"                 { return Parser.LESSTHAN; }
++    ">"                 { return Parser.GREATERTHAN; }
++    "*"                 { return Parser.STAR; }
++    "/"                 { return Parser.SLASH; }
++    "+"                 { return Parser.PLUS; }
++    "-"                 { return Parser.MINUS; }
++
++	{IntegerLiteral}	{ return Parser.INTEGER_LITERAL; }
++	{FloatLiteral}		{ return Parser.FLOAT_LITERAL; }
++	"true" | "false"	{ return Parser.BOOLEAN_LITERAL; }
++
++	[:jletter:] [:jletterdigit:]* {
++        return Parser.IDENTIFIER;
++    }
++
++	"@" {WhiteSpace}* [:jletter:] [:jletterdigit:]* {
++		return Parser.ANNOTATION;
++	}
++
++	<ANNOSTRING> {
++		"\""            { codeBody.append("\""); popState(); appendingToCodeBody=false; return Parser.ANNOSTRING; }
++		"\\\""          { codeBody.append("\\\""); }
++		"\\\\"          { codeBody.append("\\\\"); }
++	}
++
++	<ANNOCHAR> {
++		\'              { codeBody.append("\'"); popState(); appendingToCodeBody=false; return Parser.ANNOCHAR; }
++		"\\'"           { codeBody.append("\\'"); }
++		"\\\\"          { codeBody.append("\\\\"); }
++	}
++}
++
+ <PARENBLOCK> {
+     "("                 { nestingDepth++; }
+     ")"                 {
+-        nestingDepth--;
++		nestingDepth--;
+         if (nestingDepth == classDepth) {
+             popState();
+-            return Parser.PARENBLOCK;
++			return Parser.PARENBLOCK;
+         }
+     }
+ }
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/grammar/parser.y
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/grammar/parser.y	(revision 457)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/grammar/parser.y	(working copy)
+@@ -2,19 +2,22 @@
+ import com.thoughtworks.qdox.parser.*;
+ import com.thoughtworks.qdox.parser.structs.*;
+ import java.io.IOException;
++import java.util.LinkedList;
+ %}
+ 
+-%token SEMI DOT DOTDOTDOT COMMA STAR EQUALS
++%token SEMI DOT DOTDOTDOT COMMA STAR EQUALS ANNOSTRING ANNOCHAR SLASH PLUS MINUS
+ %token PACKAGE IMPORT PUBLIC PROTECTED PRIVATE STATIC FINAL ABSTRACT NATIVE STRICTFP SYNCHRONIZED TRANSIENT VOLATILE
+-%token CLASS INTERFACE ENUM THROWS EXTENDS IMPLEMENTS SUPER DEFAULT
++%token CLASS INTERFACE ENUM ANNOINTERFACE THROWS EXTENDS IMPLEMENTS SUPER DEFAULT
+ %token BRACEOPEN BRACECLOSE SQUAREOPEN SQUARECLOSE PARENOPEN PARENCLOSE LESSTHAN GREATERTHAN AMPERSAND QUERY AT
+ %token JAVADOCSTART JAVADOCEND JAVADOCEOL
+ %token CODEBLOCK PARENBLOCK
+-%token INTEGER_LITERAL FLOAT_LITERAL
+ 
+ // strongly typed tokens/types
+-%token <sval> IDENTIFIER JAVADOCTAG JAVADOCTOKEN
++%token <sval> IDENTIFIER JAVADOCTAG JAVADOCTOKEN ANNOTATION
++%token <sval> BOOLEAN_LITERAL INTEGER_LITERAL FLOAT_LITERAL
+ %type <sval> fullidentifier modifier classtype typedeclspecifier typename memberend
++%type <sval> annotationValueConstant annotationSymConstant
++%type <oval> annoElementValue
+ %type <ival> dimensions
+ %type <bval> varargs
+ %type <type> type arrayidentifier
+@@ -81,7 +84,7 @@
+ 
+ dimensions:
+     /* empty */ { $$ = 0; }
+-|   dimensions SQUAREOPEN SQUARECLOSE {
++	|   dimensions SQUAREOPEN SQUARECLOSE {
+         $$ = $1 + 1; 
+     };
+ 
+@@ -105,20 +108,82 @@
+     ;
+ 
+ 
+-// ----- ANNOTATIONS 
++// ----- ANNOTATIONS
+ 
++annotationValueConstant:
++	FLOAT_LITERAL		{ $$ = $1; } |
++	INTEGER_LITERAL		{ $$ = $1; } |
++	BOOLEAN_LITERAL		{ $$ = $1; } |
++	fullidentifier		{ $$ = $1; } |
++	fullidentifier DOT CLASS { $$ = $1 + ".class"; } |
++	ANNOSTRING			{
++		// would prefer to set this as a returned token in flex... how?
++		String str = lexer.getCodeBody();
++		str = str.substring( 1, str.length() - 1 );
++		$$ = str;
++	} |
++	ANNOCHAR			{
++		String str = lexer.getCodeBody();
++		str = str.substring( 1, str.length() - 1 );
++		$$ = str;
++	};
++
++annotationSymConstant:
++	LESSTHAN	{ $$ = "<"; } |
++	GREATERTHAN	{ $$ = ">"; } |
++	STAR		{ $$ = "*"; } |
++	SLASH		{ $$ = "/"; } |
++	PLUS		{ $$ = "+"; } |
++	MINUS		{ $$ = "/"; };
++
++annotationValueConstants:
++	annotationValueConstant {
++		annoConstants.add( $1 );
++	} | annotationValueConstants annotationSymConstant annotationValueConstant {
++		annoConstants.add( $2 );
++		annoConstants.add( $3 );
++	};
++
+ annotation:
+-    AT IDENTIFIER |
+-    AT IDENTIFIER PARENOPEN annotationarglist PARENCLOSE;
+-    
+-annotationarglist:
+-    |
+-    annotationarglist COMMA |
+-    annotationarglist fullidentifier |
+-    annotationarglist fullidentifier DOT CLASS |
+-    annotationarglist BRACEOPEN annotationarglist BRACECLOSE; /* array */ |
+-    annotationarglist annotation;
++	{ ano = new AnnoDef(); } annotationWork { builder.addAnnotation(ano); };
+ 
++annotationWork:
++	ANNOTATION {
++        ano.lineNumber = line;
++		ano.name = $1.substring(1).trim();
++	} annoParens;
++
++annoParens:
++	|
++	PARENOPEN annoParenContents PARENCLOSE;
++
++annoParenContents:
++	annoElementValue { ano.args.put( "value", $1 ); } |
++	annoElementValuePairs;
++
++annoElementValuePairs:
++	annoElementValuePair |
++	annoElementValuePairs COMMA annoElementValuePair;
++
++annoElementValuePair:
++	IDENTIFIER EQUALS annoElementValue { ano.args.put( $1, $3 ); };
++
++annoElementValue:
++	PARENOPEN annoElementValue PARENCLOSE { $$ = $2; } |
++	annotationValueConstants { $$ = annoConstants; annoConstants = new LinkedList(); } |
++	{	AnnoDef tmpAno = new AnnoDef();
++		tmpAno.tempAnno = ano;
++		ano = tmpAno;
++	} annotationWork { $$ = ano; ano = ano.tempAnno; } |
++	annoElementValueArrayInitializer { $$ = annoValues; annoValues = new LinkedList(); };
++
++annoElementValueArrayInitializer:
++    BRACEOPEN annoElementValues BRACECLOSE;
++
++annoElementValues:
++	annoElementValue { annoValues.add( $1 ); } |
++	annoElementValues COMMA annoElementValue { annoValues.add( $3 ); };
++
+ // ----- TYPES
+ 
+ type:
+@@ -216,7 +281,7 @@
+ classorinterface: 
+     CLASS { cls.type = ClassDef.CLASS; } | 
+     INTERFACE { cls.type = ClassDef.INTERFACE; } |
+-    AT INTERFACE { cls.type = ClassDef.ANNOTATION_TYPE; };
++    ANNOINTERFACE { cls.type = ClassDef.ANNOTATION_TYPE; };
+ 
+ opt_extends: | EXTENDS extendslist;
+ 
+@@ -344,6 +409,7 @@
+ private StringBuffer textBuffer = new StringBuffer();
+ private ClassDef cls = new ClassDef();
+ private MethodDef mth = new MethodDef();
++private AnnoDef ano = new AnnoDef();
+ private FieldDef param = new FieldDef();
+ private java.util.Set modifiers = new java.util.HashSet();
+ private TypeDef fieldType;
+@@ -351,6 +417,9 @@
+ private int column;
+ private boolean debugLexer;
+ 
++private LinkedList annoConstants = new LinkedList();
++private LinkedList annoValues = new LinkedList();
++
+ private void appendToBuffer(String word) {
+     if (textBuffer.length() > 0) {
+         char lastChar = textBuffer.charAt(textBuffer.length() - 1);
+@@ -407,9 +476,10 @@
+ }
+ 
+ private class Value {
++	Object oval;
+     String sval;
+     int ival;
+-    boolean bval;
++	boolean bval;
+     TypeDef type;
+ }
+ 
+@@ -423,4 +493,4 @@
+     fd.body = body;
+     builder.addField(fd);
+ }
+-            
++
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java	(revision 457)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java	(working copy)
+@@ -12,6 +12,7 @@
+     protected List modifiers = new ArrayList();
+     private String comment;
+     private DocletTag[] tags = new DocletTag[0];
++    private Annotation[] annotations = new Annotation[0];
+     private JavaClassParent parent;
+     private int lineNumber = -1;
+ 
+@@ -39,6 +40,11 @@
+         return tags;
+     }
+ 
++    public Annotation[] getAnnotations()
++    {
++        return annotations;
++    }
++
+     public DocletTag[] getTagsByName(String name) {
+         List specifiedTags = new ArrayList();
+         for (int i = 0; i < tags.length; i++) {
+@@ -139,6 +145,10 @@
+         tagList.toArray(this.tags);
+     }
+ 
++    public void setAnnotations(Annotation[] annotations) {
++        this.annotations = annotations;
++    }
++
+     //helper methods for querying the modifiers
+     public boolean isAbstract() {
+         return isModifierPresent("abstract");
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/Annotation.java
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/Annotation.java	(revision 0)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/Annotation.java	(revision 0)
+@@ -0,0 +1,74 @@
++package com.thoughtworks.qdox.model;
++
++import java.io.Serializable;
++import java.util.HashMap;
++import java.util.Iterator;
++import java.util.Map;
++
++/**
++ * 
++ * @author Eric Redmond
++ */
++public class Annotation implements Serializable
++{
++    private final Type type;
++    private final int lineNumber;
++
++    private Map namedParameters;
++    private AbstractJavaEntity context;
++
++    public Annotation(Type type,
++            AbstractJavaEntity context,
++            Map namedParameters,
++            int lineNumber)
++	{
++		this.type = type;
++		this.context = context;
++    	this.namedParameters = namedParameters == null ? new HashMap(0) : namedParameters;
++		this.lineNumber = lineNumber;
++	}
++
++    /**
++     * @return the annotation type
++     */
++    public Type getType() {
++    	return type;
++    }
++
++    /**
++     * @param key name of a named-parameter
++     * @return the corresponding value,
++     *   or null if no such named-parameter was present
++     */
++    public Object getNamedParameter(String key) {
++    	return namedParameters.get( key );
++    }
++
++    /**
++     * @return a Map containing all the named-parameters
++     */
++    public Map getNamedParameterMap() {
++    	return namedParameters;
++    }
++
++    public final AbstractJavaEntity getContext() {
++        return context;
++    }
++
++    public int getLineNumber() {
++        return lineNumber;
++    }
++
++    public String toString() {
++        StringBuffer result = new StringBuffer();
++        result.append('@');
++        result.append(type.getValue());
++        result.append('(');
++        if( !namedParameters.isEmpty() ) {
++            for(Iterator i = namedParameters.entrySet().iterator(); i.hasNext();) result.append( i.next() + ",");
++            result.deleteCharAt( result.length()-1 );
++        }
++        result.append(')');
++        return result.toString();
++    }
++}
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/JavaClass.java
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/JavaClass.java	(revision 457)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/JavaClass.java	(working copy)
+@@ -18,6 +18,7 @@
+ 
+     private static Type OBJECT = new Type("java.lang.Object");
+     private static Type ENUM = new Type("java.lang.Enum");
++    private static Type ANNOTATION = new Type("java.lang.annotation.Annotation");
+ 
+     private List methods = new LinkedList();
+     private JavaMethod[] methodsArray;
+@@ -27,6 +28,7 @@
+     private JavaClass[] classesArray;
+     private boolean interfce;
+     private boolean isEnum;
++    private boolean isAnnotation;
+ 
+     // Don't access this directly. Use asType() to get my Type
+     private Type type;
+@@ -69,7 +71,7 @@
+ 
+         if (isEnum) {
+             return ENUM;
+-        } else if (!interfce && (superClass == null) && !iAmJavaLangObject) {
++        } else if (!interfce && !isAnnotation && (superClass == null) && !iAmJavaLangObject) {
+             return OBJECT;
+         }
+ 
+@@ -109,7 +111,7 @@
+         writeAccessibilityModifier(result);
+         writeNonAccessibilityModifiers(result);
+ 
+-        result.write(isEnum ? "enum " : interfce ? "interface " : "class ");
++        result.write(isEnum ? "enum " : interfce ? "interface " : isAnnotation ? "@interface " : "class ");
+         result.write(name);
+ 
+         // subclass
+@@ -173,6 +175,10 @@
+         this.isEnum = isEnum;
+     }
+ 
++    public void setAnnotation(boolean isAnnotation) {
++        this.isAnnotation = isAnnotation;
++    }
++
+     public void addMethod(JavaMethod meth) {
+         meth.setParent(this);
+         methods.add(meth);
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/ModelBuilder.java
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(revision 457)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(working copy)
+@@ -1,17 +1,20 @@
+ package com.thoughtworks.qdox.model;
+ 
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.Iterator;
++import java.util.LinkedList;
++import java.util.List;
++import java.util.Map;
++import java.util.Set;
++
+ import com.thoughtworks.qdox.parser.Builder;
++import com.thoughtworks.qdox.parser.structs.AnnoDef;
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
+ 
+-import java.util.ArrayList;
+-import java.util.Iterator;
+-import java.util.LinkedList;
+-import java.util.List;
+-import java.util.Set;
+-
+ /**
+  * @author <a href="mailto:joew@thoughtworks.com">Joe Walnes</a>
+  */
+@@ -21,6 +24,7 @@
+     private final JavaSource source;
+     private JavaClassParent currentParent;
+     private JavaClass currentClass;
++    private List currentAnnoDefs;
+     private String lastComment;
+     private List lastTagSet;
+     private DocletTagFactory docletTagFactory;
+@@ -35,6 +39,7 @@
+         source = new JavaSource();
+         source.setClassLibrary(classLibrary);
+         currentParent = source;
++        currentAnnoDefs = new ArrayList();
+     }
+ 
+     public void addPackage(String packageName) {
+@@ -63,7 +68,9 @@
+         currentClass.setName(def.name);
+         currentClass.setInterface(ClassDef.INTERFACE.equals(def.type));
+         currentClass.setEnum(ClassDef.ENUM.equals(def.type));
++        currentClass.setAnnotation(ClassDef.ANNOTATION_TYPE.equals(def.type));
+ 
++
+         // superclass
+         if (currentClass.isInterface()) {
+             currentClass.setSuperClass(null);
+@@ -92,11 +99,15 @@
+         // javadoc
+         addJavaDoc(currentClass);
+ 
+-        // ignore annotation types (for now)
+-        if (ClassDef.ANNOTATION_TYPE.equals(def.type)) {
+-            return;
+-        }
+-        
++//        // ignore annotation types (for now)
++//        if (ClassDef.ANNOTATION_TYPE.equals(def.type)) {
++//        	System.out.println( currentClass.getFullyQualifiedName() );
++//            return;
++//        }
++
++        // annotations
++        setAnnotations( currentClass );
++
+         currentParent.addClass(currentClass);
+         currentParent = currentClass;
+         classLibrary.add(currentClass.getFullyQualifiedName());
+@@ -180,6 +191,9 @@
+         // javadoc
+         addJavaDoc(currentMethod);
+ 
++        // annotations
++        setAnnotations( currentMethod );
++
+         currentClass.addMethod(currentMethod);
+     }
+ 
+@@ -204,9 +218,59 @@
+         // javadoc
+         addJavaDoc(currentField);
+ 
++        // annotations
++        setAnnotations( currentField );
++
+         currentClass.addField(currentField);
+     }
+ 
++    private void setAnnotations( AbstractJavaEntity entity ) {
++        if( !currentAnnoDefs.isEmpty() ) {
++            Annotation[] annotations = new Annotation[currentAnnoDefs.size()];
++            int index = 0;
++            for (Iterator iter = currentAnnoDefs.iterator(); iter.hasNext();) {
++            	AnnoDef def = (AnnoDef)iter.next();
++            	annotations[index++] = buildAnnotation( def, entity );
++            }
++
++            entity.setAnnotations( annotations );
++            currentAnnoDefs.clear();
++        }
++    }
++
++    private Annotation buildAnnotation( AnnoDef def, AbstractJavaEntity entity ) {
++    	Type annoType = createType(def.name, 0);
++
++    	Map args = new HashMap();
++        for (Iterator iter = def.args.entrySet().iterator(); iter.hasNext();) {
++        	Map.Entry entry = (Map.Entry)iter.next();
++        	Object value = entry.getValue();
++
++        	if( value instanceof AnnoDef ) {
++        		args.put( entry.getKey(), buildAnnotation( (AnnoDef)value, entity ) );
++        	}
++        	else if( value instanceof List ) {
++        		List values = (List)value;
++        		if( values.size() == 1 ) {
++        			// TODO: what about types?
++        			args.put( entry.getKey(), values.get( 0 ) );
++        		}
++        		else {
++        			args.put( entry.getKey(), values );
++        		}
++        	}
++        }
++
++    	Annotation anno = new Annotation( annoType, entity, args, def.lineNumber );
++        return anno;
++    }
++
++
++    // Don't resolve until we need it... class hasn't been defined yet.
++    public void addAnnotation( AnnoDef def ) {
++    	currentAnnoDefs.add( def );
++    }
++
+     public JavaSource getSource() {
+         return source;
+     }
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/parser/Builder.java
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/parser/Builder.java	(revision 457)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/parser/Builder.java	(working copy)
+@@ -1,5 +1,6 @@
+ package com.thoughtworks.qdox.parser;
+ 
++import com.thoughtworks.qdox.parser.structs.AnnoDef;
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+@@ -23,4 +24,5 @@
+ 
+     void addField(FieldDef def);
+ 
++    void addAnnotation(AnnoDef def);
+ }
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/parser/structs/AnnoDef.java
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/parser/structs/AnnoDef.java	(revision 0)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/java/com/thoughtworks/qdox/parser/structs/AnnoDef.java	(revision 0)
+@@ -0,0 +1,34 @@
++package com.thoughtworks.qdox.parser.structs;
++
++import java.util.HashMap;
++import java.util.Iterator;
++import java.util.Map;
++
++public class AnnoDef extends LocatedDef
++{
++    public String name = "";
++    public Map args = new HashMap();
++    public AnnoDef tempAnno = null;	// holds an annotation to construct nested values
++
++    public boolean equals(Object obj) {
++        AnnoDef annoDef = (AnnoDef) obj;
++        return annoDef.name.equals(name) && annoDef.args.equals(args);
++    }
++
++    public int hashCode() {
++        return name.hashCode() + args.hashCode();
++    }
++
++    public String toString() {
++        StringBuffer result = new StringBuffer();
++        result.append('@');
++        result.append(name);
++        result.append('(');
++        if( !args.isEmpty() ) {
++            for(Iterator i = args.entrySet().iterator(); i.hasNext();) result.append( i.next() + ",");
++            result.deleteCharAt( result.length()-1 );
++        }
++        result.append(')');
++        return result.toString();
++    }
++}
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/AnnotationsTest.java
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/AnnotationsTest.java	(revision 457)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/AnnotationsTest.java	(working copy)
+@@ -1,12 +1,21 @@
+ package com.thoughtworks.qdox;
+ 
+-import com.thoughtworks.qdox.model.JavaClass;
+ import java.io.StringReader;
++
+ import junit.framework.TestCase;
+ 
++import com.thoughtworks.qdox.model.JavaClass;
++import com.thoughtworks.qdox.model.Type;
++
+ public class AnnotationsTest extends TestCase {
+ 
+-    private JavaDocBuilder builder = new JavaDocBuilder();
++    private JavaDocBuilder builder;
++    public AnnotationsTest()
++    {
++        builder = new JavaDocBuilder();
++        //builder.setDebugLexer( true );
++        //builder.setDebugParser( true );
++    }
+ 
+     public void testShouldIgnoreSimpleClassAnnotation() {
+         String source = "" 
+@@ -33,6 +42,7 @@
+     public void testShouldIgnoreMethodParameterAnnotation() {
+         String source = ""
+             + "public class X {\n"
++            + "    String field = new String( \"hey\" );\n"
+             + "    public void setX(@name String x) {}\n"
+             + "}\n";
+ 
+@@ -70,10 +80,10 @@
+     }
+ 
+     public void testShouldIgnoreArrayValuedSingleMemberClassAnnotations() {
+-        String source = "" 
+-            + "@Endorsers({\"Children\", \"Unscrupulous dentists\"})\n"
++        String source = "" /** @hey=\"yo\" someval = \"yep\" */
++            + "@ Endorsers({(\"Children\"), \"Unscrupulous dentists\"})\n"
+             + "public class Lollipop {\n"
+-            + "  @Cheese({\"Edam\", \"Gruyere\"})\n"
++            + "  @Cheese( hey=@ano({\"Edam\", \"Gruyere\", 2}), t=5.5f, c=4)\n"
+             + "  void doStuff() { }\n"
+             + "}\n";
+ 
+@@ -83,24 +93,29 @@
+ 
+     public void testShouldIgnoreComplexSingleMemberClassAnnotations() {
+         String source = "" 
+-            + "@Author(@Name(first = \"Joe\", last = \"Hacker\"))\n" // I won't take it personally! ;) -joe
++            + "@Author(@Name(first = \"Joe\", last = true))\n" // I won't take it personally! ;) -joe
+             + "public class BitTwiddle {\n"
+-            + "  @Author(@Name(first = \"Joe\", last = \"Hacker\"))\n"
++            + "  @Author(@Name(first = \'c\', last = 2.5e3f))\n"
+             + "  void doStuff() { }\n"
+             + "}\n";
+ 
+         builder.addSource(new StringReader(source));
+         assertNotNull(builder.getClassByName("BitTwiddle"));
++        assertNotNull( builder.getClassByName("BitTwiddle").getAnnotations()[0].getNamedParameter("value") );
++        assertEquals( "Author", builder.getClassByName("BitTwiddle")
++        	.getMethodBySignature("doStuff", new Type[] {})
++        		.getAnnotations()[0].getType().getValue() );
+     }
+ 
+     public void testShouldIgnoreAnnotationDeclaration() {
+-        String source = "" 
++        String source = "package org.jabba;\n"
++        	+ "@MyAnno\n"
+             + "public @interface Note {\n"
+             + "    String text;\n"
+             + "}\n";
+ 
+         builder.addSource(new StringReader(source));
+-        assertEquals(0, builder.getClasses().length);
++        assertEquals(1, builder.getClasses().length);
+     }
+ 
+     public void testShouldIgnoreAnnotationWithClassType() {
+@@ -138,6 +153,13 @@
+         assertEquals("Person", builder.getClassByName("Person").getName());
+     }
+ 
++    // from QDOX-108
++    public void testFQNAnnotations() {
++        String source = "" 
++            + "@com.mycompany.Fnord(a=1)\n"
++            + "public interface Foo extends Bar {}\n";
+ 
+-
++        builder.addSource(new StringReader(source));
++        assertEquals("Foo", builder.getClassByName("Foo").getName());
++    }
+ }
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java	(revision 457)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java	(working copy)
+@@ -88,7 +88,7 @@
+ 
+         JavaSource source = builder.getSource();
+         
+-        assertEquals(0, source.getClasses().length);
++        assertEquals(1, source.getClasses().length);
+     }
+ 
+     public void testClassExtends() throws Exception {
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/parser/LexerTest.java
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/parser/LexerTest.java	(revision 457)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/parser/LexerTest.java	(working copy)
+@@ -528,8 +528,7 @@
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+ 
+         assertLex(Parser.PUBLIC, lexer);
+-        assertLex(Parser.AT, lexer);
+-        assertLex(Parser.INTERFACE, lexer);
++        assertLex(Parser.ANNOINTERFACE, lexer);
+         assertLex(Parser.IDENTIFIER, "Copyright", lexer);
+         assertLex(Parser.BRACEOPEN, lexer);
+         assertLex(Parser.IDENTIFIER, "int", lexer);
+@@ -553,16 +552,19 @@
+             + "public class LexerTest extends TestCase {}\n";
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+ 
+-        assertLex(Parser.AT, lexer);
+-        assertLex(Parser.IDENTIFIER, "Copyright", lexer);
++        assertLex(Parser.ANNOTATION, "@Copyright", lexer);
+         assertLex(Parser.PARENOPEN, lexer);
+         assertLex(Parser.IDENTIFIER, "year", lexer);
++        assertLex(Parser.EQUALS, lexer);
++        assertLex(Parser.INTEGER_LITERAL, "2004", lexer);
+         assertLex(Parser.COMMA, lexer);
+         assertLex(Parser.IDENTIFIER, "month", lexer);
++        assertLex(Parser.EQUALS, lexer);
++        assertLex(Parser.ANNOSTRING, lexer);
+         assertLex(Parser.PARENCLOSE, lexer);
+-        assertLex(Parser.AT, lexer);
+-        assertLex(Parser.IDENTIFIER, "Note", lexer);
++        assertLex(Parser.ANNOTATION, "@Note", lexer);
+         assertLex(Parser.PARENOPEN, lexer);
++        assertLex(Parser.ANNOSTRING, lexer);
+         assertLex(Parser.PARENCLOSE, lexer);
+         assertLex(Parser.PUBLIC, lexer);
+         assertLex(Parser.CLASS, lexer);
+Index: C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/parser/MockBuilder.java
+===================================================================
+--- C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/parser/MockBuilder.java	(revision 457)
++++ C:/Documents and Settings/eredmond/blaze/qdox2/src/test/com/thoughtworks/qdox/parser/MockBuilder.java	(working copy)
+@@ -1,5 +1,6 @@
+ package com.thoughtworks.qdox.parser;
+ 
++import com.thoughtworks.qdox.parser.structs.AnnoDef;
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+@@ -124,6 +125,10 @@
+         myAddFieldParameter0Values.addActual(arg0);
+     }
+ 
++    public void addAnnotation( AnnoDef def ) {
++        
++    }
++    
+     public void verify() {
+         myAddPackageCalls.verify();
+         myAddPackageParameter0Values.verify();

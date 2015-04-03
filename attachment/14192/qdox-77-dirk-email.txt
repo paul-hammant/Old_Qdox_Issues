@@ -1,0 +1,144 @@
+
+Hi,
+
+I'm playing around with QDOX a little bit. Nice tool. Thanks for the good
+work!
+
+It seems that development of QDOX has slowed down a bit. The latest checkin
+is > 43 days old. What's up?!?
+
+Anyway, I attached a patch for QDOX-77. The patch includes changes to the
+lexer and the LexerTest testcase. I solved the problem by introducing a new
+lexer state OBJECT_ASSIGNMENT, which is started by reading the keyword 'new'
+in state ASSIGNMENT. This allows you to have statements such as:
+
+  HashMap<String,String> m1 = new HashMap<String,String>();
+  HashMap<?,?>[]         m2 = new HashMap<?,?>[0];
+  HashMap[]              m3 = new HashMap[0];
+  HashMap<?,?>[]         m4 = { new HashMap<String,String>(), 
+                                new HashMap<Integer,String>() }
+
+(Note: The javac compiler accepts all these.)
+
+Furthermore, my patch fixes a little bug regarding enums: in the original
+version, trailing semicolons in the enum declaration were not allowed. For
+example, you cannot have:
+
+   enum Season { SPRING, SUMMER, AUTUMN, WINTER; }
+
+Instead you'd had to write
+
+   enum Season { SPRING, SUMMER, AUTUMN, WINTER }
+
+The two bugfixes diminish the number of parse errors in the JDK 1.5 src.zip
+from 18 to 9. In case you are interested: Here are the parse errors using
+the qdox-1.6-SNAPSHOT.jar from yesterday:
+
+*** Error parsing file com/sun/mirror/declaration/Modifier.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[41,51] in
+com/sun/mirror/declaration/Modifier.java
+*** Error parsing file com/sun/mirror/util/DeclarationFilter.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[17,8] in
+com/sun/mirror/util/DeclarationFilter.java
+*** Error parsing file java/awt/Toolkit.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[1768,29] in
+java/awt/Toolkit.java
+*** Error parsing file java/lang/management/MemoryType.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[26,9] in
+java/lang/management/MemoryType.java
+*** Error parsing file java/lang/SuppressWarnings.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[12,8] in
+java/lang/SuppressWarnings.java
+*** Error parsing file java/lang/Thread.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[1626,19] in
+java/lang/Thread.java
+*** Error parsing file java/math/RoundingMode.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[107,7] in
+java/math/RoundingMode.java
+*** Error parsing file java/security/KeyRep.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[60,5] in
+java/security/KeyRep.java
+*** Error parsing file java/security/Security.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[626,39] in
+java/security/Security.java
+*** Error parsing file java/util/Calendar.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[784,91] in
+java/util/Calendar.java
+*** Error parsing file java/util/concurrent/TimeUnit.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[40,16] in
+java/util/concurrent/TimeUnit.java
+*** Error parsing file java/util/logging/LogManager.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[140,75] in
+java/util/logging/LogManager.java
+*** Error parsing file java/util/Scanner.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[384,32] in
+java/util/Scanner.java
+*** Error parsing file javax/swing/plaf/basic/BasicFileChooserUI.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[1144,68] in
+javax/swing/plaf/basic/BasicFileChooserUI.java
+*** Error parsing file javax/swing/plaf/metal/CachedPainter.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[33,44] in
+javax/swing/plaf/metal/CachedPainter.java
+*** Error parsing file javax/swing/text/html/parser/DTD.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[44,32] in
+javax/swing/text/html/parser/DTD.java
+*** Error parsing file org/omg/CORBA/CompletionStatus.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[44,1] in
+org/omg/CORBA/CompletionStatus.java
+*** Error parsing file org/omg/CORBA/DefinitionKind.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[39,1] in
+org/omg/CORBA/DefinitionKind.java
+
+And here are the parse errors after appying my patch:
+
+*** Error parsing file com/sun/mirror/declaration/Modifier.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[44,5] in
+com/sun/mirror/declaration/Modifier.java
+*** Error parsing file com/sun/mirror/util/DeclarationFilter.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[17,8] in
+com/sun/mirror/util/DeclarationFilter.java
+*** Error parsing file java/lang/management/MemoryType.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[26,9] in
+java/lang/management/MemoryType.java
+*** Error parsing file java/lang/SuppressWarnings.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[12,8] in
+java/lang/SuppressWarnings.java
+*** Error parsing file java/math/RoundingMode.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[107,7] in
+java/math/RoundingMode.java
+*** Error parsing file java/security/KeyRep.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[60,5] in
+java/security/KeyRep.java
+*** Error parsing file java/util/concurrent/TimeUnit.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[40,16] in
+java/util/concurrent/TimeUnit.java
+*** Error parsing file org/omg/CORBA/CompletionStatus.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[44,1] in
+org/omg/CORBA/CompletionStatus.java
+*** Error parsing file org/omg/CORBA/DefinitionKind.java:
+com.thoughtworks.qdox.parser.ParseException: syntax error @[39,1] in
+org/omg/CORBA/DefinitionKind.java
+
+The remaining errors come from enums with methods/constructors or from the
+new 'import static' expression. Both are not supported in QDOX currently. I
+hope to send a patch for that later.
+
+Note that I tested JDK 1.4 compatibility, too: QDOX parsed all of JDK 1.4
+src.zip except org/omg/CORBA/CompletionStatus.java and
+org/omg/CORBA/DefinitionKind.java. Those files cannot be parsed because they
+have javadoc in a comma separated, multi field declaration. The unpatched
+QDOX shows the same error btw.
+
+My patch is quite large, because I didn't forced my Java editor to remove
+trailing whitespaces. Sorry for that. Trailing whitespaces are bad anyway...
+;-)
+
+Again, thanks for QDOX.
+PS: Hope to see full generics support in it. :-)
+
+Greets,
+Dirk.
+
+-- 
+Handyrechnung zu hoch? Tipp: SMS und MMS mit GMX
+Seien Sie so frei: Alle Infos unter http://www.gmx.net/de/go/freesms

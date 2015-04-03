@@ -1,0 +1,898 @@
+Index: pom.xml
+===================================================================
+--- pom.xml	(revision 628)
++++ pom.xml	(working copy)
+@@ -196,6 +196,7 @@
+            <lexDefinitions>
+              <lexFile>${basedir}/src/grammar/lexer.flex</lexFile>
+            </lexDefinitions>
++           <skeleton>${basedir}/src/grammar/skeleton.inner</skeleton>
+          </configuration>
+       </plugin>
+       <plugin>
+Index: src/grammar/lexer.flex
+===================================================================
+--- src/grammar/lexer.flex	(revision 619)
++++ src/grammar/lexer.flex	(working copy)
+@@ -88,8 +88,9 @@
+ UnicodeChar = \\u[a-fA-F0-9]{4}						  
+ Id						= ([:jletter:]|{UnicodeChar}) ([:jletterdigit:]|{UnicodeChar})*
+ Annotation = "@" {WhiteSpace}* {Id} ("."{Id})* {WhiteSpace}*
++JavadocEnd  = "*"+ "/"
+ 
+-%state JAVADOC CODEBLOCK PARENBLOCK ASSIGNMENT STRING CHAR SINGLELINECOMMENT MULTILINECOMMENT ANNOTATION ANNOSTRING ANNOCHAR ENUM
++%state JAVADOC JAVADOCTAG JAVADOCLINE CODEBLOCK PARENBLOCK ASSIGNMENT STRING CHAR SINGLELINECOMMENT MULTILINECOMMENT ANNOTATION ANNOSTRING ANNOCHAR ENUM
+ 
+ %%
+ 
+@@ -182,9 +183,9 @@
+         return Parser.BRACECLOSE; 
+     }
+ 
+-    "/*" "*"+           { 
+-        pushState(JAVADOC); 
+-        javaDocNewLine = true; 
++    "/**" ~"*/" {
++        pushState(JAVADOC);
++        yypushStream(new java.io.StringReader(text().substring(2))); 
+         return Parser.JAVADOCSTART;
+     }
+ 
+@@ -237,22 +238,24 @@
+           }
+ }
+ <JAVADOC> {
+-    "*"+ "/"            { popState(); return Parser.JAVADOCEND; }
+-    ^ [ \t]* "*"+ / [^/*] { /* ignore */ }
+-    {Eol}               { javaDocNewLine = true; return Parser.JAVADOCEOL; }
+-    {CommentChar}* "*"+ / [ \t\r\n] {
+-        return Parser.JAVADOCTOKEN;
+-    }
+-    {CommentChar}+ { 
+-        int token = Parser.JAVADOCTOKEN;
+-        if (javaDocNewLine && yycharat(0) == '@') {
+-                token = Parser.JAVADOCTAG;
+-        }
+-        javaDocNewLine = false;
+-        return token;
+-    }
++    "@"               { yypushback(1); pushState(JAVADOCTAG); }
++    [^ \t\r*@]		  { yypushback(1); pushState(JAVADOCLINE); }
++    "*"+ [ \t]* / "@" { pushState(JAVADOCTAG); }
++    "*"+ [ \t]?       { pushState(JAVADOCLINE); }
++    {JavadocEnd}      { popState(); yypopStream(); return Parser.JAVADOCEND; }
+ }
++<JAVADOCLINE> {
++  ~{Eol}                           { popState(); return Parser.JAVADOCLINE; }
++  .* [^ \t*] / [ \t]* {JavadocEnd} { popState(); return Parser.JAVADOCLINE;}
++  {JavadocEnd}                     { popState(); popState(); yypopStream(); return Parser.JAVADOCEND; }
++}
+ 
++<JAVADOCTAG> {
++  "@" [^ \t\n\r]+  { return Parser.JAVADOCTAG; }
++  [ \t]+           { popState();pushState(JAVADOCLINE);}
++  {Eol}            { popState();return Parser.JAVADOCLINE;}
++}
++
+ <CODEBLOCK> {
+      "{"  { 
+             if(codeblockDepth++ > 0 ) {
+Index: src/grammar/parser.y
+===================================================================
+--- src/grammar/parser.y	(revision 619)
++++ src/grammar/parser.y	(working copy)
+@@ -25,7 +25,7 @@
+ %token BYTE SHORT INT LONG CHAR FLOAT DOUBLE BOOLEAN
+ 
+ // strongly typed tokens/types
+-%token <sval> IDENTIFIER JAVADOCTAG JAVADOCTOKEN
++%token <sval> IDENTIFIER JAVADOCTAG JAVADOCLINE
+ %token <sval> BOOLEAN_LITERAL
+ %token <sval> INTEGER_LITERAL
+ %token <sval> LONG_LITERAL
+@@ -78,12 +78,9 @@
+ javadoctokens: | javadoctokens javadoctoken;
+ 
+ javadoctoken: 
+-    JAVADOCTOKEN {
++    JAVADOCLINE {
+         appendToBuffer($1);
+-    } |
+-    JAVADOCEOL {
+-        textBuffer.append('\n');
+-    };
++    } 
+ 
+ javadoctags: | javadoctags javadoctag;
+ 
+Index: src/grammar/skeleton.inner
+===================================================================
+--- src/grammar/skeleton.inner	(revision 0)
++++ src/grammar/skeleton.inner	(revision 0)
+@@ -0,0 +1,433 @@
++/*
++
++  This file is based on skeleton.nested, but this version skips resetting the line number and column.
++  It's used for parsing the javadoc comments. It's much more solid to extract the comment block and read it per line. 
++
++*/
++  /** This character denotes the end of file */
++  public static final int YYEOF = -1;
++
++  /** initial size of the lookahead buffer */
++--- private static final int ZZ_BUFFERSIZE = ...;
++
++  /** lexical states */
++---  lexical states, charmap
++
++  /* error codes */
++  private static final int ZZ_UNKNOWN_ERROR = 0;
++  private static final int ZZ_NO_MATCH = 1;
++  private static final int ZZ_PUSHBACK_2BIG = 2;
++
++  /* error messages for the codes above */
++  private static final String ZZ_ERROR_MSG[] = {
++    "Unkown internal scanner error",
++    "Error: could not match input",
++    "Error: pushback value was too large"
++  };
++
++--- isFinal list
++  /** the input device */
++  private java.io.Reader zzReader;
++
++  /** the current state of the DFA */
++  private int zzState;
++
++  /** the current lexical state */
++  private int zzLexicalState = YYINITIAL;
++
++  /** this buffer contains the current text to be matched and is
++      the source of the yytext() string */
++  private char zzBuffer[] = new char[ZZ_BUFFERSIZE];
++
++  /** the textposition at the last accepting state */
++  private int zzMarkedPos;
++  
++  /** the current text position in the buffer */
++  private int zzCurrentPos;
++
++  /** startRead marks the beginning of the yytext() string in the buffer */
++  private int zzStartRead;
++
++  /** endRead marks the last character in the buffer, that has been read
++      from input */
++  private int zzEndRead;
++
++  /** number of newlines encountered up to the start of the matched text */
++  private int yyline;
++
++  /** the number of characters up to the start of the matched text */
++  private int yychar;
++
++  /**
++   * the number of characters from the last newline up to the start of the 
++   * matched text
++   */
++  private int yycolumn;
++
++  /** 
++   * zzAtBOL == true <=> the scanner is currently at the beginning of a line
++   */
++  private boolean zzAtBOL = true;
++
++  /** zzAtEOF == true <=> the scanner is at the EOF */
++  private boolean zzAtEOF;
++
++  /** denotes if the user-EOF-code has already been executed */
++  private boolean zzEOFDone;
++
++  /** the stack of open (nested) input streams to read from */
++  private java.util.Stack zzStreams = new java.util.Stack();
++
++  /**
++   * inner class used to store info for nested
++   * input streams
++   */
++  private static final class ZzFlexStreamInfo {
++    java.io.Reader zzReader;
++    int zzEndRead;
++    int zzStartRead;
++    int zzCurrentPos;
++    int zzMarkedPos;
++    int yyline;
++    int yycolumn;
++    char [] zzBuffer;
++    boolean zzAtEOF;
++    boolean zzEOFDone;
++
++    /** sets all values stored in this class */
++    ZzFlexStreamInfo(java.io.Reader zzReader, int zzEndRead, int zzStartRead,
++                  int zzCurrentPos, int zzMarkedPos, 
++                  char [] zzBuffer, boolean zzAtEOF, int yyline, int yycolumn) {
++      this.zzReader      = zzReader;
++      this.zzEndRead     = zzEndRead;
++      this.zzStartRead   = zzStartRead;
++      this.zzCurrentPos  = zzCurrentPos;
++      this.zzMarkedPos   = zzMarkedPos;
++      this.zzBuffer      = zzBuffer;
++      this.zzAtEOF       = zzAtEOF;
++      this.zzEOFDone     = zzEOFDone;
++      this.yyline         = yyline;
++      this.yycolumn       = yycolumn;
++    }
++  }
++
++--- user class code
++
++  /**
++   * Creates a new scanner
++   * There is also a java.io.InputStream version of this constructor.
++   *
++   * @param   in  the java.io.Reader to read input from.
++   */
++--- constructor declaration
++
++
++  /**
++   * Refills the input buffer.
++   *
++   * @return      <code>false</code>, iff there was new input.
++   * 
++   * @exception   java.io.IOException  if any I/O-Error occurs
++   */
++  private boolean zzRefill() throws java.io.IOException {
++
++    /* first: make room (if you can) */
++    if (zzStartRead > 0) {
++      System.arraycopy(zzBuffer, zzStartRead,
++                       zzBuffer, 0,
++                       zzEndRead-zzStartRead);
++
++      /* translate stored positions */
++      zzEndRead-= zzStartRead;
++      zzCurrentPos-= zzStartRead;
++      zzMarkedPos-= zzStartRead;
++      zzStartRead = 0;
++    }
++
++    /* is the buffer big enough? */
++    if (zzCurrentPos >= zzBuffer.length) {
++      /* if not: blow it up */
++      char newBuffer[] = new char[zzCurrentPos*2];
++      System.arraycopy(zzBuffer, 0, newBuffer, 0, zzBuffer.length);
++      zzBuffer = newBuffer;
++    }
++
++    /* finally: fill the buffer with new input */
++    int numRead = zzReader.read(zzBuffer, zzEndRead,
++                                            zzBuffer.length-zzEndRead);
++
++    if (numRead > 0) {
++      zzEndRead+= numRead;
++      return false;
++    }
++    // unlikely but not impossible: read 0 characters, but not at end of stream
++    if (numRead == 0) {
++      int c = zzReader.read();
++      if (c == -1) {
++        return true;
++      } else {
++        zzBuffer[zzEndRead++] = (char) c;
++        return false;
++      }     
++    }
++    
++    // numRead < 0) 
++    return true;
++  }
++
++    
++  /**
++   * Closes the input stream.
++   */
++  public final void yyclose() throws java.io.IOException {
++    zzAtEOF = true;            /* indicate end of file */
++    zzEndRead = zzStartRead;  /* invalidate buffer    */
++
++    if (zzReader != null)
++      zzReader.close();
++  }
++
++
++  /**
++   * Stores the current input stream on a stack, and
++   * reads from a new stream. Lexical state, line,
++   * char, and column counting remain untouched.
++   *
++   * The current input stream can be restored with
++   * yypopstream (usually in an <<EOF>> action).
++   *
++   * @param reader the new input stream to read from
++   *
++   * @see #yypopStream()
++   */
++  public final void yypushStream(java.io.Reader reader) {
++    zzStreams.push(
++      new ZzFlexStreamInfo(zzReader, zzEndRead, zzStartRead, zzCurrentPos,
++                        zzMarkedPos, zzBuffer, zzAtEOF,
++                        yyline, yycolumn)
++    );
++    zzAtEOF  = false;
++    zzBuffer = new char[ZZ_BUFFERSIZE];
++    zzReader = reader;
++    zzEndRead = zzStartRead = 0;
++    zzCurrentPos = zzMarkedPos = 0;
++//    yyline = yycolumn = 0;
++  }
++    
++
++  /**
++   * Closes the current input stream and continues to
++   * read from the one on top of the stream stack. 
++   *
++   * @throws java.util.EmptyStackException
++   *         if there is no further stream to read from.
++   *
++   * @throws java.io.IOException
++   *         if there was an error in closing the stream.
++   *
++   * @see #yypushStream(java.io.Reader)
++   */
++  public final void yypopStream() throws java.io.IOException {
++    zzReader.close();
++    ZzFlexStreamInfo s = (ZzFlexStreamInfo) zzStreams.pop();
++    zzBuffer      = s.zzBuffer;
++    zzReader      = s.zzReader;
++    zzEndRead     = s.zzEndRead;
++    zzStartRead   = s.zzStartRead;
++    zzCurrentPos  = s.zzCurrentPos;
++    zzMarkedPos   = s.zzMarkedPos ;
++    zzAtEOF       = s.zzAtEOF;
++    zzEOFDone     = s.zzEOFDone;
++//    yyline         = s.yyline;
++//    yycolumn       = s.yycolumn;
++  }
++
++
++  /**
++   * Returns true iff there are still streams left 
++   * to read from on the stream stack.
++   */
++  public final boolean yymoreStreams() {
++    return !zzStreams.isEmpty();
++  }
++
++
++  /**
++   * Resets the scanner to read from a new input stream.
++   * Does not close the old reader.
++   *
++   * All internal variables are reset, the old input stream 
++   * <b>cannot</b> be reused (internal buffer is discarded and lost).
++   * Lexical state is set to <tt>ZZ_INITIAL</tt>.
++   *
++   * @param reader   the new input stream 
++   *
++   * @see #yypushStream(java.io.Reader)
++   * @see #yypopStream()
++   */
++  public final void yyreset(java.io.Reader reader) {
++    zzReader = reader;
++    zzAtBOL  = true;
++    zzAtEOF  = false;
++    zzEOFDone = false;
++    zzEndRead = zzStartRead = 0;
++    zzCurrentPos = zzMarkedPos = 0;
++//    yyline = yychar = yycolumn = 0;
++    zzLexicalState = YYINITIAL;
++  }
++
++
++  /**
++   * Returns the current lexical state.
++   */
++  public final int yystate() {
++    return zzLexicalState;
++  }
++
++
++  /**
++   * Enters a new lexical state
++   *
++   * @param newState the new lexical state
++   */
++  public final void yybegin(int newState) {
++    zzLexicalState = newState;
++  }
++
++
++  /**
++   * Returns the text matched by the current regular expression.
++   */
++  public final String yytext() {
++    return new String( zzBuffer, zzStartRead, zzMarkedPos-zzStartRead );
++  }
++
++
++  /**
++   * Returns the character at position <tt>pos</tt> from the 
++   * matched text. 
++   * 
++   * It is equivalent to yytext().charAt(pos), but faster
++   *
++   * @param pos the position of the character to fetch. 
++   *            A value from 0 to yylength()-1.
++   *
++   * @return the character at position pos
++   */
++  public final char yycharat(int pos) {
++    return zzBuffer[zzStartRead+pos];
++  }
++
++
++  /**
++   * Returns the length of the matched text region.
++   */
++  public final int yylength() {
++    return zzMarkedPos-zzStartRead;
++  }
++
++
++  /**
++   * Reports an error that occured while scanning.
++   *
++   * In a wellformed scanner (no or only correct usage of 
++   * yypushback(int) and a match-all fallback rule) this method 
++   * will only be called with things that "Can't Possibly Happen".
++   * If this method is called, something is seriously wrong
++   * (e.g. a JFlex bug producing a faulty scanner etc.).
++   *
++   * Usual syntax/scanner level error handling should be done
++   * in error fallback rules.
++   *
++   * @param   errorCode  the code of the errormessage to display
++   */
++--- zzScanError declaration
++    String message;
++    try {
++      message = ZZ_ERROR_MSG[errorCode];
++    }
++    catch (ArrayIndexOutOfBoundsException e) {
++      message = ZZ_ERROR_MSG[ZZ_UNKNOWN_ERROR];
++    }
++
++--- throws clause
++  } 
++
++
++  /**
++   * Pushes the specified amount of characters back into the input stream.
++   *
++   * They will be read again by then next call of the scanning method
++   *
++   * @param number  the number of characters to be read again.
++   *                This number must not be greater than yylength()!
++   */
++--- yypushback decl (contains zzScanError exception)
++    if ( number > yylength() )
++      zzScanError(ZZ_PUSHBACK_2BIG);
++
++    zzMarkedPos -= number;
++  }
++
++
++--- zzDoEOF
++  /**
++   * Resumes scanning until the next regular expression is matched,
++   * the end of input is encountered or an I/O-Error occurs.
++   *
++   * @return      the next token
++   * @exception   java.io.IOException  if any I/O-Error occurs
++   */
++--- yylex declaration
++    int zzInput;
++    int zzAction;
++
++--- local declarations
++
++    while (true) {
++      // cached fields:
++      int zzCurrentPosL;
++      int zzMarkedPosL = zzMarkedPos;
++      int zzEndReadL = zzEndRead;
++      char [] zzBufferL = zzBuffer;
++      char [] zzCMapL = ZZ_CMAP;
++
++--- start admin (line, char, col count)
++      zzAction = -1;
++
++      zzCurrentPosL = zzCurrentPos = zzStartRead = zzMarkedPosL;
++  
++--- start admin (lexstate etc)
++
++      zzForAction: {
++        while (true) {
++    
++--- next input, line, col, char count, next transition, isFinal action
++            zzAction = zzState;
++            zzMarkedPosL = zzCurrentPosL;
++--- line count update
++          }
++
++        }
++      }
++
++      // store back cached position
++      zzMarkedPos = zzMarkedPosL;
++--- char count update
++
++--- actions
++        default: 
++          if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
++            zzAtEOF = true;
++--- eofvalue
++          } 
++          else {
++--- no match
++          }
++      }
++    }
++  }
++
++--- main
++
++}
+Index: src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	(revision 631)
++++ src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	(working copy)
+@@ -1024,6 +1024,26 @@
+         JavaMethod javaMethod = javaClass.getMethods()[0];
+         assertEquals("\"test blah blah\"", javaMethod.getAnnotations()[0].getNamedParameter("description").toString());
+     }
++    
++    //for qdox-146
++    public void testWhitespaceCanBeRetainedInJavadoc() {
++        String sourceCode = ""
++                + "package com.acme.thing;\n"
++                + "\n"
++                + "/**\n"
++                + " * This class does something.\n"
++                + " *     chalala\n"
++                + " *         cha  **  lala\n"
++                + " **/\n"
++                + "public class AClassName {\n"
++                + "}";
++        JavaDocBuilder builder = new JavaDocBuilder();
++        builder.addSource(new StringReader(sourceCode));
++        JavaClass aClass = builder.getClassByName("com.acme.thing.AClassName");
++        assertEquals("This class does something.\n"
++                + "    chalala\n"
++                + "        cha  **  lala", aClass.getComment());
++    }
+ 
+     //for qdox-152
+     public void testExtendedClass() throws Exception {
+@@ -1098,4 +1118,25 @@
+     	assertNotNull(javaClass.getAnnotations()[0].getNamedParameter("cascade"));
+     } 
+     
++    /**
++     * According to sun specs: Starting with Javadoc 1.4, the leading asterisks are optional
++     * @throws Exception
++     */
++    public void testJavadocWithoutStartingAsterisks() throws Exception {
++    	String source = "    /**\n" + 
++    			"     Some text\n" +
++    			"more text\n" +
++    			"\t and even more\n" +
++    			"     \n" + 
++    			"     @throws Exception\n" +
++    			"@deprecated" + 
++    			"     */\n" + 
++    			"public class Foo{}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	assertEquals("Some text\nmore text\n and even more\n", javaClass.getComment());
++    	assertEquals("throws", javaClass.getTags()[0].getName());
++    	assertEquals("Exception", javaClass.getTags()[0].getValue());
++    	assertEquals("deprecated", javaClass.getTags()[1].getName());
++    }
+ }
+Index: src/test/com/thoughtworks/qdox/parser/LexerTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/parser/LexerTest.java	(revision 619)
++++ src/test/com/thoughtworks/qdox/parser/LexerTest.java	(working copy)
+@@ -313,22 +313,18 @@
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+ 
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n",lexer);
+         assertLex(Parser.JAVADOCTAG, "@hello", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "world", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "world\n", lexer);
+ 
+         assertLex(Parser.JAVADOCTAG, "@a", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "b", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "c", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "d", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "b c d\n", lexer);
+ 
+         assertLex(Parser.JAVADOCTAG, "@bye", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n",lexer);
+ 
+         assertLex(Parser.JAVADOCTAG, "@bye:bye", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n",lexer);
+ 
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+@@ -340,7 +336,7 @@
+         assertLex(Parser.JAVADOCSTART, lexer);
+ 
+         assertLex(Parser.JAVADOCTAG, "@hello", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "world", lexer);
++        assertLex(Parser.JAVADOCLINE, "world", lexer);
+ 
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+@@ -352,12 +348,24 @@
+         assertLex(Parser.JAVADOCSTART, lexer);
+         
+         assertLex(Parser.JAVADOCTAG, "@foo", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "bar", lexer);
++        assertLex(Parser.JAVADOCLINE, "bar", lexer);
+         
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+     }
+ 
++    public void testDeepJavadocTag() throws Exception {
++        String in = "  /** *  *** * @m x \n" +
++        		"*/";
++        Lexer lexer = new JFlexLexer(new StringReader(in));
++        assertLex(Parser.JAVADOCSTART, lexer);
++        
++        assertLex(Parser.JAVADOCLINE, "*  *** * @m x \n", lexer);
++        
++        assertLex(Parser.JAVADOCEND, lexer);
++        assertLex(0, lexer); 
++    }
++
+     public void testDocCommentContainingAtSymbols() throws Exception {
+         String in = ""
+             + "/**\n"
+@@ -369,19 +377,11 @@
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+ 
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "joe@truemesh.com", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "{@link", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "here}.", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "me", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "@home", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "geeks", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "@", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "play", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "joe@truemesh.com\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "{@link here}.\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "me @home\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "geeks @ play\n", lexer);
+ 
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+@@ -397,16 +397,10 @@
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+ 
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "5", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "*", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "4", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "SELECT", lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "COUNT(*)", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "**stars**everywhere**", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "5 * 4\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "SELECT COUNT(*)\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "**stars**everywhere** \n", lexer);
+ 
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+@@ -419,9 +413,8 @@
+                 + " *****/";
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "blah", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "blah\n", lexer);
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+     }
+@@ -431,7 +424,7 @@
+                 + "/***blah***/public";
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "blah", lexer);
++        assertLex(Parser.JAVADOCLINE, "blah", lexer);
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(Parser.PUBLIC, lexer);
+         assertLex(0, lexer);
+@@ -449,16 +442,12 @@
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+         
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "simple", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "indented", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "nospace", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCTOKEN, "multistar", lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
+-        assertLex(Parser.JAVADOCEOL, lexer);
++        assertLex(Parser.JAVADOCLINE, "\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "simple\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "indented\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "nospace\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "multistar\n", lexer);
++        assertLex(Parser.JAVADOCLINE, "\n", lexer);
+         
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+Index: src/test/com/thoughtworks/qdox/parser/ParserTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/parser/ParserTest.java	(revision 619)
++++ src/test/com/thoughtworks/qdox/parser/ParserTest.java	(working copy)
+@@ -171,9 +171,7 @@
+ 
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "This");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "great!");
++        setupLex(Parser.JAVADOCLINE, "This is great!");
+         setupLex(Parser.JAVADOCEND);
+         setupLex(0);
+ 
+@@ -194,8 +192,7 @@
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+         setupLex(Parser.JAVADOCTAG, "@This");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "great!");
++        setupLex(Parser.JAVADOCLINE, "is great!");
+         setupLex(Parser.JAVADOCEND);
+         setupLex(0);
+ 
+@@ -236,9 +233,7 @@
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+         setupLex(Parser.JAVADOCTAG, "@This");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "great!");
+-        setupLex(Parser.JAVADOCTOKEN, "Mmmkay.");
++        setupLex(Parser.JAVADOCLINE, "is great! Mmmkay.");
+         setupLex(Parser.JAVADOCEND);
+         setupLex(0);
+ 
+@@ -262,10 +257,9 @@
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+         setupLex(Parser.JAVADOCTAG, "@This");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "great!");
++        setupLex(Parser.JAVADOCLINE, "is great!");
+         setupLex(Parser.JAVADOCTAG, "@mock");
+-        setupLex(Parser.JAVADOCTOKEN, "generate");
++        setupLex(Parser.JAVADOCLINE, "generate");
+         setupLex(Parser.JAVADOCEND);
+         setupLex(0);
+ 
+@@ -287,16 +281,11 @@
+ 
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "Welcome!");
+-        setupLex(Parser.JAVADOCTOKEN, "Here");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "my");
+-        setupLex(Parser.JAVADOCTOKEN, "class.");
++        setupLex(Parser.JAVADOCLINE, "Welcome! Here is my class.");
+         setupLex(Parser.JAVADOCTAG, "@This");
+-        setupLex(Parser.JAVADOCTOKEN, "is");
+-        setupLex(Parser.JAVADOCTOKEN, "great!");
++        setupLex(Parser.JAVADOCLINE, "is great!");
+         setupLex(Parser.JAVADOCTAG, "@mock");
+-        setupLex(Parser.JAVADOCTOKEN, "generate");
++        setupLex(Parser.JAVADOCLINE, "generate");
+         setupLex(Parser.JAVADOCEND);
+         setupLex(0);
+ 
+@@ -789,11 +778,11 @@
+ 
+         // setup values
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc1");
++        setupLex(Parser.JAVADOCLINE, "javadoc1");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc2");
++        setupLex(Parser.JAVADOCLINE, "javadoc2");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.PACKAGE);
+@@ -801,11 +790,11 @@
+         setupLex(Parser.SEMI);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc3");
++        setupLex(Parser.JAVADOCLINE, "javadoc3");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc4");
++        setupLex(Parser.JAVADOCLINE, "javadoc4");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.IMPORT);
+@@ -815,11 +804,11 @@
+         setupLex(Parser.SEMI);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc5");
++        setupLex(Parser.JAVADOCLINE, "javadoc5");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc6");
++        setupLex(Parser.JAVADOCLINE, "javadoc6");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.IMPORT);
+@@ -829,11 +818,11 @@
+         setupLex(Parser.SEMI);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc7");
++        setupLex(Parser.JAVADOCLINE, "javadoc7");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc8");
++        setupLex(Parser.JAVADOCLINE, "javadoc8");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.PUBLIC);
+@@ -843,11 +832,11 @@
+         setupLex(Parser.BRACECLOSE);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc9");
++        setupLex(Parser.JAVADOCLINE, "javadoc9");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(Parser.JAVADOCSTART);
+-        setupLex(Parser.JAVADOCTOKEN, "javadoc10");
++        setupLex(Parser.JAVADOCLINE, "javadoc10");
+         setupLex(Parser.JAVADOCEND);
+ 
+         setupLex(0);

@@ -1,0 +1,29 @@
+Index: src/java/com/thoughtworks/qdox/JavaDocBuilder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/JavaDocBuilder.java	(revision 554)
++++ src/java/com/thoughtworks/qdox/JavaDocBuilder.java	(working copy)
+@@ -127,13 +127,19 @@
+         JavaClass result = (JavaClass) classes.get(name);
+         if (result == null) {
+             // Try to make a binary class out of it
+-            result = createBinaryClass(name);
+-            if (result != null) {
+-                addClass(result);
+-            } else {
++        	try {
++                result = createBinaryClass(name);
++                if (result != null) {
++                    addClass(result);
++                } else {
++                    result = createUnknownClass(name);
++                    classes.put(name, result);
++                }
++        	}
++        	catch(NoClassDefFoundError e) {
+                 result = createUnknownClass(name);
+                 classes.put(name, result);
+-            }
++        	}
+         }
+         return result;
+     }

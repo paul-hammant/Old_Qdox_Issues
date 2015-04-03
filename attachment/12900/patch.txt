@@ -1,0 +1,1724 @@
+*** qdox.iml	Wed Dec 31 14:00:00 1969
+--- qdox.iml	Tue Aug 24 12:39:14 2004
+***************
+*** 0 ****
+--- 1,20 ----
++ <?xml version="1.0" encoding="UTF-8"?>
++ <module version="4" relativePaths="true" type="JAVA_MODULE">
++   <component name="ModuleRootManager" />
++   <component name="NewModuleRootManager">
++     <output url="file://$MODULE_DIR$/target/classes" />
++     <exclude-output />
++     <exclude-exploded />
++     <content url="file://$MODULE_DIR$">
++       <sourceFolder url="file://$MODULE_DIR$/src/java" isTestSource="false" />
++       <sourceFolder url="file://$MODULE_DIR$/src/test" isTestSource="true" />
++       <sourceFolder url="file://$MODULE_DIR$/target/src/java" isTestSource="false" />
++     </content>
++     <orderEntry type="inheritedJdk" />
++     <orderEntry type="sourceFolder" forTests="false" />
++     <orderEntry type="library" name="Test" level="application" />
++     <orderEntry type="library" name="Ant" level="application" />
++     <orderEntryProperties />
++   </component>
++ </module>
++ 
+
+*** src/java/com/thoughtworks/qdox/model/AbstractInheritableJavaEntityImpl.java	Wed Dec 31 14:00:00 1969
+--- src/java/com/thoughtworks/qdox/model/AbstractInheritableJavaEntityImpl.java	Tue Aug 24 12:57:24 2004
+***************
+*** 0 ****
+--- 1,13 ----
++ package com.thoughtworks.qdox.model;
++ 
++ /**
++  * @author Aslak Helles&oslash;y
++  * @version $Revision: 1.5 $
++  */
++ public abstract class AbstractInheritableJavaEntityImpl extends AbstractJavaEntityImpl implements AbstractInheritableJavaEntity {
++     
++     public DocletTag getTagByName(String name, boolean inherited) {
++         DocletTag[] tags = getTagsByName(name, inherited);
++         return tags.length > 0 ? tags[0] : null;
++     }
++ }
+
+*** src/java/com/thoughtworks/qdox/model/AbstractJavaEntityImpl.java	Wed Dec 31 14:00:00 1969
+--- src/java/com/thoughtworks/qdox/model/AbstractJavaEntityImpl.java	Tue Aug 24 17:33:17 2004
+***************
+*** 0 ****
+--- 1,243 ----
++ package com.thoughtworks.qdox.model;
++ 
++ import java.util.ArrayList;
++ import java.util.Arrays;
++ import java.util.Iterator;
++ import java.util.List;
++ 
++ public abstract class AbstractJavaEntityImpl implements AbstractJavaEntity {
++ 
++     protected String name;
++     protected List modifiers = new ArrayList();
++     private String comment;
++     private DocletTag[] tags = new DocletTag[0];
++     private int lineNumber = -1;
++     private JavaClassParent parent;
++ 
++     public int getLineNumber() {
++     	return lineNumber;
++     }
++ 
++     public String getName() {
++         return name;
++     }
++ 
++     /**
++      * Return list of modifiers as Strings.
++      * (public, private, protected, final, abstract, static)
++      */
++     public String[] getModifiers() {
++         return (String[]) modifiers.toArray(new String[modifiers.size()]);
++     }
++ 
++     public String getComment() {
++         return comment;
++     }
++ 
++     public DocletTag[] getTags() {
++         return tags;
++     }
++ 
++     public DocletTag[] getTagsByName(String name) {
++         List specifiedTags = new ArrayList();
++         for (int i = 0; i < tags.length; i++) {
++             DocletTag docletTag = tags[i];
++             if (docletTag.getName().equals(name)) {
++                 specifiedTags.add(docletTag);
++             }
++         }
++         return (DocletTag[]) specifiedTags.toArray(new DocletTag[specifiedTags.size()]);
++     }
++ 
++     public DocletTag getTagByName(String name) {
++         for (int i = 0; i < tags.length; i++) {
++             DocletTag docletTag = tags[i];
++             if (docletTag.getName().equals(name)) {
++                 return docletTag;
++             }
++         }
++         return null;
++     }
++ 
++     /**
++      * Convenience method for <code>getTagByName(String).getNamedParameter(String)</code>
++      * that also checks for null tag.
++      * @since 1.3
++      */
++     public String getNamedParameter(String tagName, String parameterName) {
++         DocletTag tag = getTagByName(tagName);
++         if(tag != null) {
++             return tag.getNamedParameter(parameterName);
++         } else {
++             return null;
++         }
++     }
++ 
++     public void commentHeader(IndentBuffer buffer) {
++         if (comment == null && (tags == null || tags.length == 0)) {
++             return;
++         } else {
++             buffer.write("/**");
++             buffer.newline();
++ 
++             if (comment != null && comment.length() > 0) {
++                 buffer.write(" * ");
++                 buffer.write(comment);
++                 buffer.newline();
++             }
++ 
++             if (tags != null && tags.length > 0) {
++                 if (comment != null && comment.length() > 0) {
++                     buffer.write(" *");
++                     buffer.newline();
++                 }
++                 for (int i = 0; i < tags.length; i++) {
++                     DocletTag docletTag = tags[i];
++                     buffer.write(" * @");
++                     buffer.write(docletTag.getName());
++                     if (docletTag.getValue().length() > 0) {
++                         buffer.write(' ');
++                         buffer.write(docletTag.getValue());
++                     }
++                     buffer.newline();
++                 }
++             }
++ 
++             buffer.write(" */");
++             buffer.newline();
++         }
++     }
++ 
++     public String toString() {
++         IndentBuffer result = new IndentBuffer();
++         write(result);
++         return result.toString();
++     }
++ 
++     public void write(IndentBuffer result) {
++         commentHeader(result);
++         writeBody(result);
++     }
++ 
++     protected abstract void writeBody(IndentBuffer result);
++ 
++     public void setName(String name) {
++         this.name = name;
++     }
++ 
++     public void setModifiers(String[] modifiers) {
++         this.modifiers = Arrays.asList(modifiers);
++     }
++ 
++     public void setComment(String comment) {
++         this.comment = comment;
++     }
++ 
++     public void setTags(List tagList) {
++         this.tags = new DocletTag[tagList.size()];
++         tagList.toArray(this.tags);
++     }
++ 
++     //helper methods for querying the modifiers
++     public boolean isAbstract() {
++         return isModifierPresent("abstract");
++     }
++ 
++     public boolean isPublic() {
++         return isModifierPresent("public");
++     }
++ 
++     public boolean isPrivate() {
++         return isModifierPresent("private");
++     }
++ 
++     public boolean isProtected() {
++         return isModifierPresent("protected");
++     }
++ 
++     public boolean isStatic() {
++         return isModifierPresent("static");
++     }
++ 
++     public boolean isFinal() {
++         return isModifierPresent("final");
++     }
++ 
++     public boolean isSynchronized() {
++         return isModifierPresent("synchronized");
++     }
++ 
++     public boolean isTransient() {
++         return isModifierPresent("transient");
++     }
++ 
++ 	/**
++ 	 * @since 1.4
++ 	 */
++     public boolean isVolatile() {
++         return isModifierPresent("volatile");
++     }
++ 
++ 	/**
++ 	 * @since 1.4
++ 	 */
++     public boolean isNative() {
++         return isModifierPresent("native");
++     }
++ 
++ 	/**
++ 	 * @since 1.4
++ 	 */
++     public boolean isStrictfp() {
++         return isModifierPresent("strictfp");
++     }
++ 
++     private boolean isModifierPresent(String modifier) {
++         return modifiers.contains(modifier);
++     }
++ 
++     protected void writeNonAccessibilityModifiers(IndentBuffer result) {
++         // modifiers (anything else)
++         for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
++             String modifier = (String) iter.next();
++             if (!modifier.startsWith("p")) {
++                 result.write(modifier);
++                 result.write(' ');
++             }
++         }
++     }
++ 
++     protected void writeAccessibilityModifier(IndentBuffer result) {
++         for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
++             String modifier = (String) iter.next();
++             if (modifier.startsWith("p")) {
++                 result.write(modifier);
++                 result.write(' ');
++             }
++         }
++     }
++ 
++     protected void writeAllModifiers(IndentBuffer result) {
++         for (Iterator iter = modifiers.iterator(); iter.hasNext();) {
++             String modifier = (String) iter.next();
++             result.write(modifier);
++             result.write(' ');
++         }
++     }
++ 
++     public void setLineNumber(int lineNumber) {
++         this.lineNumber = lineNumber;
++     }
++ 
++     public JavaClassParent getParent() {
++         return parent;
++     }
++ 
++     public void setParent(JavaClassParent parent) {
++         this.parent = parent;
++     }
++ 
++     public JavaSource getSource() {
++         return parent.getParentSource();
++     }
++ }
+
+*** src/java/com/thoughtworks/qdox/model/JavaClassImpl.java	Wed Dec 31 14:00:00 1969
+--- src/java/com/thoughtworks/qdox/model/JavaClassImpl.java	Tue Aug 24 18:09:41 2004
+***************
+*** 0 ****
+--- 1,577 ----
++ package com.thoughtworks.qdox.model;
++ 
++ import com.thoughtworks.qdox.JavaDocBuilder;
++ import com.thoughtworks.qdox.model.util.OrderedMap;
++ 
++ import java.util.ArrayList;
++ import java.util.Collection;
++ import java.util.HashSet;
++ import java.util.Iterator;
++ import java.util.LinkedList;
++ import java.util.List;
++ import java.util.Map;
++ import java.util.Set;
++ 
++ /**
++  * @author <a href="mailto:joew@thoughtworks.com">Joe Walnes</a>
++  * @author Aslak Helles&oslash;y
++  */
++ public class JavaClassImpl extends AbstractInheritableJavaEntityImpl implements JavaClass {
++ 
++     private static Type OBJECT = new TypeImpl("java.lang.Object");
++     
++     private List methods = new LinkedList();
++     private JavaMethod[] methodsArray;
++     private List fields = new LinkedList();
++     private JavaField[] fieldsArray;
++     private List classes = new LinkedList();
++     private JavaClass[] classesArray;
++     private boolean interfce;
++ 
++     // Don't access this directly. Use asType() to get my Type
++     private Type type;
++     private Type superClass;
++     private Type[] implementz = new TypeImpl[0];
++     private JavaClassCache javaClassCache;
++ 
++     protected JavaClassImpl() {
++     }
++     
++     public JavaClassImpl(String name) {
++         setName(name);
++     }
++ 
++     public void setJavaClassCache(JavaClassCache javaClassCache) {
++         this.javaClassCache = javaClassCache;
++ 
++         // reassign OBJECT. This will make it have a "source" too,
++         // causing Type.getJavaClass() to return a JavaClass, instead
++         // of null.
++         OBJECT = javaClassCache.getClassByName("java.lang.Object").asType();
++     }
++ 
++     /**
++      * Interface or class?
++      */
++     public boolean isInterface() {
++         return interfce;
++     }
++ 
++     public Type getSuperClass() {
++         boolean iAmJavaLangObject = OBJECT.equals(asType());
++ 
++         if (!interfce && (superClass == null) && !iAmJavaLangObject) {
++             return OBJECT;
++         }
++ 
++         return superClass;
++     }
++ 
++     /**
++      * Shorthand for getSuperClass().getJavaClass() with null checking.
++      */
++     public JavaClass getSuperJavaClass() {
++         if (getSuperClass() != null) {
++             return getSuperClass().getJavaClass();
++         } else {
++             return null;
++         }
++     }
++ 
++     public Type[] getImplements() {
++         return implementz;
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public JavaClass[] getImplementedInterfaces() {
++         Type[] type = getImplements();
++         JavaClass[] result = new JavaClass[type.length];
++ 
++         for (int i = 0; i < result.length; i++) {
++             result[i] = type[i].getJavaClass();
++         }
++ 
++         return result;
++     }
++ 
++     protected void writeBody(IndentBuffer result) {
++         writeAccessibilityModifier(result);
++         writeNonAccessibilityModifiers(result);
++ 
++         result.write(interfce ? "interface " : "class ");
++         result.write(name);
++ 
++         // subclass
++         if (superClass != null) {
++             result.write(" extends ");
++             result.write(superClass.getValue());
++         }
++ 
++         // implements
++         if (implementz.length > 0) {
++             result.write(interfce ? " extends " : " implements ");
++ 
++             for (int i = 0; i < implementz.length; i++) {
++                 if (i > 0) {
++                     result.write(", ");
++                 }
++ 
++                 result.write(implementz[i].getValue());
++             }
++         }
++ 
++         result.write(" {");
++         result.newline();
++         result.indent();
++ 
++         // fields
++         for (Iterator iterator = fields.iterator(); iterator.hasNext();) {
++             JavaField javaField = (JavaField) iterator.next();
++ 
++             result.newline();
++             javaField.write(result);
++         }
++ 
++         // methods
++         for (Iterator iterator = methods.iterator(); iterator.hasNext();) {
++             JavaMethod javaMethod = (JavaMethod) iterator.next();
++ 
++             result.newline();
++             javaMethod.write(result);
++         }
++ 
++         // inner-classes
++         for (Iterator iterator = classes.iterator(); iterator.hasNext();) {
++             JavaClass javaClass = (JavaClass) iterator.next();
++ 
++             result.newline();
++             javaClass.write(result);
++         }
++ 
++         result.deindent();
++         result.newline();
++         result.write('}');
++         result.newline();
++     }
++ 
++     public void setInterface(boolean interfce) {
++         this.interfce = interfce;
++     }
++ 
++     public void addMethod(JavaMethod meth) {
++         meth.setParent(this);
++         methods.add(meth);
++         methodsArray = null;
++     }
++ 
++     public void setSuperClass(Type type) {
++         superClass = type;
++     }
++ 
++     public void setImplementz(Type[] implementz) {
++         this.implementz = implementz;
++     }
++ 
++     public void addField(JavaField javaField) {
++         javaField.setParent(this);
++         fields.add(javaField);
++         fieldsArray = null;
++     }
++ 
++     public JavaSource getParentSource() {
++         JavaClassParent parent = getParent();
++         return ((parent == null) ? null : parent.getParentSource());
++     }
++ 
++     public String getPackage() {
++         return getParentSource().getPackage();
++     }
++ 
++     public String getFullyQualifiedName() {
++         return getParent().getClassNamePrefix() + getName();
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public boolean isInner() {
++         return getParent() instanceof JavaClass;
++     }
++ 
++     public String resolveType(String typeName) {
++         // Maybe it's an inner class?
++         JavaClass[] innerClasses = getInnerClasses();
++         for (int i = 0; i < innerClasses.length; i++) {
++             if (innerClasses[i].getName().equals(typeName)) {
++                 return innerClasses[i].getFullyQualifiedName();
++             }
++         }
++ 
++         return getParent().resolveType(typeName);
++     }
++ 
++     public ClassLibrary getClassLibrary() {
++         return getParent().getClassLibrary();
++     }
++ 
++     public String getClassNamePrefix() {
++         return getFullyQualifiedName() + "$";
++     }
++ 
++     public Type asType() {
++         if (type == null) {
++             type = new TypeImpl(getFullyQualifiedName(), 0, this);
++         }
++ 
++         return type;
++     }
++ 
++     public JavaMethod[] getMethods() {
++         if (methodsArray == null) {
++             methodsArray = new JavaMethod[methods.size()];
++             methods.toArray(methodsArray);
++         }
++ 
++         return methodsArray;
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public JavaMethod[] getMethods(boolean superclasses) {
++         if (superclasses) {
++             Set signatures = new HashSet();
++             List methods = new ArrayList();
++ 
++             addMethodsFromSuperclassAndInterfaces(signatures, methods, this);
++ 
++             return (JavaMethod[]) methods.toArray(new JavaMethod[methods.size()]);
++         } else {
++             return getMethods();
++         }
++     }
++ 
++     private void addMethodsFromSuperclassAndInterfaces(Set signatures,
++                                                        List methodList, JavaClass clazz) {
++         JavaMethod[] methods = clazz.getMethods();
++ 
++         addNewMethods(signatures, methodList, methods);
++ 
++         JavaClass superclass = clazz.getSuperJavaClass();
++ 
++         // TODO workaround for a bug in getSuperJavaClass
++         if ((superclass != null) && (superclass != clazz)) {
++             addMethodsFromSuperclassAndInterfaces(signatures, methodList,
++                     superclass);
++         }
++ 
++         JavaClass[] implementz = clazz.getImplementedInterfaces();
++ 
++         for (int i = 0; i < implementz.length; i++) {
++             if (implementz[i] != null) {
++                 addMethodsFromSuperclassAndInterfaces(signatures, methodList,
++                         implementz[i]);
++             }
++         }
++     }
++ 
++     private void addNewMethods(Set signatures, List methodList,
++                                JavaMethod[] methods) {
++         for (int i = 0; i < methods.length; i++) {
++             JavaMethod method = methods[i];
++ 
++             if (!method.isPrivate()) {
++                 String signature = method.getDeclarationSignature(false);
++ 
++                 if (!signatures.contains(signature)) {
++                     methodList.add(method);
++                     signatures.add(signature);
++                 }
++             }
++         }
++     }
++ 
++     /**
++      * @param name           method name
++      * @param parameterTypes parameter types or null if there are no parameters.
++      * @return the matching method or null if no match is found.
++      */
++     public JavaMethod getMethodBySignature(String name, Type[] parameterTypes) {
++         JavaMethod[] methods = getMethods();
++ 
++         for (int i = 0; i < methods.length; i++) {
++             if (methods[i].signatureMatches(name, parameterTypes)) {
++                 return methods[i];
++             }
++         }
++ 
++         return null;
++     }
++ 
++     public JavaMethod getMethodBySignature(String name, Type[] parameterTypes,
++                                            boolean superclasses) {
++         JavaMethod[] result = getMethodsBySignature(name, parameterTypes,
++                 superclasses);
++ 
++         return (result.length > 0) ? result[0] : null;
++     }
++ 
++     public JavaMethod[] getMethodsBySignature(String name,
++                                               Type[] parameterTypes, boolean superclasses) {
++         List result = new ArrayList();
++ 
++         JavaMethod methodInThisClass = getMethodBySignature(name, parameterTypes);
++ 
++         if (methodInThisClass != null) {
++             result.add(methodInThisClass);
++         }
++ 
++         if (superclasses) {
++             JavaClass superclass = getSuperJavaClass();
++ 
++             if (superclass != null) {
++                 JavaMethod method = superclass.getMethodBySignature(name,
++                         parameterTypes, true);
++ 
++                 // todo: ideally we should check on package privacy too. oh well.
++                 if ((method != null) && !method.isPrivate()) {
++                     result.add(method);
++                 }
++             }
++ 
++             JavaClass[] implementz = getImplementedInterfaces();
++ 
++             for (int i = 0; i < implementz.length; i++) {
++                 JavaMethod method = implementz[i].getMethodBySignature(name,
++                         parameterTypes, true);
++ 
++                 if (method != null) {
++                     result.add(method);
++                 }
++             }
++         }
++ 
++         return (JavaMethod[]) result.toArray(new JavaMethod[result.size()]);
++     }
++ 
++     public JavaField[] getFields() {
++         if (fieldsArray == null) {
++             fieldsArray = new JavaFieldImpl[fields.size()];
++             fields.toArray(fieldsArray);
++         }
++ 
++         return fieldsArray;
++     }
++ 
++     public JavaField getFieldByName(String name) {
++         JavaField[] fields = getFields();
++ 
++         for (int i = 0; i < fields.length; i++) {
++             if (fields[i].getName().equals(name)) {
++                 return fields[i];
++             }
++         }
++ 
++         return null;
++     }
++ 
++     public void addClass(JavaClass cls) {
++         cls.setParent(this);
++         classes.add(cls);
++         classesArray = null;
++     }
++ 
++     /**
++      * @deprecated Use {@link #getInnerClasses()} instead.
++      */
++     public JavaClass[] getClasses() {
++         return getInnerClasses();
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public JavaClass[] getInnerClasses() {
++         if (classesArray == null) {
++             classesArray = new JavaClassImpl[classes.size()];
++             classes.toArray(classesArray);
++         }
++ 
++         return classesArray;
++     }
++ 
++     public JavaClass getInnerClassByName(String name) {
++         JavaClass[] classes = getInnerClasses();
++ 
++         for (int i = 0; i < classes.length; i++) {
++             if (classes[i].getName().equals(name)) {
++                 return classes[i];
++             }
++         }
++ 
++         return null;
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public boolean isA(String fullClassName) {
++         Type type = new TypeImpl(fullClassName, 0, this);
++         return asType().isA(type);
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public boolean isA(JavaClass javaClass) {
++         return asType().isA(javaClass.asType());
++     }
++ 
++     /**
++      * Gets bean properties without looking in superclasses or interfaces.
++      *
++      * @since 1.3
++      */
++     public BeanProperty[] getBeanProperties() {
++         return getBeanProperties(false);
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public BeanProperty[] getBeanProperties(boolean superclasses) {
++         Map beanPropertyMap = getBeanPropertyMap(superclasses);
++         Collection beanPropertyCollection = beanPropertyMap.values();
++ 
++         return (BeanProperty[]) beanPropertyCollection.toArray(new BeanProperty[beanPropertyCollection
++                 .size()]);
++     }
++ 
++     private Map getBeanPropertyMap(boolean superclasses) {
++         JavaMethod[] methods = getMethods(superclasses);
++         Map beanPropertyMap = new OrderedMap();
++ 
++         // loop over the methods.
++         for (int i = 0; i < methods.length; i++) {
++             JavaMethod method = methods[i];
++ 
++             if (method.isPropertyAccessor()) {
++                 String propertyName = method.getPropertyName();
++                 BeanProperty beanProperty = getOrCreateProperty(beanPropertyMap,
++                         propertyName);
++ 
++                 beanProperty.setAccessor(method);
++                 beanProperty.setType(method.getPropertyType());
++             } else if (method.isPropertyMutator()) {
++                 String propertyName = method.getPropertyName();
++                 BeanProperty beanProperty = getOrCreateProperty(beanPropertyMap,
++                         propertyName);
++ 
++                 beanProperty.setMutator(method);
++                 beanProperty.setType(method.getPropertyType());
++             }
++         }
++ 
++         return beanPropertyMap;
++     }
++ 
++     private BeanProperty getOrCreateProperty(Map beanPropertyMap,
++                                              String propertyName) {
++         BeanProperty result = (BeanProperty) beanPropertyMap.get(propertyName);
++ 
++         if (result == null) {
++             result = new BeanProperty(propertyName);
++             beanPropertyMap.put(propertyName, result);
++         }
++ 
++         return result;
++     }
++ 
++     /**
++      * Gets bean property without looking in superclasses or interfaces.
++      *
++      * @since 1.3
++      */
++     public BeanProperty getBeanProperty(String propertyName) {
++         return getBeanProperty(propertyName, false);
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public BeanProperty getBeanProperty(String propertyName,
++                                         boolean superclasses) {
++         return (BeanProperty) getBeanPropertyMap(superclasses).get(propertyName);
++     }
++ 
++     /**
++      * Gets the known derived classes. That is, subclasses or implementing classes.
++      *
++      * @return
++      */
++     public JavaClass[] getDerivedClasses() {
++         List result = new ArrayList();
++         JavaDocBuilder builder = (JavaDocBuilder) javaClassCache;
++         JavaClass[] classes = builder.getClasses();
++ 
++         for (int i = 0; i < classes.length; i++) {
++             JavaClass clazz = classes[i];
++ 
++             if (clazz.isA(this) && !(clazz == this)) {
++                 result.add(clazz);
++             }
++         }
++ 
++         return (JavaClass[]) result.toArray(new JavaClass[result.size()]);
++     }
++ 
++     public DocletTag[] getTagsByName(String name, boolean superclasses) {
++         List result = new ArrayList();
++ 
++         addTagsRecursive(result, this, name, superclasses);
++ 
++         return (DocletTag[]) result.toArray(new DocletTag[result.size()]);
++     }
++ 
++     private void addTagsRecursive(List result, JavaClass javaClass,
++                                   String name, boolean superclasses) {
++         DocletTag[] tags = javaClass.getTagsByName(name);
++ 
++         addNewTags(result, tags);
++ 
++         if (superclasses) {
++             JavaClass superclass = javaClass.getSuperJavaClass();
++ 
++             // THIS IS A HACK AROUND A BUG THAT MUST BE SOLVED!!!
++             // SOMETIMES A CLASS RETURNS ITSELF AS SUPER ?!?!?!?!?!
++             if ((superclass != null) && (superclass != javaClass)) {
++                 addTagsRecursive(result, superclass, name, superclasses);
++             }
++ 
++             JavaClass[] implementz = javaClass.getImplementedInterfaces();
++ 
++             for (int h = 0; h < implementz.length; h++) {
++                 if (implementz[h] != null) {
++                     addTagsRecursive(result, implementz[h], name, superclasses);
++                 }
++             }
++         }
++     }
++ 
++     private void addNewTags(List list, DocletTag[] tags) {
++         for (int i = 0; i < tags.length; i++) {
++             DocletTag superTag = tags[i];
++ 
++             if (!list.contains(superTag)) {
++                 list.add(superTag);
++             }
++         }
++     }
++ 
++     public int compareTo(Object o) {
++         return getFullyQualifiedName().compareTo(((JavaClass) o).getFullyQualifiedName());
++     }
++ 
++ }
+
+*** src/java/com/thoughtworks/qdox/model/JavaFieldImpl.java	Wed Dec 31 14:00:00 1969
+--- src/java/com/thoughtworks/qdox/model/JavaFieldImpl.java	Tue Aug 24 18:09:41 2004
+***************
+*** 0 ****
+--- 1,55 ----
++ package com.thoughtworks.qdox.model;
++ 
++ public class JavaFieldImpl extends AbstractJavaEntityImpl implements JavaField {
++ 
++     private Type type;
++     private JavaClass parent;
++ 
++     protected JavaFieldImpl() {
++     }
++ 
++     public JavaFieldImpl(String name) {
++         setName(name);
++     }
++ 
++     protected JavaFieldImpl(Type type, String name) {
++         setType(type);
++         setName(name);
++     }
++     
++     public Type getType() {
++         return type;
++     }
++ 
++     protected void writeBody(IndentBuffer result) {
++         writeAllModifiers(result);
++         result.write(type.toString());
++         result.write(' ');
++         result.write(name);
++         result.write(';');
++         result.newline();
++     }
++ 
++     public void setType(Type type) {
++         this.type = type;
++     }
++ 
++     public int compareTo(Object o) {
++         return getName().compareTo(((JavaField)o).getName());
++     }
++ 
++     public String getDeclarationSignature(boolean withModifiers) {
++         IndentBuffer result = new IndentBuffer();
++         if (withModifiers) {
++             writeAllModifiers(result);
++         }
++         result.write(type.toString());
++         result.write(' ');
++         result.write(name);
++         return result.toString();
++     }
++ 
++     public String getCallSignature() {
++         return getName();
++     }
++ }
+
+*** src/java/com/thoughtworks/qdox/model/JavaMethodImpl.java	Wed Dec 31 14:00:00 1969
+--- src/java/com/thoughtworks/qdox/model/JavaMethodImpl.java	Tue Aug 24 18:09:41 2004
+***************
+*** 0 ****
+--- 1,293 ----
++ package com.thoughtworks.qdox.model;
++ 
++ import java.beans.Introspector;
++ import java.util.List;
++ import java.util.ArrayList;
++ 
++ public class JavaMethodImpl extends AbstractInheritableJavaEntityImpl implements JavaMethod {
++ 
++     private Type returns = TypeImpl.VOID;
++     private JavaParameter[] parameters = JavaParameterImpl.EMPTY_ARRAY;
++     private Type[] exceptions = TypeImpl.EMPTY_ARRAY;
++     private boolean constructor;
++ 
++     protected JavaMethodImpl() {
++     }
++ 
++     public JavaMethodImpl(String name) {
++         setName(name);
++     }
++ 
++     protected JavaMethodImpl(Type returns, String name) {
++         setReturns(returns);
++         setName(name);
++     }
++     
++     public Type getReturns() {
++         return returns;
++     }
++ 
++     public JavaParameter[] getParameters() {
++         return parameters;
++     }
++ 
++     public JavaParameter getParameterByName(String name) {
++         JavaParameter[] parameters = getParameters();
++         for (int i = 0; i < parameters.length; i++) {
++             if (parameters[i].getName().equals(name)) {
++                 return parameters[i];
++             }
++         }
++         return null;
++     }
++ 
++     public Type[] getExceptions() {
++         return exceptions;
++     }
++ 
++     public boolean isConstructor() {
++         return constructor;
++     }
++ 
++     protected void writeBody(IndentBuffer result) {
++         writeBody(result, true, true, true);
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     protected void writeBody(IndentBuffer result, boolean withModifiers, boolean isDeclaration, boolean isPrettyPrint) {
++         if (withModifiers) {
++             writeAccessibilityModifier(result);
++             writeNonAccessibilityModifiers(result);
++         }
++ 
++         if (!constructor) {
++             if(isDeclaration) {
++                 result.write(returns.toString());
++                 result.write(' ');
++             }
++         }
++ 
++         result.write(name);
++         result.write('(');
++         for (int i = 0; i < parameters.length; i++) {
++             JavaParameter parameter = parameters[i];
++             if (i > 0) result.write(", ");
++             if (isDeclaration) {
++                 result.write(parameter.getType().toString());
++                 result.write(' ');
++             }
++             result.write(parameter.getName());
++         }
++         result.write(')');
++         if (isDeclaration) {
++             if (exceptions.length > 0) {
++                 result.write(" throws ");
++                 for (int i = 0; i < exceptions.length; i++) {
++                     if (i > 0) result.write(", ");
++                     result.write(exceptions[i].getValue());
++                 }
++             }
++         }
++         if (isPrettyPrint) {
++             result.write(';');
++             result.newline();
++         }
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     private String getSignature(boolean withModifiers, boolean isDeclaration) {
++         IndentBuffer result = new IndentBuffer();
++         writeBody(result, withModifiers, isDeclaration, false);
++         return result.toString();
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public String getDeclarationSignature(boolean withModifiers) {
++         return getSignature(withModifiers, true);
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public String getCallSignature() {
++         return getSignature(false, false);
++     }
++ 
++     public void setReturns(Type returns) {
++         this.returns = returns;
++     }
++ 
++     public void setParameters(JavaParameter[] parameters) {
++         for (int i = 0; i < parameters.length; i++) {
++             parameters[i].setParentMethod(this);
++         }
++         this.parameters = parameters;
++     }
++ 
++     public void setExceptions(Type[] exceptions) {
++         this.exceptions = exceptions;
++     }
++ 
++     public void setConstructor(boolean constructor) {
++         this.constructor = constructor;
++     }
++ 
++     public boolean equals(Object obj) {
++         if (obj == null) return false;
++         JavaMethod m = (JavaMethod) obj;
++ 
++         if (m.isConstructor() != isConstructor()) return false;
++ 
++         if (m.getName() == null) return (getName() == null);
++         if (!m.getName().equals(getName())) return false;
++         
++         if (m.getReturns() == null) return (getReturns() == null);
++         if (!m.getReturns().equals(getReturns())) return false;
++ 
++         JavaParameter[] myParams = getParameters();
++         JavaParameter[] otherParams = m.getParameters();
++         if (otherParams.length != myParams.length) return false;
++         for (int i = 0; i < myParams.length; i++) {
++             if (!otherParams[i].equals(myParams[i])) return false;
++         }
++ 
++         return true;
++     }
++ 
++     /**
++      * @param name method name
++      * @param parameterTypes parameter types or null if there are no parameters.
++      * @return true if the signature and parameters match.
++      */
++     public boolean signatureMatches(String name, Type[] parameterTypes) {
++         if (!name.equals(this.name)) return false;
++         parameterTypes = parameterTypes == null ? new Type[0] : parameterTypes;
++         if (parameterTypes.length != this.parameters.length) return false;
++         for (int i = 0; i < parameters.length; i++) {
++             if (!parameters[i].getType().equals(parameterTypes[i])) {
++                 return false;
++             }
++         }
++         return true;
++     }
++ 
++     public int hashCode() {
++         int hashCode = name.hashCode();
++         if (returns != null) hashCode *= returns.hashCode();
++         hashCode *= getParameters().length;
++         return hashCode;
++     }
++ 
++     public JavaClass getParentClass() {
++         return (JavaClass) getParent();
++     }
++ 
++     public void setParentClass(JavaClass parentClass) {
++         setParent(parentClass);
++     }
++ 
++     public boolean isPublic() {
++         return super.isPublic() || getParentClass().isInterface();
++     }
++ 
++     /**
++      * @return true if this method is a Java Bean accessor
++      * @since 1.3
++      */
++     public boolean isPropertyAccessor() {
++         if (isStatic()) return false;
++         if (getParameters().length != 0) return false;
++         
++         if (getName().startsWith("is")) {
++             return (getName().length() > 2
++                     && Character.isUpperCase(getName().charAt(2)));
++         }
++         if (getName().startsWith("get")) {
++             return (getName().length() > 3
++                     && Character.isUpperCase(getName().charAt(3)));
++         }
++         
++         return false;
++     }
++ 
++     /**
++      * @return true if this method is a Java Bean accessor
++      * @since 1.3
++      */
++     public boolean isPropertyMutator() {
++         if (isStatic()) return false;
++         if (getParameters().length != 1) return false;
++         
++         if (getName().startsWith("set")) {
++             return (getName().length() > 3
++                     && Character.isUpperCase(getName().charAt(3)));
++         }
++ 
++         return false;
++     }
++ 
++     /**
++      * @return the type of the property this method represents, or null if this method
++      * is not a property mutator or property accessor.
++      * @since 1.3
++      */
++     public Type getPropertyType() {
++         if (isPropertyAccessor()) {
++             return getReturns();
++         }
++         if (isPropertyMutator()) {
++             return getParameters()[0].getType();
++         } 
++         return null;
++     }
++ 
++     /**
++      * @return the name of the property this method represents, or null if this method
++      * is not a property mutator or property accessor.
++      * @since 1.3
++      */
++     public String getPropertyName() {
++         int start = -1;
++         if (getName().startsWith("get") || getName().startsWith("set")) {
++             start = 3;
++         } else if (getName().startsWith("is")) {
++             start = 2;
++         } else {
++             return null;
++         }
++         return Introspector.decapitalize(getName().substring(start));
++     }
++ 
++     public DocletTag[] getTagsByName(String name, boolean inherited) {
++         JavaClass clazz = getParentClass();
++         JavaParameter[] params = getParameters();
++         Type[] types = new TypeImpl[params.length];
++         for (int i = 0; i < types.length; i++) {
++             types[i] = params[i].getType();
++         }
++         JavaMethod[] methods = clazz.getMethodsBySignature(getName(), types, true);
++ 
++         List result = new ArrayList();
++         for (int i = 0; i < methods.length; i++) {
++             JavaMethod method = methods[i];
++             DocletTag[] tags = method.getTagsByName(name);
++             for (int j = 0; j < tags.length; j++) {
++                 DocletTag tag = tags[j];
++                 if(!result.contains(tag)) {
++                     result.add(tag);
++                 }
++             }
++         }
++         return (DocletTag[]) result.toArray(new DocletTag[result.size()]);
++     }
++ 
++     public int compareTo(Object o) {
++         return getDeclarationSignature(false).compareTo(((JavaMethod)o).getDeclarationSignature(false));
++     }
++ }
+
+*** src/java/com/thoughtworks/qdox/model/JavaParameterImpl.java	Wed Dec 31 14:00:00 1969
+--- src/java/com/thoughtworks/qdox/model/JavaParameterImpl.java	Tue Aug 24 13:29:24 2004
+***************
+*** 0 ****
+--- 1,47 ----
++ /*
++  * Copyright (c) 2004 Your Corporation. All Rights Reserved.
++  */
++ package com.thoughtworks.qdox.model;
++ 
++ import java.io.Serializable;
++ 
++ public class JavaParameterImpl implements JavaParameter {
++ 
++     public static final JavaParameter[]
++             EMPTY_ARRAY = new JavaParameterImpl[0];
++ 
++     private String name;
++     private Type type;
++     private JavaMethod parentMethod;
++ 
++     public JavaParameterImpl(Type type, String name) {
++         this.name = name;
++         this.type = type;
++     }
++ 
++     public String getName() {
++         return name;
++     }
++ 
++     public Type getType() {
++         return type;
++     }
++ 
++     public boolean equals(Object obj) {
++         JavaParameter p = (JavaParameter) obj;
++         // name isn't used in equality check.
++         return getType().equals(p.getType());
++     }
++ 
++     public int hashCode() {
++         return getType().hashCode();
++     }
++ 
++     public JavaMethod getParentMethod() {
++         return parentMethod;
++     }
++ 
++     public void setParentMethod(JavaMethod parentMethod) {
++         this.parentMethod = parentMethod;
++     }
++ }
+
+*** src/java/com/thoughtworks/qdox/model/JavaSourceImpl.java	Wed Dec 31 14:00:00 1969
+--- src/java/com/thoughtworks/qdox/model/JavaSourceImpl.java	Tue Aug 24 13:30:33 2004
+***************
+*** 0 ****
+--- 1,228 ----
++ /*
++  * Copyright (c) 2004 Your Corporation. All Rights Reserved.
++  */
++ package com.thoughtworks.qdox.model;
++ 
++ import java.io.File;
++ import java.io.Serializable;
++ import java.util.HashMap;
++ import java.util.HashSet;
++ import java.util.LinkedList;
++ import java.util.List;
++ import java.util.Map;
++ import java.util.Set;
++ import java.net.URL;
++ import java.net.MalformedURLException;
++ 
++ public class JavaSourceImpl implements JavaSource {
++ 
++     private static final Set PRIMITIVE_TYPES = new HashSet();
++ 
++     static {
++         PRIMITIVE_TYPES.add("boolean");
++         PRIMITIVE_TYPES.add("byte");
++         PRIMITIVE_TYPES.add("char");
++         PRIMITIVE_TYPES.add("double");
++         PRIMITIVE_TYPES.add("float");
++         PRIMITIVE_TYPES.add("int");
++         PRIMITIVE_TYPES.add("long");
++         PRIMITIVE_TYPES.add("short");
++         PRIMITIVE_TYPES.add("void");
++     }
++ 
++     private String packge;
++     private List imports = new LinkedList();
++     private String[] importsArray;
++     private List classes = new LinkedList();
++     private JavaClass[] classesArray;
++     private ClassLibrary classLibrary;
++     private Map resolvedTypeCache = new HashMap();
++     private URL url;
++ 
++     /**
++      * @since 1.4
++      */
++     public void setURL(URL url) {
++         this.url = url;
++     }
++ 
++     /**
++      * @since 1.4
++      */
++     public URL getURL() {
++         return url;
++     }
++ 
++     /**
++      * @deprecated use setURL
++      */
++     public void setFile(File file) {
++         try {
++             setURL(file.toURL());
++         } catch (MalformedURLException e) {
++             throw new IllegalStateException(e.getMessage());
++         }
++     }
++ 
++     /**
++      * @deprecated use getURL
++      */
++     public File getFile() {
++         return new File(url.getFile());
++     }
++ 
++     public String getPackage() {
++         return packge;
++     }
++ 
++     public void setPackage(String packge) {
++         this.packge = packge;
++     }
++ 
++     public void addImport(String imp) {
++         imports.add(imp);
++         importsArray = null;
++     }
++ 
++     public String[] getImports() {
++         if (importsArray == null) {
++             importsArray = new String[imports.size()];
++             imports.toArray(importsArray);
++         }
++         return importsArray;
++     }
++ 
++     public void addClass(JavaClass cls) {
++         cls.setParent(this);
++         classes.add(cls);
++         classesArray = null;
++     }
++ 
++     public JavaClass[] getClasses() {
++         if (classesArray == null) {
++             classesArray = new JavaClassImpl[classes.size()];
++             classes.toArray(classesArray);
++         }
++         return classesArray;
++     }
++ 
++     public ClassLibrary getClassLibrary() {
++         return classLibrary;
++     }
++ 
++     public void setClassLibrary(ClassLibrary classLibrary) {
++         this.classLibrary = classLibrary;
++     }
++ 
++     public String toString() {
++         IndentBuffer result = new IndentBuffer();
++ 
++         // package statement
++         if (packge != null) {
++             result.write("package ");
++             result.write(packge);
++             result.write(';');
++             result.newline();
++             result.newline();
++         }
++ 
++         // import statement
++         String[] imports = getImports();
++         for (int i = 0; imports != null && i < imports.length; i++) {
++             result.write("import ");
++             result.write(imports[i]);
++             result.write(';');
++             result.newline();
++         }
++         if (imports != null && imports.length > 0) {
++             result.newline();
++         }
++ 
++         // classes
++         JavaClass[] classes = getClasses();
++         for (int i = 0; i < classes.length; i++) {
++             if (i > 0) result.newline();
++             classes[i].write(result);
++         }
++ 
++         return result.toString();
++     }
++ 
++     public String resolveType(String typeName) {
++         if (resolvedTypeCache.containsKey(typeName)) {
++             return (String) resolvedTypeCache.get(typeName);
++         }
++         String resolved = resolveTypeInternal(typeName);
++         if (resolved != null) {
++             resolvedTypeCache.put(typeName, resolved);
++         }
++         return resolved;
++     }
++ 
++     private String resolveTypeInternal(String typeName) {
++ 
++         // primitive types
++         if (PRIMITIVE_TYPES.contains(typeName)) return typeName;
++ 
++         // check if a matching fully-qualified import
++         String[] imports = getImports();
++         for (int i = 0; i < imports.length; i++) {
++             if (imports[i].equals(typeName)) return typeName;
++             if (imports[i].endsWith("." + typeName)) return imports[i];
++         }
++ 
++         if (getClassLibrary() == null) return null;
++ 
++         // check for fully-qualified class
++         if (getClassLibrary().contains(typeName)) {
++             return typeName;
++         }
++         
++         // check for a class in the same package
++         {
++             String fqn = getClassNamePrefix() + typeName;
++             if (getClassLibrary().contains(fqn)) {
++                 return fqn;
++             }
++         }
++ 
++         // check for wildcard imports
++         for (int i = 0; i < imports.length; i++) {
++             if (imports[i].endsWith(".*")) {
++                 String fqn = 
++                     imports[i].substring(0, imports[i].length() - 1)
++                     + typeName;
++                 if (getClassLibrary().contains(fqn)) {
++                     return fqn;
++                 }
++             }
++         }
++ 
++         // try java.lang.*
++         {
++             String fqn = "java.lang." + typeName;
++             if (getClassLibrary().contains(fqn)) {
++                 return fqn;
++             }
++         }
++ 
++         // maybe it's an inner-class reference
++         int indexOfLastDot = typeName.lastIndexOf('.');
++         if (indexOfLastDot != -1) {
++             String root = typeName.substring(0,indexOfLastDot);
++             String leaf = typeName.substring(indexOfLastDot+1);
++             return resolveType(root + "$" + leaf);
++         }
++         
++         return null;
++     }
++ 
++     public String getClassNamePrefix() {
++         if (getPackage() == null) return "";
++         return getPackage() + ".";
++     }
++ 
++     public JavaSource getParentSource() {
++         return this;
++     }
++ }
+
+*** src/java/com/thoughtworks/qdox/model/TypeImpl.java	Wed Dec 31 14:00:00 1969
+--- src/java/com/thoughtworks/qdox/model/TypeImpl.java	Tue Aug 24 13:34:28 2004
+***************
+*** 0 ****
+--- 1,130 ----
++ package com.thoughtworks.qdox.model;
++ 
++ import java.io.Serializable;
++ 
++ public class TypeImpl implements Type {
++ 
++     public static final Type[] EMPTY_ARRAY = new TypeImpl[0];
++     public static final Type VOID = new TypeImpl("void");
++ 
++     private String name;
++     private JavaClassParent context;
++     private String fullName;
++     private int dimensions;
++ 
++     public TypeImpl(String fullName, String name, int dimensions, JavaClassParent context) {
++         this.fullName = fullName;
++         this.name = name;
++         this.dimensions = dimensions;
++         this.context = context;
++     }
++ 
++     public TypeImpl(String fullName, int dimensions, JavaClassParent context) {
++         this(fullName, null, dimensions, context);
++     }
++ 
++     public TypeImpl(String fullName, int dimensions) {
++         this(fullName, dimensions, null);
++     }
++ 
++     public TypeImpl(String fullName) {
++         this(fullName, 0);
++     }
++     
++     public static Type createUnresolved(String name, int dimensions, JavaClassParent context) {
++         return new TypeImpl(null, name, dimensions, context);
++     }
++     
++     public JavaClassParent getJavaClassParent() {
++         return context;
++     }
++ 
++     public String getValue() {
++         return isResolved() ? fullName : name;
++     }
++ 
++     public boolean isResolved() {
++         if (fullName == null && context != null) {
++             fullName = context.resolveType(name);
++         }
++         return (fullName != null);
++     }
++ 
++     /**
++      * @see java.lang.Comparable#compareTo(Object)
++      */
++     public int compareTo(Object o) {
++         if (!(o instanceof Type))
++             return 0;
++ 
++         return getValue().compareTo(((Type) o).getValue());
++     }
++ 
++     public boolean isArray() {
++         return dimensions > 0;
++     }
++ 
++     public int getDimensions() {
++         return dimensions;
++     }
++ 
++     public String toString() {
++         if (dimensions == 0) return getValue();
++         StringBuffer buff = new StringBuffer(getValue());
++         for (int i = 0; i < dimensions; i++) buff.append("[]");
++         String result = buff.toString();
++         return result;
++     }
++ 
++     public boolean equals(Object obj) {
++         if (obj == null) return false;
++         Type t = (Type) obj;
++         return getValue().equals(t.getValue()) && t.getDimensions() == getDimensions();
++     }
++ 
++     public int hashCode() {
++         return getValue().hashCode();
++     }
++ 
++     public JavaClass getJavaClass() {
++         JavaClassParent javaClassParent = getJavaClassParent();
++         if (javaClassParent == null) {
++             return null;
++         }
++         ClassLibrary classLibrary = javaClassParent.getClassLibrary();
++         if (classLibrary == null) {
++             return null;
++         }
++         return classLibrary.getClassByName(getValue());
++     }
++ 
++     /**
++      * @since 1.3
++      */
++     public boolean isA(Type type) {
++         if (this.equals(type)) {
++             return true;
++         } else {
++             JavaClass javaClass = getJavaClass();
++             if (javaClass != null) {
++                 // ask our interfaces
++                 Type[] implementz = javaClass.getImplements();
++                 for (int i = 0; i < implementz.length; i++) {
++                     if (implementz[i].isA(type)) {
++                         return true;
++                     }
++                 }
++ 
++                 // ask our superclass
++                 Type supertype = javaClass.getSuperClass();
++                 if (supertype != null) {
++                     if (supertype.isA(type)) {
++                         return true;
++                     }
++                 }
++             }
++         }
++         // We'we walked up the hierarchy and found nothing.
++         return false;
++     }
++ }
+
+*** bootstrap/yacc.linux
+--- bootstrap/yacc.linux
+*** bootstrap/yacc.solaris
+--- bootstrap/yacc.solaris
+*** src/java/com/thoughtworks/qdox/JavaDocBuilder.java
+--- src/java/com/thoughtworks/qdox/JavaDocBuilder.java
+*** src/java/com/thoughtworks/qdox/model/AbstractInheritableJavaEntity.java
+--- src/java/com/thoughtworks/qdox/model/AbstractInheritableJavaEntity.java
+*** src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java
+--- src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java
+*** src/java/com/thoughtworks/qdox/model/JavaClass.java
+--- src/java/com/thoughtworks/qdox/model/JavaClass.java
+*** src/java/com/thoughtworks/qdox/model/JavaClassParent.java
+--- src/java/com/thoughtworks/qdox/model/JavaClassParent.java
+*** src/java/com/thoughtworks/qdox/model/JavaField.java
+--- src/java/com/thoughtworks/qdox/model/JavaField.java
+*** src/java/com/thoughtworks/qdox/model/JavaMethod.java
+--- src/java/com/thoughtworks/qdox/model/JavaMethod.java
+*** src/java/com/thoughtworks/qdox/model/JavaParameter.java
+--- src/java/com/thoughtworks/qdox/model/JavaParameter.java
+*** src/java/com/thoughtworks/qdox/model/JavaSource.java
+--- src/java/com/thoughtworks/qdox/model/JavaSource.java
+*** src/java/com/thoughtworks/qdox/model/ModelBuilder.java
+--- src/java/com/thoughtworks/qdox/model/ModelBuilder.java
+*** src/java/com/thoughtworks/qdox/model/Type.java
+--- src/java/com/thoughtworks/qdox/model/Type.java
+*** src/java/com/thoughtworks/qdox/parser/Lexer.java
+--- src/java/com/thoughtworks/qdox/parser/Lexer.java
+*** src/java/com/thoughtworks/qdox/parser/structs/TypeDef.java
+--- src/java/com/thoughtworks/qdox/parser/structs/TypeDef.java
+*** src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java
+--- src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java
+*** src/test/com/thoughtworks/qdox/model/AbstractJavaEntityTest.java
+--- src/test/com/thoughtworks/qdox/model/AbstractJavaEntityTest.java
+*** src/test/com/thoughtworks/qdox/model/ClassLibraryTest.java
+--- src/test/com/thoughtworks/qdox/model/ClassLibraryTest.java
+*** src/test/com/thoughtworks/qdox/model/JavaClassTest.java
+--- src/test/com/thoughtworks/qdox/model/JavaClassTest.java
+*** src/test/com/thoughtworks/qdox/model/JavaFieldTest.java
+--- src/test/com/thoughtworks/qdox/model/JavaFieldTest.java
+*** src/test/com/thoughtworks/qdox/model/JavaMethodTest.java
+--- src/test/com/thoughtworks/qdox/model/JavaMethodTest.java
+*** src/test/com/thoughtworks/qdox/model/JavaParameterTest.java
+--- src/test/com/thoughtworks/qdox/model/JavaParameterTest.java
+*** src/test/com/thoughtworks/qdox/model/JavaSourceTest.java
+--- src/test/com/thoughtworks/qdox/model/JavaSourceTest.java
+*** src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java
+--- src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java
+*** src/test/com/thoughtworks/qdox/model/TypeTest.java
+--- src/test/com/thoughtworks/qdox/model/TypeTest.java
+*** src/test/com/thoughtworks/qdox/parser/LexerTest.java
+--- src/test/com/thoughtworks/qdox/parser/LexerTest.java
+*** src/test/com/thoughtworks/qdox/parser/MockLexer.java
+--- src/test/com/thoughtworks/qdox/parser/MockLexer.java
+*** src/test/com/thoughtworks/qdox/traversal/TraversalTest.java
+--- src/test/com/thoughtworks/qdox/traversal/TraversalTest.java
+*** xdocs/index.xml
+--- xdocs/index.xml
+*** xdocs/license.xml
+--- xdocs/license.xml
+*** xdocs/navigation.xml
+--- xdocs/navigation.xml
+*** xdocs/tasks.xml
+--- xdocs/tasks.xml

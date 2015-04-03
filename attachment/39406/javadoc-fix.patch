@@ -1,0 +1,53 @@
+Index: src/java/com/thoughtworks/qdox/model/annotation/EvaluatingVisitor.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/EvaluatingVisitor.java	(revision 515)
++++ src/java/com/thoughtworks/qdox/model/annotation/EvaluatingVisitor.java	(working copy)
+@@ -51,9 +51,8 @@
+      * Return the result type of a binary operator
+      * <p>
+      * Performs binary numeric promotion as specified in the Java Language
+-     * Specification, <a
+-     * href="http://java.sun.com/docs/books/jls/second_edition/html/conversions.doc.html#170983">section
+-     * 5.6.1<a>
++     * Specification, 
++     * @see <a href="http://java.sun.com/docs/books/jls/second_edition/html/conversions.doc.html#170983">section 5.6.1<a>
+      */
+     protected static Class resultType( Object left, Object right ) {
+         Class type = void.class;
+@@ -83,9 +82,8 @@
+      * Return the numeric result type of a binary operator
+      * <p>
+      * Performs binary numeric promotion as specified in the Java Language
+-     * Specification, <a
+-     * href="http://java.sun.com/docs/books/jls/second_edition/html/conversions.doc.html#170983">section
+-     * 5.6.1<a>
++     * Specification, 
++     * @see <a href="http://java.sun.com/docs/books/jls/second_edition/html/conversions.doc.html#170983">section 5.6.1<a>
+      */
+     protected static Class numericResultType( Object left, Object right ) {
+         Class type = void.class;
+@@ -106,9 +104,8 @@
+      * Return the result type of an unary operator
+      * <p>
+      * Performs unary numeric promotion as specified in the Java Language
+-     * Specification, <a
+-     * href="http://java.sun.com/docs/books/jls/second_edition/html/conversions.doc.html#170952">section
+-     * 5.6.2<a>
++     * Specification, 
++     * @see <a href="http://java.sun.com/docs/books/jls/second_edition/html/conversions.doc.html#170952">section 5.6.2<a>
+      */
+     protected static Class unaryNumericResultType( Object value ) {
+         Class type = void.class;
+Index: src/java/com/thoughtworks/qdox/model/ModelBuilder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(revision 515)
++++ src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(working copy)
+@@ -143,7 +143,7 @@
+      *      
+      * @param typeDef
+      * @param dimensions
+-     * @return
++     * @return the Type
+      */
+     public Type createType(TypeDef typeDef, int dimensions) {
+     	if(typeDef == null) {

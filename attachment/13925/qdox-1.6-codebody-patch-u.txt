@@ -1,0 +1,447 @@
+diff -u -r clean/qdox/src/grammar/lexer.flex patched/qdox/src/grammar/lexer.flex
+--- clean/qdox/src/grammar/lexer.flex	2005-01-04 03:16:05.000000000 +0800
++++ patched/qdox/src/grammar/lexer.flex	2005-02-01 10:59:15.746050600 +0800
+@@ -21,6 +21,7 @@
+     private int[] stateStack = new int[10];
+     private boolean javaDocNewLine;
+     private boolean javaDocStartedContent;
++    private StringBuffer codeBody = new StringBuffer(8192);
+ 
+     public String text() {
+         return yytext();
+@@ -46,6 +47,13 @@
+     private void popState() {
+         yybegin(stateStack[--stateDepth]);
+     }
++    
++    // Added by shawn
++    public String getCodeBody(){
++        String s = codeBody.toString();
++        codeBody = new StringBuffer(8192);
++        return s;
++    }
+ 
+ %}
+ 
+@@ -108,6 +116,7 @@
+     "{"                 {
+         nestingDepth++;
+         if (nestingDepth == classDepth + 1) {
++            codeBody.append('{');
+             pushState(CODEBLOCK);
+         }
+         else {
+@@ -162,44 +171,59 @@
+ }
+ 
+ <CODEBLOCK> {
+-    "{"                 { nestingDepth++; }
++    "{"                 { codeBody.append("{");nestingDepth++; }
+     "}"                 {
+         nestingDepth--;
+         if (nestingDepth == classDepth) {
++            codeBody.append("\n}");
+             popState();
+             return Parser.CODEBLOCK;
++        }else{
++            codeBody.append("}");
+         }
+     }
++    // Added by shawn
++    //.|\r|\n|\r\n|\t	{codeBody.append( yytext() );}
++    .|{WhiteSpace}	{codeBody.append( yytext() );}
+ }
+ 
++// ---- Modified to read the codebody after the assign identifier. Shawn.
+ <ASSIGNMENT> {
+     ";"                 { 
+         if (nestingDepth == assignmentDepth) { 
+             popState(); 
+             return Parser.SEMI; 
+-        } 
++        }else{
++          codeBody.append(";");
++        }
+     }
+     ","                 {
+         if (nestingDepth == assignmentDepth) { 
+             popState(); 
+             return Parser.COMMA; 
++        }else{
++            codeBody.append(",");
+         } 
+     }
+-    "{"                 { nestingDepth++; }
+-    "}"                 { nestingDepth--; }
+-    "("                 { nestingDepth++; }
++    "{"                 { codeBody.append("{");nestingDepth++; }
++    "}"                 { codeBody.append("}");nestingDepth--; }
++    "("                 { codeBody.append("(");nestingDepth++; }
+     ")"                 { 
++    	codeBody.append(")");
+         nestingDepth--; 
+         if (nestingDepth < assignmentDepth) { 
+             popState(); 
+             return Parser.PARENCLOSE; 
+         }
+     }
+-    "["                 { nestingDepth++; }
+-    "]"                 { nestingDepth--; }
++    "["                 { codeBody.append("[");nestingDepth++; }
++    "]"                 { codeBody.append("]");nestingDepth--; }
++    .|{WhiteSpace}	{ codeBody.append(yytext());}
+ }
+ 
+-<ASSIGNMENT, CODEBLOCK, YYINITIAL> {
++
++//<ASSIGNMENT, CODEBLOCK, YYINITIAL> {
++<ASSIGNMENT, YYINITIAL> {
+     "\""                { pushState(STRING); }
+     \'                  { pushState(CHAR); }
+     "//"                { pushState(SINGLELINECOMMENT); }
+diff -u -r clean/qdox/src/grammar/parser.y patched/qdox/src/grammar/parser.y
+--- clean/qdox/src/grammar/parser.y	2005-01-18 05:11:21.000000000 +0800
++++ patched/qdox/src/grammar/parser.y	2005-02-01 10:35:31.809845800 +0800
+@@ -14,7 +14,7 @@
+ 
+ // strongly typed tokens/types
+ %token <sval> IDENTIFIER JAVADOCTAG JAVADOCTOKEN
+-%type <sval> fullidentifier modifier classtype
++%type <sval> fullidentifier modifier classtype memberend // added by Shawn
+ %type <ival> dimensions
+ %type <bval> varargs
+ %type <type> type arrayidentifier
+@@ -215,17 +215,30 @@
+ 	enum |
+     SEMI;
+ 
+-memberend: SEMI | CODEBLOCK;
++memberend: SEMI | CODEBLOCK{
++	$$ = lexer.getCodeBody(); 
++};
+ 
+ static_block:
+-    modifiers CODEBLOCK { modifiers.clear(); };
++    modifiers CODEBLOCK { 
++ 	mth.lineNumber = line;
++        mth.modifiers.addAll(modifiers);
++        mth.body = lexer.getCodeBody();
++        mth.constructor = true;
++        mth.staticInitializer = true;
++        builder.addMethod(mth);
++        mth = new MethodDef();     
++        modifiers.clear(); 
++        //System.out.println("FIXME: How to get the static method body? \n" + lexer.getCodeBody()); 
++    };
+ 
+ // ----- FIELD
+ 
+ fields:
+     modifiers type arrayidentifier {
+         fieldType = $2;
+-        makeField($3);
++        makeField($3,lexer.getCodeBody());
++        //System.out.println(lexer.getCodeBody());
+     }
+     extrafields memberend {
+         modifiers.clear();
+@@ -233,7 +246,8 @@
+   
+ extrafields: | 
+     extrafields COMMA { line = lexer.getLine(); } arrayidentifier {
+-        makeField($4);
++        makeField($4,lexer.getCodeBody());
++        //System.out.println(lexer.getCodeBody());
+     };
+ 
+ 
+@@ -246,6 +260,7 @@
+         mth.returns = $3.name;
+         mth.dimensions = $6 + $3.dimensions; // return dimensions can be specified after return type OR after params
+         mth.name = $4;
++        mth.body = $8;
+         builder.addMethod(mth);
+         mth = new MethodDef(); 
+     } |
+@@ -255,6 +270,7 @@
+         mth.returns = $2.name;
+         mth.dimensions = $5 + $2.dimensions; // return dimensions can be specified after return type OR after params
+         mth.name = $3;
++        mth.body = $7;
+         builder.addMethod(mth);
+         mth = new MethodDef();
+     };
+@@ -264,6 +280,7 @@
+         mth.lineNumber = line;
+         mth.modifiers.addAll(modifiers); modifiers.clear(); 
+         mth.constructor = true; mth.name = $2;
++        mth.body = $5;
+         builder.addMethod(mth);
+         mth = new MethodDef(); 
+     };
+@@ -311,6 +328,7 @@
+ private java.util.Set modifiers = new java.util.HashSet();
+ private TypeDef fieldType;
+ private int line;
++private int column;
+ private boolean debugLexer;
+ 
+ private String buffer() {
+@@ -366,13 +384,14 @@
+     TypeDef type;
+ }
+ 
+-private void makeField(TypeDef field) {
++private void makeField(TypeDef field,String body) {
+     FieldDef fd = new FieldDef();
+     fd.lineNumber = line;
+     fd.modifiers.addAll(modifiers); 
+     fd.type = fieldType.name; 
+     fd.dimensions = fieldType.dimensions + field.dimensions;
+     fd.name = field.name;
++    fd.body = body;
+     builder.addField(fd);
+ }
+             
+diff -u -r clean/qdox/src/java/com/thoughtworks/qdox/model/JavaClass.java patched/qdox/src/java/com/thoughtworks/qdox/model/JavaClass.java
+--- clean/qdox/src/java/com/thoughtworks/qdox/model/JavaClass.java	2004-12-15 19:38:22.000000000 +0800
++++ patched/qdox/src/java/com/thoughtworks/qdox/model/JavaClass.java	2005-02-01 10:19:13.025572300 +0800
+@@ -25,7 +25,7 @@
+     private List classes = new LinkedList();
+     private JavaClass[] classesArray;
+     private boolean interfce;
+-
++	    
+     // Don't access this directly. Use asType() to get my Type
+     private Type type;
+     private Type superClass;
+diff -u -r clean/qdox/src/java/com/thoughtworks/qdox/model/JavaField.java patched/qdox/src/java/com/thoughtworks/qdox/model/JavaField.java
+--- clean/qdox/src/java/com/thoughtworks/qdox/model/JavaField.java	2004-12-15 19:38:23.000000000 +0800
++++ patched/qdox/src/java/com/thoughtworks/qdox/model/JavaField.java	2005-02-01 09:38:43.909175200 +0800
+@@ -3,7 +3,8 @@
+ public class JavaField extends AbstractJavaEntity implements Member {
+ 
+     private Type type;
+-
++    private String body;
++    	
+     public JavaField() {
+     }
+ 
+@@ -25,6 +26,10 @@
+         result.write(type.toString());
+         result.write(' ');
+         result.write(name);
++        if(body.length()>0){
++          result.write(" = ");
++          result.write(body);
++        }
+         result.write(';');
+         result.newline();
+     }
+@@ -51,5 +56,13 @@
+     public String getCallSignature() {
+         return getName();
+     }
++    
++    public String getBody(){
++    	return body;
++    }
++    
++    public void setBody(String body){
++    	this.body = body;
++    }
+ 
+ }
+diff -u -r clean/qdox/src/java/com/thoughtworks/qdox/model/JavaMethod.java patched/qdox/src/java/com/thoughtworks/qdox/model/JavaMethod.java
+--- clean/qdox/src/java/com/thoughtworks/qdox/model/JavaMethod.java	2005-01-04 01:41:31.000000000 +0800
++++ patched/qdox/src/java/com/thoughtworks/qdox/model/JavaMethod.java	2005-02-01 10:51:40.000843900 +0800
+@@ -10,6 +10,10 @@
+     private JavaParameter[] parameters = JavaParameter.EMPTY_ARRAY;
+     private Type[] exceptions = Type.EMPTY_ARRAY;
+     private boolean constructor;
++    
++    // Added by Shawn
++    private String body;
++    private boolean staticInitializer;
+ 
+     public JavaMethod() {
+     }
+@@ -48,6 +52,10 @@
+     public boolean isConstructor() {
+         return constructor;
+     }
++    
++    public boolean isStaticInitializer(){
++    	return staticInitializer;
++    }
+ 
+     protected void writeBody(IndentBuffer result) {
+         writeBody(result, true, true, true);
+@@ -70,20 +78,26 @@
+         }
+ 
+         result.write(name);
+-        result.write('(');
+-        for (int i = 0; i < parameters.length; i++) {
+-            JavaParameter parameter = parameters[i];
+-            if (i > 0) result.write(", ");
+-            if (isDeclaration) {
+-                result.write(parameter.getType().toString());
+-                if (parameter.isVarArgs()) {
+-                    result.write("...");
+-                }
+-                result.write(' ');
+-            }
+-            result.write(parameter.getName());
++        
++        // Static initializer have no parameters
++        // Modified by Shawn
++        if(!isStaticInitializer()){
++          result.write('(');
++          for (int i = 0; i < parameters.length; i++) {
++              JavaParameter parameter = parameters[i];
++              if (i > 0) result.write(", ");
++              if (isDeclaration) {
++                  result.write(parameter.getType().toString());
++                  if (parameter.isVarArgs()) {
++                      result.write("...");
++                  }
++                  result.write(' ');
++              }
++              result.write(parameter.getName());
++          }
++          result.write(')');        	
+         }
+-        result.write(')');
++        
+         if (isDeclaration) {
+             if (exceptions.length > 0) {
+                 result.write(" throws ");
+@@ -93,6 +107,8 @@
+                 }
+             }
+         }
++        // Added by Shawn
++        result.write(getBody());
+         if (isPrettyPrint) {
+             result.write(';');
+             result.newline();
+@@ -140,12 +156,18 @@
+     public void setConstructor(boolean constructor) {
+         this.constructor = constructor;
+     }
++        
++    public void setStaticInitializer(boolean staticInit){
++    	this.staticInitializer = staticInit;
++    }
+ 
+     public boolean equals(Object obj) {
+         if (obj == null) return false;
+         JavaMethod m = (JavaMethod) obj;
+ 
+         if (m.isConstructor() != isConstructor()) return false;
++        
++        if (m.isStaticInitializer() != isStaticInitializer()) return false;
+ 
+         if (m.getName() == null) return (getName() == null);
+         if (!m.getName().equals(getName())) return false;
+@@ -293,5 +315,12 @@
+     public int compareTo(Object o) {
+         return getDeclarationSignature(false).compareTo(((JavaMethod)o).getDeclarationSignature(false));
+     }
+-
++    
++    // Added by Shawn
++    public String getBody(){
++    	return body;
++    }
++    public void setBody(String body){
++    	this.body = body;
++    }
+ }
+diff -u -r clean/qdox/src/java/com/thoughtworks/qdox/model/ModelBuilder.java patched/qdox/src/java/com/thoughtworks/qdox/model/ModelBuilder.java
+--- clean/qdox/src/java/com/thoughtworks/qdox/model/ModelBuilder.java	2005-01-04 01:41:31.000000000 +0800
++++ patched/qdox/src/java/com/thoughtworks/qdox/model/ModelBuilder.java	2005-02-01 10:36:16.807829800 +0800
+@@ -145,6 +145,7 @@
+         currentMethod.setName(def.name);
+         currentMethod.setReturns(createType(def.returns, def.dimensions));
+         currentMethod.setConstructor(def.constructor);
++        currentMethod.setStaticInitializer(def.staticInitializer);
+ 
+         // parameters
+         {
+@@ -173,6 +174,9 @@
+             def.modifiers.toArray(modifiers);
+             currentMethod.setModifiers(modifiers);
+         }
++        
++        // body Added by Shawn 
++        currentMethod.setBody(def.body);
+ 
+         // javadoc
+         addJavaDoc(currentMethod);
+@@ -194,7 +198,10 @@
+             def.modifiers.toArray(modifiers);
+             currentField.setModifiers(modifiers);
+         }
+-
++	
++	// code body
++	currentField.setBody(def.body);
++	
+         // javadoc
+         addJavaDoc(currentField);
+ 
+diff -u -r clean/qdox/src/java/com/thoughtworks/qdox/parser/Lexer.java patched/qdox/src/java/com/thoughtworks/qdox/parser/Lexer.java
+--- clean/qdox/src/java/com/thoughtworks/qdox/parser/Lexer.java	2004-01-23 20:36:14.000000000 +0800
++++ patched/qdox/src/java/com/thoughtworks/qdox/parser/Lexer.java	2005-01-31 22:58:00.000000000 +0800
+@@ -11,5 +11,6 @@
+     int getLine();
+ 
+     int getColumn();
++    String getCodeBody();
+     
+ }
+diff -u -r clean/qdox/src/java/com/thoughtworks/qdox/parser/structs/FieldDef.java patched/qdox/src/java/com/thoughtworks/qdox/parser/structs/FieldDef.java
+--- clean/qdox/src/java/com/thoughtworks/qdox/parser/structs/FieldDef.java	2005-01-04 01:41:31.000000000 +0800
++++ patched/qdox/src/java/com/thoughtworks/qdox/parser/structs/FieldDef.java	2005-02-01 09:33:54.811724800 +0800
+@@ -9,6 +9,7 @@
+     public Set modifiers = new HashSet();
+     public int dimensions;
+     public boolean isVarArgs;
++    public String body = "";
+ 
+     public boolean equals(Object obj) {
+         FieldDef paramDef = (FieldDef) obj;
+@@ -32,6 +33,9 @@
+         for (int i = 0; i < dimensions; i++) result.append("[]");
+         result.append(' ');
+         result.append(name);
++        if(body.length()>0){
++            result.append(" = ").append(body);
++        }
+         return result.toString();
+     }
+ }
+diff -u -r clean/qdox/src/java/com/thoughtworks/qdox/parser/structs/MethodDef.java patched/qdox/src/java/com/thoughtworks/qdox/parser/structs/MethodDef.java
+--- clean/qdox/src/java/com/thoughtworks/qdox/parser/structs/MethodDef.java	2004-06-20 08:12:18.000000000 +0800
++++ patched/qdox/src/java/com/thoughtworks/qdox/parser/structs/MethodDef.java	2005-02-01 10:36:26.698011700 +0800
+@@ -12,7 +12,9 @@
+     public List params = new ArrayList();
+     public Set exceptions = new HashSet();
+     public boolean constructor = false;
++    public boolean staticInitializer = false;
+     public int dimensions;
++    public String body = ""; // Added by Shawn
+ 
+     public boolean equals(Object obj) {
+         MethodDef methodDef = (MethodDef) obj;
+@@ -45,6 +47,7 @@
+         result.append(')');
+         result.append(" throws ");
+         result.append(exceptions);
++        result.append(body); // Added by shawn
+         return result.toString();
+     }
+ }

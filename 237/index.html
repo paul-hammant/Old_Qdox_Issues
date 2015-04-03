@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html class="mozilla"><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    
+
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<title>[QDOX-237] ArrayIndexOutOfBoundsException: 500 - jira.codehaus.org</title>
+<script type="text/javascript"><!--
+/* Script removed by snapshot save */
+--></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+<link rel="shortcut icon" href="index_files/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="https://jira.codehaus.org/osd.jsp" title="[QDOX-237] ArrayIndexOutOfBoundsException: 500 - jira.codehaus.org">
+
+    
+
+
+<!--[if IE]><![endif]-->
+<script type="text/javascript"><!--
+/* Script removed by snapshot save */
+--></script>
+<link type="text/css" rel="stylesheet" href="index_files/batch.css" media="all">
+<!--[if lte IE 8]>
+<link type="text/css" rel="stylesheet" href="/s/d41d8cd98f00b204e9800998ecf8427e/en_UK-huda6k-1988229788/6162/7/6/_/download/superbatch/css/batch.css?conditionalComment=lte+IE+8" media="all">
+<![endif]-->
+<!--[if lte IE 9]>
+<link type="text/css" rel="stylesheet" href="/s/d41d8cd98f00b204e9800998ecf8427e/en_UK-huda6k-1988229788/6162/7/6/_/download/superbatch/css/batch.css?conditionalComment=lte+IE+9" media="all">
+<![endif]-->
+<link type="text/css" rel="stylesheet" href="index_files/batch-1.css" media="all">
+<script type="text/javascript" src="index_files/batch.js"></script><style type="text/css"></style>
+<!--[if lte IE 8]>
+<script type="text/javascript" src="/s/d41d8cd98f00b204e9800998ecf8427e/en_UK-huda6k-1988229788/6162/7/6/_/download/superbatch/js/batch.js?conditionalComment=lte+IE+8" ></script>
+<![endif]-->
+<script type="text/javascript" src="index_files/batch-1.js"></script>
+<script type="text/javascript" src="index_files/jira.webresources_calendar-en.js"></script>
+<script type="text/javascript" src="index_files/com.atlassian.administraticksearch-webresources.js"></script>
+
+<script type="text/javascript" src="index_files/shortcuts.js"></script>
+
+
+    
+    
+    
+    <meta name="decorator" content="atl.general">
+    <meta id="isNavigator" name="isNavigator" content="true">
+    <meta name="ajs-user.search.mode" content="basic">
+    <meta name="ajs-issue-search-help-title" content="Searching for Issues">
+    <meta name="ajs-issue-search-help-url" content="https://docs.atlassian.com/jira/docs-061/Searching+for+Issues">
+    <meta name="ajs-advanced-search-help-title" content="Performing Advanced Searches">
+    <meta name="ajs-advanced-search-help-url" content="https://docs.atlassian.com/jira/docs-061/Advanced+Searching">
+    
+</head>
+<body data-aui-version="5.1.8" id="jira" class="aui-layout aui-theme-default ka ajax-issue-search-and-view page-type-navigator navigator-issue-only" data-version="6.1.6">
+<div id="page">
+    <header id="header" style="display:none" role="banner">
+        
+
+
+
+    
+        
+            
+        
+    
+
+
+
+
+
+
+
+        
+
+
+
+
+        
+
+
+
+
+
+<fieldset class="parameters hidden dont-default-focus">
+    <input title="tzdetect.pref.tzid" value="America/Chicago" type="hidden">
+    <input title="tzdetect.pref.tzname" value="(GMT-06:00) Chicago" type="hidden">
+    <input title="tzdetect.pref.tzoffset" value="(GMT-06:00)" type="hidden">
+    <input title="tzdetect.pref.tzdst" value="true" type="hidden">
+    <input title="tzdetect.pref.nothanks" value="" type="hidden">
+</fieldset>
+<nav data-aui-responsive="true" class="aui-header aui-dropdown2-trigger-group" role="navigation"><div class="aui-header-inner"><div class="aui-header-before"><a class="aui-dropdown2-trigger app-switcher-trigger" aria-owns="app-switcher" aria-haspopup="true" tabindex="0"><span class="aui-icon aui-icon-small aui-iconfont-appswitcher">Linked Applications</span></a><div id="app-switcher" class="aui-dropdown2 aui-style-default"><div class="aui-dropdown2-section"><ul class="nav-links"><li class="nav-link nav-link-local"><a href="https://jira.codehaus.org/" class="aui-dropdown2-radio interactive checked" title="https://jira.codehaus.org/"><span class="nav-link-label">jira.codehaus.org</span></a></li><li class="nav-link"><a href="http://jira.sonarsource.com/" class="aui-dropdown2-radio interactive" title="http://jira.sonarsource.com/"><span class="nav-link-label">SonarSource</span></a></li><li class="nav-link"><a href="http://docs.codehaus.org/" class="aui-dropdown2-radio interactive" title="http://docs.codehaus.org/"><span class="nav-link-label">Codehaus</span></a></li><li class="nav-link"><a href="http://xircles.codehaus.org/" class="aui-dropdown2-radio interactive" title="http://xircles.codehaus.org"><span class="nav-link-label">Xircles</span></a></li></ul></div></div><script><!--
+/* Script removed by snapshot save */
+--></script></div><div class="aui-header-primary"><h1 id="logo" class="aui-header-logo aui-header-logo-custom"><a href="https://jira.codehaus.org/secure/MyJiraHome.jspa"><img data-aui-responsive-header-index="0" src="urn:download-error:http://www.codehaus.org/codehaus-small.gif" alt="jira.codehaus.org"></a></h1><ul style="width: auto;" class="aui-nav">
+
+
+
+
+<li><a class="aui-nav-link aui-dropdown2-ajax jira-ajax-menu aui-dropdown2-trigger " href="https://jira.codehaus.org/secure/Dashboard.jspa" id="home_link" accesskey="d" title="View and manage your dashboards" aria-haspopup="true" aria-owns="home_link-content">Dashboards</a><div id="home_link-content" class="aui-dropdown2 aui-style-default" data-aui-dropdown2-ajax-key="home_link"></div></li><li><a class="aui-nav-link aui-dropdown2-ajax jira-ajax-menu aui-dropdown2-trigger " href="/Old_Qdox_Issues/index.html" id="browse_link" accesskey="p" title="View recent projects and browse a list of projects" aria-haspopup="true" aria-owns="browse_link-content">Projects</a><div id="browse_link-content" class="aui-dropdown2 aui-style-default" data-aui-dropdown2-ajax-key="browse_link"></div></li><li><a class="aui-nav-link aui-dropdown2-ajax jira-ajax-menu aui-dropdown2-trigger " href="https://jira.codehaus.org/secure/IssueNavigator.jspa" id="find_link" accesskey="i" title="Search for issues and view recent issues" aria-haspopup="true" aria-owns="find_link-content">Issues</a><div id="find_link-content" class="aui-dropdown2 aui-style-default" data-aui-dropdown2-ajax-key="find_link"></div></li>
+<li style="display: none;"><a id="aui-responsive-header-dropdown-trigger-0" class="aui-dropdown2-trigger" aria-owns="aui-responsive-header-dropdown-content-0" aria-haspopup="true" href="#">More<span class="icon aui-icon-dropdown"></span></a><div id="aui-responsive-header-dropdown-content-0" class="aui-dropdown2 aui-style-default"><div class="aui-dropdown2-section"><ul id="aui-responsive-header-dropdown-list-0"></ul></div></div></li></ul></div><div class="aui-header-secondary"><ul class="aui-nav"><li>
+    <form action="https://jira.codehaus.org/secure/QuickSearch.jspa" method="post" id="quicksearch" class="aui-quicksearch dont-default-focus ajs-dirty-warning-exempt">
+        <input id="quickSearchInput" class="search" title="Quick Search ( Type '/' )" placeholder="Quick Search" name="searchString" accesskey="q" type="text">
+        <input class="hidden" value="Search" type="submit">
+    </form>
+</li>
+
+
+
+    <li id="system-help-menu">
+        <a class="aui-nav-link aui-dropdown2-trigger" aria-haspopup="true" aria-owns="system-help-menu-content" href="https://docs.atlassian.com/jira/docs-061/JIRA+Documentation" target="_blank" title="Help"><span class="aui-icon aui-icon-small aui-iconfont-help">Help</span></a>
+        <div id="system-help-menu-content" class="aui-dropdown2 aui-style-default">
+                            <div class="aui-dropdown2-section">
+                                                                <ul id="jira-help" class="aui-list-truncate">
+                                                            <li>
+                                    <a id="view_help" class="interactive" title="Goto the online documentation for JIRA" href="https://docs.atlassian.com/jira/docs-061/JIRA+Documentation" target="_blank">Online Help</a>
+                                </li>
+                                                            <li>
+                                    <a id="keyshortscuthelp" class="interactive" title="Get more information about JIRA's Keyboard Shortcuts ( Type '?' )" href="https://jira.codehaus.org/secure/ViewKeyboardShortcuts%21default.jspa" target="_blank">Keyboard Shortcuts</a>
+                                </li>
+                                                            <li>
+                                    <a id="view_about" class="interactive" title="Get more information about JIRA" href="https://jira.codehaus.org/secure/AboutPage.jspa">About JIRA</a>
+                                </li>
+                                                            <li>
+                                    <a id="view_credits" class="interactive" title="See who did what" href="https://jira.codehaus.org/secure/JiraCreditsPage%21default.jspa" target="_blank">JIRA Credits</a>
+                                </li>
+                                                            <li>
+                                    <a id="whats-new-menu-link" class="interactive" href="https://docs.atlassian.com/jira/docs-061/whatsnew/iframe">What?s New</a>
+                                </li>
+                                                    </ul>
+                                    </div>
+                    </div>
+    </li>
+
+
+
+
+
+
+
+
+
+<li id="user-options">
+            <a class="aui-nav-link login-link" href="https://jira.codehaus.org/login.jsp?os_destination=%2Fbrowse%2FQDOX-237">Log In</a>
+                <div id="user-options-content" class="aui-dropdown2 aui-style-default">
+                            <div class="aui-dropdown2-section">
+                                                        </div>
+                    </div>
+    </li>
+</ul></div></div><!-- .aui-header-inner--></nav><!-- .aui-header -->
+    </header>
+    
+
+
+<div id="announcement-banner" class="alertHeader">
+    <div style="position: absolute; right: 20em; top: -2em">
+  <a href="https://xircles.codehaus.org/signup">Signup</a>
+</div>
+</div>
+
+
+    <section id="content" role="main">
+        
+    
+
+    <div class="issue-container ">
+                                    <div id="issue-content" class="issue-edit-form">
+                    <header id="stalker" class="issue-header js-stalker">
+                        <div class="issue-header-content"><header class="aui-page-header"><div class="aui-page-header-inner"><div class="aui-page-header-image"><span id="10103" class="aui-avatar aui-avatar-large aui-avatar-project jira-system-avatar"><span class="aui-avatar-inner"><img id="project-avatar" alt="QDox" src="index_files/projectavatar.png"></span></span></div><!-- .aui-page-header-image --><div class="aui-page-header-main"><ol class="aui-nav aui-nav-breadcrumbs"><li><a id="project-name-val" href="/Old_Qdox_Issues/index.html">QDox</a></li><li><a class="issue-link" data-issue-key="QDOX-237" href="#" id="key-val" rel="129178">QDOX-237</a></li></ol><h1 id="summary-val">ArrayIndexOutOfBoundsException: 500</h1></div><!-- .aui-page-header-main --><div class="aui-page-header-actions"><div id="issue-header-pager"></div></div><!-- .aui-page-header-actions --></div><!-- .aui-page-header-inner --></header><!-- .aui-page-header --><div class="command-bar"><div class="ops-cont"><div class="ops-menus aui-toolbar"><div class="toolbar-split toolbar-split-left"><ul id="opsbar-ops-login-lnk_container" class="toolbar-group pluggable-ops"><li class="toolbar-item"><a id="ops-login-lnk" style="display:none" title="Log In" class="toolbar-trigger" href="https://jira.codehaus.org/login.jsp?os_destination=%2Fbrowse%2FQDOX-237"><span class="trigger-label">Log In</span></a></li></ul><ul id="opsbar-opsbar-operations" class="toolbar-group pluggable-ops"></ul><ul id="opsbar-opsbar-transitions" class="toolbar-group pluggable-ops"></ul><ul id="opsbar-opsbar-admin" class="toolbar-group pluggable-ops"></ul></div><div class="toolbar-split toolbar-split-right"><ul id="opsbar-jira.issue.tools" style="display:none" class="toolbar-group pluggable-ops"><li class="toolbar-item toolbar-dropdown"><div><a href="#" id="viewissue-export" title="Export this issue in another format" data-hide-on-scroll=".split-view .issue-container" data-contain-to-window="true" class="toolbar-trigger  js-default-dropdown"><span class="icon icon-export viewissue-export"></span> <span class="dropdown-text">Export</span><span class="icon drop-menu"></span></a><div class="aui-list hidden"><ul class="aui-list-section aui-first aui-last"><li class="aui-list-item"><a href="https://jira.codehaus.org/si/jira.issueviews:issue-xml/QDOX-237/QDOX-237.xml" class="aui-list-item-link" id="jira.issueviews:issue-xml"><span class="trigger-label">XML</span></a></li><li class="aui-list-item"><a href="https://jira.codehaus.org/si/jira.issueviews:issue-word/QDOX-237/QDOX-237.doc" class="aui-list-item-link" id="jira.issueviews:issue-word"><span class="trigger-label">Word</span></a></li><li class="aui-list-item"><a href="https://jira.codehaus.org/si/jira.issueviews:issue-html/QDOX-237/QDOX-237.html" class="aui-list-item-link" id="jira.issueviews:issue-html"><span class="trigger-label">Printable</span></a></li></ul></div></div></li></ul></div></div></div></div></div>
+                    </header>
+                    <div class="issue-body-content">
+                        <div class="aui-group issue-body"><div class="aui-item issue-main-column"><div id="details-module" class="module toggle-wrap"><div id="details-module_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Details</h2></div><div class="mod-content">
+
+
+
+
+<ul id="issuedetails" class="property-list two-cols">
+    <li class="item">
+        <div class="wrap">
+            <strong class="name">Type:</strong>
+            <span id="type-val" class="value">
+                                <img alt="Improvement" src="index_files/improvement.png" title="Improvement - An improvement or enhancement to an existing feature or task." height="16" width="16"> Improvement
+            </span>
+        </div>
+    </li>
+    <li class="item item-right">
+        <div class="wrap">
+            <strong class="name">Status:</strong>
+            <span id="status-val" class="value">
+                                
+
+<img src="index_files/closed.png" alt="Closed" title="Closed - The issue is considered finished, the resolution is correct. Issues which are closed can be reopened." height="16" width="16"> Closed
+            </span>
+                    </div>
+    </li>
+            <li class="item">
+            <div class="wrap">
+                <strong class="name">Priority:</strong>
+                <span id="priority-val" class="value">
+                                        <img alt="Major" src="index_files/major.png" title="Major - Major loss of function." height="16" width="16"> Major
+                </span>
+            </div>
+        </li>
+                                <li class="item item-right">
+            <div class="wrap">
+                <strong class="name">Resolution:</strong>
+                <span id="resolution-val" class="value resolved">
+                                     Fixed
+                                </span>
+            </div>
+        </li>
+                <li class="item">
+            <div class="wrap">
+                <strong class="name">Affects Version/s:</strong>
+                <span id="versions-val" class="value">
+                                            <span style="height: auto;" class="shorten" id="versions-field">
+                                                            <span title="1.12 ">1.12</span>                                                    </span>
+                                    </span>
+            </div>
+        </li>
+                <li class="item item-right">
+            <div class="wrap">
+                <strong class="name">Fix Version/s:</strong>
+                <span id="fixfor-val" class="value">
+                                            <span style="height: auto;" class="shorten" id="fixVersions-field">
+                                                            <a href="/Old_Qdox_Issues/index.html/fixforversion/15636" title="2.0 ">2.0</a>                                                    </span>
+                                    </span>
+            </div>
+        </li>
+                <li class="item">
+            <div class="wrap">
+                <strong class="name">Component/s:</strong>
+                <span id="components-val" class="value">
+                                            <span style="height: auto;" class="shorten" id="components-field">
+                                                            <a href="/Old_Qdox_Issues/index.html/component/10124" title="Parser ">Parser</a>                                                    </span>
+                                    </span>
+            </div>
+        </li>
+                    <li class="item full-width">
+            <div class="wrap" id="wrap-labels">
+                <strong class="name">Labels:</strong>
+                    <div class="labels-wrap value">
+            <span class="labels" id="labels-129178-value">None</span>
+                </div>
+            </div>
+        </li>
+        </ul>
+
+<div id="customfieldmodule">
+    <div class="aui-tabs horizontal-tabs" id="customfield-tabs">
+                    <div id="customfield-panel-1" class="tabs-pane active-pane">
+                        <ul class="property-list">
+                                                <li id="rowForcustomfield_10210" class="item">
+                        <div class="wrap">
+                            <strong title="Number of attachments " class="name">Number of attachments :</strong>
+                            <div id="customfield_10210-val" class="value type-attachments" data-fieldtype="attachments" data-fieldtypecompletekey="com.atlassian.jira.toolkit:attachments">
+                                    0
+
+                            </div>
+                        </div>
+                    </li>
+                                        </ul>
+        </div>
+        </div></div>
+</div></div><div id="descriptionmodule" class="module toggle-wrap"><div id="descriptionmodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Description</h2></div><div class="mod-content"><div id="description-val" class="field-ignore-highlight">
+    <div class="user-content-block">
+                    <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>java.lang.ArrayIndexOutOfBoundsException: 500
+	at com.thoughtworks.qdox.parser.impl.Parser.val_push(Parser.java:142)
+	at com.thoughtworks.qdox.parser.impl.Parser.yyparse(Parser.java:1303)
+	at com.thoughtworks.qdox.parser.impl.Parser.parse(Parser.java:999)
+	at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:353)
+	at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:381)
+	at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:377)
+	at de.lgohlke.qdox.QdoxBug.testQDoxParserBug(QdoxBug.java:42)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:597)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:44)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:41)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:20)
+	at org.junit.runners.BlockJUnit4ClassRunner.runNotIgnored(BlockJUnit4ClassRunner.java:79)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:71)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:49)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:193)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:52)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:191)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:42)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:184)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:236)
+	at org.eclipse.jdt.internal.junit4.runner.JUnit4TestReference.run(JUnit4TestReference.java:50)
+	at org.eclipse.jdt.internal.junit.runner.TestExecution.run(TestExecution.java:38)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:467)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:683)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run(RemoteTestRunner.java:390)
+	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.main(RemoteTestRunner.java:197)
+
+
+</pre>
+</div></div>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<pre class="code-java"> @Test
+  <span class="code-keyword">public</span> void testQDoxParserBug() <span class="code-keyword">throws</span> IOException{
+    File file = <span class="code-keyword">new</span> File(<span class="code-quote">"src/test/resources/de/lgohlke/test/LocalizedFormats.java"</span>);
+    <span class="code-keyword">new</span> JavaDocBuilder().addSource(file);
+  }
+</pre>
+</div></div>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<pre class="code-java">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * <span class="code-keyword">this</span> work <span class="code-keyword">for</span> additional information regarding copyright ownership.
+ * The ASF licenses <span class="code-keyword">this</span> file to You under the Apache License, Version 2.0
+ * (the <span class="code-quote">"License"</span>); you may not use <span class="code-keyword">this</span> file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http:<span class="code-comment">//www.apache.org/licenses/LICENSE-2.0
+</span> *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an <span class="code-quote">"AS IS"</span> BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License <span class="code-keyword">for</span> the specific language governing permissions and
+ * limitations under the License.
+ */
+<span class="code-keyword">package</span> org.apache.commons.math.exception.util;
+
+<span class="code-keyword">public</span> <span class="code-keyword">enum</span> LocalizedFormats <span class="code-keyword">implements</span> Localizable {
+
+    <span class="code-comment">// CHECKSTYLE: stop MultipleVariableDeclarations
+</span>    <span class="code-comment">// CHECKSTYLE: stop JavadocVariable
+</span>
+    ARGUMENT_OUTSIDE_DOMAIN(<span class="code-quote">"Argument {0} outside domain [{1} ; {2}]"</span>),
+    ARRAY_SIZES_SHOULD_HAVE_DIFFERENCE_1(<span class="code-quote">"array sizes should have difference 1 ({0} != {1} + 1)"</span>),
+    ARRAY_SUMS_TO_ZERO(<span class="code-quote">"array sums to zero"</span>),
+    ASSYMETRIC_EIGEN_NOT_SUPPORTED(<span class="code-quote">"eigen decomposition of assymetric matrices not supported yet"</span>),
+    AT_LEAST_ONE_COLUMN(<span class="code-quote">"matrix must have at least one column"</span>),
+    AT_LEAST_ONE_ROW(<span class="code-quote">"matrix must have at least one row"</span>),
+    BANDWIDTH(<span class="code-quote">"bandwidth ({0})"</span>),
+    BINOMIAL_INVALID_PARAMETERS_ORDER(<span class="code-quote">"must have n &gt;= k <span class="code-keyword">for</span> binomial coefficient (n, k), got k = {0}, n = {1}"</span>),
+    BINOMIAL_NEGATIVE_PARAMETER(<span class="code-quote">"must have n &gt;= 0 <span class="code-keyword">for</span> binomial coefficient (n, k), got n = {0}"</span>),
+    CANNOT_CLEAR_STATISTIC_CONSTRUCTED_FROM_EXTERNAL_MOMENTS(<span class="code-quote">"statistics constructed from external moments cannot be cleared"</span>),
+    CANNOT_COMPUTE_0TH_ROOT_OF_UNITY(<span class="code-quote">"cannot compute 0-th root of unity, indefinite result"</span>),
+    CANNOT_COMPUTE_BETA_DENSITY_AT_0_FOR_SOME_ALPHA(<span class="code-quote">"cannot compute beta density at 0 when alpha = {0,number}"</span>),
+    CANNOT_COMPUTE_BETA_DENSITY_AT_1_FOR_SOME_BETA(<span class="code-quote">"cannot compute beta density at 1 when beta = %.3g"</span>),
+    CANNOT_COMPUTE_NTH_ROOT_FOR_NEGATIVE_N(<span class="code-quote">"cannot compute nth root <span class="code-keyword">for</span> <span class="code-keyword">null</span> or negative n: {0}"</span>),
+    CANNOT_CONVERT_OBJECT_TO_FRACTION(<span class="code-quote">"cannot convert given object to a fraction number: {0}"</span>),
+    CANNOT_DISCARD_NEGATIVE_NUMBER_OF_ELEMENTS(<span class="code-quote">"cannot discard a negative number of elements ({0})"</span>),
+    CANNOT_FORMAT_INSTANCE_AS_3D_VECTOR(<span class="code-quote">"cannot format a {0} instance as a 3D vector"</span>),
+    CANNOT_FORMAT_INSTANCE_AS_COMPLEX(<span class="code-quote">"cannot format a {0} instance as a complex number"</span>),
+    CANNOT_FORMAT_INSTANCE_AS_REAL_VECTOR(<span class="code-quote">"cannot format a {0} instance as a real vector"</span>),
+    CANNOT_FORMAT_OBJECT_TO_FRACTION(<span class="code-quote">"cannot format given object as a fraction number"</span>),
+    CANNOT_INCREMENT_STATISTIC_CONSTRUCTED_FROM_EXTERNAL_MOMENTS(<span class="code-quote">"statistics constructed from external moments cannot be incremented"</span>),
+    CANNOT_NORMALIZE_A_ZERO_NORM_VECTOR(<span class="code-quote">"cannot normalize a zero norm vector"</span>),
+    CANNOT_RETRIEVE_AT_NEGATIVE_INDEX(<span class="code-quote">"elements cannot be retrieved from a negative array index {0}"</span>),
+    CANNOT_SET_AT_NEGATIVE_INDEX(<span class="code-quote">"cannot set an element at a negative index {0}"</span>),
+    CANNOT_SUBSTITUTE_ELEMENT_FROM_EMPTY_ARRAY(<span class="code-quote">"cannot substitute an element from an empty array"</span>),
+    CANNOT_TRANSFORM_TO_DOUBLE(<span class="code-quote">"Conversion Exception in Transformation: {0}"</span>),
+    CARDAN_ANGLES_SINGULARITY(<span class="code-quote">"Cardan angles singularity"</span>),
+    CLASS_DOESNT_IMPLEMENT_COMPARABLE(<span class="code-quote">"class ({0}) does not implement Comparable"</span>),
+    CLOSEST_ORTHOGONAL_MATRIX_HAS_NEGATIVE_DETERMINANT(<span class="code-quote">"the closest orthogonal matrix has a negative determinant {0}"</span>),
+    COLUMN_INDEX_OUT_OF_RANGE(<span class="code-quote">"column index {0} out of allowed range [{1}, {2}]"</span>),
+    COLUMN_INDEX(<span class="code-quote">"column index ({0})"</span>), /* keep */
+    CONTINUED_FRACTION_INFINITY_DIVERGENCE(<span class="code-quote">"Continued fraction convergents diverged to +/- infinity <span class="code-keyword">for</span> value {0}"</span>),
+    CONTINUED_FRACTION_NAN_DIVERGENCE(<span class="code-quote">"Continued fraction diverged to NaN <span class="code-keyword">for</span> value {0}"</span>),
+    CONTRACTION_CRITERIA_SMALLER_THAN_EXPANSION_FACTOR(<span class="code-quote">"contraction criteria ({0}) smaller than the expansion factor ({1}).  This would lead to a never ending loop of expansion and contraction as a newly expanded internal storage array would immediately satisfy the criteria <span class="code-keyword">for</span> contraction."</span>),
+    CONTRACTION_CRITERIA_SMALLER_THAN_ONE(<span class="code-quote">"contraction criteria smaller than one ({0}).  This would lead to a never ending loop of expansion and contraction as an internal storage array length equal to the number of elements would satisfy the contraction criteria."</span>),
+    CONVERGENCE_FAILED(<span class="code-quote">"convergence failed"</span>), /* keep */
+    CROSSING_BOUNDARY_LOOPS(<span class="code-quote">"some outline boundary loops cross each other"</span>),
+    CUMULATIVE_PROBABILITY_RETURNED_NAN(<span class="code-quote">"Cumulative probability function returned NaN <span class="code-keyword">for</span> argument {0} p = {1}"</span>),
+    DIFFERENT_ROWS_LENGTHS(<span class="code-quote">"some rows have length {0} <span class="code-keyword">while</span> others have length {1}"</span>),
+    DIGEST_NOT_INITIALIZED(<span class="code-quote">"digest not initialized"</span>),
+    DIMENSIONS_MISMATCH_2x2(<span class="code-quote">"got {0}x{1} but expected {2}x{3}"</span>), /* keep */
+    DIMENSIONS_MISMATCH_SIMPLE(<span class="code-quote">"{0} != {1}"</span>), /* keep */
+    DIMENSIONS_MISMATCH(<span class="code-quote">"dimensions mismatch"</span>), /* keep */
+    DISCRETE_CUMULATIVE_PROBABILITY_RETURNED_NAN(<span class="code-quote">"Discrete cumulative probability function returned NaN <span class="code-keyword">for</span> argument {0}"</span>),
+    DISTRIBUTION_NOT_LOADED(<span class="code-quote">"distribution not loaded"</span>),
+    DUPLICATED_ABSCISSA(<span class="code-quote">"Abscissa {0} is duplicated at both indices {1} and {2}"</span>),
+    EMPTY_CLUSTER_IN_K_MEANS(<span class="code-quote">"empty cluster in k-means"</span>),
+    EMPTY_POLYNOMIALS_COEFFICIENTS_ARRAY(<span class="code-quote">"empty polynomials coefficients array"</span>), /* keep */
+    EMPTY_SELECTED_COLUMN_INDEX_ARRAY(<span class="code-quote">"empty selected column index array"</span>),
+    EMPTY_SELECTED_ROW_INDEX_ARRAY(<span class="code-quote">"empty selected row index array"</span>),
+    EMPTY_STRING_FOR_IMAGINARY_CHARACTER(<span class="code-quote">"empty string <span class="code-keyword">for</span> imaginary character"</span>),
+    ENDPOINTS_NOT_AN_INTERVAL(<span class="code-quote">"endpoints <span class="code-keyword">do</span> not specify an interval: [{0}, {1}]"</span>),
+    EQUAL_VERTICES_IN_SIMPLEX(<span class="code-quote">"equal vertices {0} and {1} in simplex configuration"</span>),
+    EULER_ANGLES_SINGULARITY(<span class="code-quote">"Euler angles singularity"</span>),
+    EVALUATION_FAILED(<span class="code-quote">"evaluation failed <span class="code-keyword">for</span> argument = {0}"</span>),
+    EVALUATION(<span class="code-quote">"evaluation"</span>), /* keep */
+    EXPANSION_FACTOR_SMALLER_THAN_ONE(<span class="code-quote">"expansion factor smaller than one ({0})"</span>),
+    FACTORIAL_NEGATIVE_PARAMETER(<span class="code-quote">"must have n &gt;= 0 <span class="code-keyword">for</span> n!, got n = {0}"</span>),
+    FAILED_BRACKETING(<span class="code-quote">"number of iterations={4}, maximum iterations={5}, initial={6}, lower bound={7}, upper bound={8}, <span class="code-keyword">final</span> a value={0}, <span class="code-keyword">final</span> b value={1}, f(a)={2}, f(b)={3}"</span>),
+    FAILED_FRACTION_CONVERSION(<span class="code-quote">"Unable to convert {0} to fraction after {1} iterations"</span>),
+    FIRST_COLUMNS_NOT_INITIALIZED_YET(<span class="code-quote">"first {0} columns are not initialized yet"</span>),
+    FIRST_ELEMENT_NOT_ZERO(<span class="code-quote">"first element is not 0: {0}"</span>),
+    FIRST_ROWS_NOT_INITIALIZED_YET(<span class="code-quote">"first {0} rows are not initialized yet"</span>),
+    FRACTION_CONVERSION_OVERFLOW(<span class="code-quote">"Overflow trying to convert {0} to fraction ({1}/{2})"</span>),
+    FUNCTION_NOT_DIFFERENTIABLE(<span class="code-quote">"function is not differentiable"</span>),
+    FUNCTION_NOT_POLYNOMIAL(<span class="code-quote">"function is not polynomial"</span>),
+    GCD_OVERFLOW_32_BITS(<span class="code-quote">"overflow: gcd({0}, {1}) is 2^31"</span>),
+    GCD_OVERFLOW_64_BITS(<span class="code-quote">"overflow: gcd({0}, {1}) is 2^63"</span>),
+    HOLE_BETWEEN_MODELS_TIME_RANGES(<span class="code-quote">"{0} wide hole between models time ranges"</span>),
+    IDENTICAL_ABSCISSAS_DIVISION_BY_ZERO(<span class="code-quote">"identical abscissas x[{0}] == x[{1}] == {2} cause division by zero"</span>),
+    INDEX_LARGER_THAN_MAX(<span class="code-quote">"the index specified: {0} is larger than the current maximal index {1}"</span>),
+    INDEX_NOT_POSITIVE(<span class="code-quote">"index ({0}) is not positive"</span>),
+    INDEX_OUT_OF_RANGE(<span class="code-quote">"index {0} out of allowed range [{1}, {2}]"</span>),
+    INDEX(<span class="code-quote">"index ({0})"</span>), /* keep */
+    NOT_FINITE_NUMBER(<span class="code-quote">"{0} is not a finite number"</span>), /* keep */
+    ARRAY_ELEMENT(<span class="code-quote">"value {0} at index {1}"</span>), /* keep */
+    INFINITE_ARRAY_ELEMENT(<span class="code-quote">"Array contains an infinite element, {0} at index {1}"</span>),
+    INFINITE_VALUE_CONVERSION(<span class="code-quote">"cannot convert infinite value"</span>),
+    INITIAL_CAPACITY_NOT_POSITIVE(<span class="code-quote">"initial capacity ({0}) is not positive"</span>),
+    INITIAL_COLUMN_AFTER_FINAL_COLUMN(<span class="code-quote">"initial column {1} after <span class="code-keyword">final</span> column {0}"</span>),
+    INITIAL_ROW_AFTER_FINAL_ROW(<span class="code-quote">"initial row {1} after <span class="code-keyword">final</span> row {0}"</span>),
+    INPUT_DATA_FROM_UNSUPPORTED_DATASOURCE(<span class="code-quote">"input data comes from unsupported datasource: {0}, supported sources: {1}, {2}"</span>),
+    INSTANCES_NOT_COMPARABLE_TO_EXISTING_VALUES(<span class="code-quote">"instance of class {0} not comparable to existing values"</span>),
+    INSUFFICIENT_DATA_FOR_T_STATISTIC(<span class="code-quote">"insufficient data <span class="code-keyword">for</span> t statistic, needs at least 2, got {0}"</span>),
+    INSUFFICIENT_DIMENSION(<span class="code-quote">"insufficient dimension {0}, must be at least {1}"</span>),
+    DIMENSION(<span class="code-quote">"dimension ({0})"</span>), /* keep */
+    INSUFFICIENT_OBSERVED_POINTS_IN_SAMPLE(<span class="code-quote">"sample contains {0} observed points, at least {1} are required"</span>),
+    INSUFFICIENT_ROWS_AND_COLUMNS(<span class="code-quote">"insufficient data: only {0} rows and {1} columns."</span>),
+    INTEGRATION_METHOD_NEEDS_AT_LEAST_TWO_PREVIOUS_POINTS(<span class="code-quote">"{0} method needs at least two previous points"</span>),
+    INTERNAL_ERROR(<span class="code-quote">"internal error, please fill a bug report at {0}"</span>),
+    INVALID_BINARY_DIGIT(<span class="code-quote">"invalid binary digit: {0}"</span>),
+    INVALID_BRACKETING_PARAMETERS(<span class="code-quote">"invalid bracketing parameters:  lower bound={0},  initial={1}, upper bound={2}"</span>),
+    INVALID_INTERVAL_INITIAL_VALUE_PARAMETERS(<span class="code-quote">"invalid interval, initial value parameters:  lower={0}, initial={1}, upper={2}"</span>),
+    INVALID_ITERATIONS_LIMITS(<span class="code-quote">"invalid iteration limits: min={0}, max={1}"</span>),
+    INVALID_MAX_ITERATIONS(<span class="code-quote">"bad value <span class="code-keyword">for</span> maximum iterations number: {0}"</span>),
+    INVALID_REGRESSION_ARRAY(<span class="code-quote">"input data array length = {0} does not match the number of observations = {1} and the number of regressors = {2}"</span>),
+    INVALID_REGRESSION_OBSERVATION(<span class="code-quote">"length of regressor array = {0} does not match the number of variables = {1} in the model"</span>),
+    INVALID_ROUNDING_METHOD(<span class="code-quote">"invalid rounding method {0}, valid methods: {1} ({2}), {3} ({4}), {5} ({6}), {7} ({8}), {9} ({10}), {11} ({12}), {13} ({14}), {15} ({16})"</span>),
+    ITERATOR_EXHAUSTED(<span class="code-quote">"iterator exhausted"</span>),
+    LCM_OVERFLOW_32_BITS(<span class="code-quote">"overflow: lcm({0}, {1}) is 2^31"</span>),
+    LCM_OVERFLOW_64_BITS(<span class="code-quote">"overflow: lcm({0}, {1}) is 2^63"</span>),
+    LIST_OF_CHROMOSOMES_BIGGER_THAN_POPULATION_SIZE(<span class="code-quote">"list of chromosomes bigger than maxPopulationSize"</span>),
+    LOESS_EXPECTS_AT_LEAST_ONE_POINT(<span class="code-quote">"Loess expects at least 1 point"</span>),
+    LOWER_BOUND_NOT_BELOW_UPPER_BOUND(<span class="code-quote">"lower bound ({0}) must be strictly less than upper bound ({1})"</span>), /* keep */
+    LOWER_ENDPOINT_ABOVE_UPPER_ENDPOINT(<span class="code-quote">"lower endpoint ({0}) must be less than or equal to upper endpoint ({1})"</span>),
+    MAP_MODIFIED_WHILE_ITERATING(<span class="code-quote">"map has been modified <span class="code-keyword">while</span> iterating"</span>),
+    EVALUATIONS(<span class="code-quote">"evaluations"</span>), /* keep */
+    MAX_COUNT_EXCEEDED(<span class="code-quote">"maximal count ({0}) exceeded"</span>), /* keep */
+    MAX_EVALUATIONS_EXCEEDED(<span class="code-quote">"maximal number of evaluations ({0}) exceeded"</span>),
+    MAX_ITERATIONS_EXCEEDED(<span class="code-quote">"maximal number of iterations ({0}) exceeded"</span>),
+    MINIMAL_STEPSIZE_REACHED_DURING_INTEGRATION(<span class="code-quote">"minimal step size ({1,number,0.00E00}) reached, integration needs {0,number,0.00E00}"</span>),
+    MISMATCHED_LOESS_ABSCISSA_ORDINATE_ARRAYS(<span class="code-quote">"Loess expects the abscissa and ordinate arrays to be of the same size, but got {0} abscissae and {1} ordinatae"</span>),
+    NAN_ELEMENT_AT_INDEX(<span class="code-quote">"element {0} is NaN"</span>),
+    NAN_VALUE_CONVERSION(<span class="code-quote">"cannot convert NaN value"</span>),
+    NEGATIVE_BRIGHTNESS_EXPONENT(<span class="code-quote">"brightness exponent should be positive or <span class="code-keyword">null</span>, but got {0}"</span>),
+    NEGATIVE_COMPLEX_MODULE(<span class="code-quote">"negative complex module {0}"</span>),
+    NEGATIVE_ELEMENT_AT_2D_INDEX(<span class="code-quote">"element ({0}, {1}) is negative: {2}"</span>),
+    NEGATIVE_ELEMENT_AT_INDEX(<span class="code-quote">"element {0} is negative: {1}"</span>),
+    NEGATIVE_NUMBER_OF_SUCCESSES(<span class="code-quote">"number of successes must be non-negative ({0})"</span>),
+    NUMBER_OF_SUCCESSES(<span class="code-quote">"number of successes ({0})"</span>), /* keep */
+    NEGATIVE_NUMBER_OF_TRIALS(<span class="code-quote">"number of trials must be non-negative ({0})"</span>),
+    NUMBER_OF_INTERPOLATION_POINTS(<span class="code-quote">"number of interpolation points ({0})"</span>), /* keep */
+    NUMBER_OF_TRIALS(<span class="code-quote">"number of trials ({0})"</span>),
+    ROBUSTNESS_ITERATIONS(<span class="code-quote">"number of robustness iterations ({0})"</span>),
+    START_POSITION(<span class="code-quote">"start position ({0})"</span>), /* keep */
+    NON_CONVERGENT_CONTINUED_FRACTION(<span class="code-quote">"Continued fraction convergents failed to converge (in less than {0} iterations) <span class="code-keyword">for</span> value {1}"</span>),
+    NON_INVERTIBLE_TRANSFORM(<span class="code-quote">"non-invertible affine transform collapses some lines into single points"</span>),
+    NON_POSITIVE_MICROSPHERE_ELEMENTS(<span class="code-quote">"number of microsphere elements must be positive, but got {0}"</span>),
+    NON_POSITIVE_POLYNOMIAL_DEGREE(<span class="code-quote">"polynomial degree must be positive: degree={0}"</span>),
+    NON_REAL_FINITE_ABSCISSA(<span class="code-quote">"all abscissae must be finite real numbers, but {0}-th is {1}"</span>),
+    NON_REAL_FINITE_ORDINATE(<span class="code-quote">"all ordinatae must be finite real numbers, but {0}-th is {1}"</span>),
+    NON_REAL_FINITE_WEIGHT(<span class="code-quote">"all weights must be finite real numbers, but {0}-th is {1}"</span>),
+    NON_SQUARE_MATRIX(<span class="code-quote">"non square ({0}x{1}) matrix"</span>),
+    NORMALIZE_INFINITE(<span class="code-quote">"Cannot normalize to an infinite value"</span>),
+    NORMALIZE_NAN(<span class="code-quote">"Cannot normalize to NaN"</span>),
+    NOT_ADDITION_COMPATIBLE_MATRICES(<span class="code-quote">"{0}x{1} and {2}x{3} matrices are not addition compatible"</span>),
+    NOT_DECREASING_NUMBER_OF_POINTS(<span class="code-quote">"points {0} and {1} are not decreasing ({2} &lt; {3})"</span>),
+    NOT_DECREASING_SEQUENCE(<span class="code-quote">"points {3} and {2} are not decreasing ({1} &lt; {0})"</span>), /* keep */
+    NOT_ENOUGH_DATA_FOR_NUMBER_OF_PREDICTORS(<span class="code-quote">"not enough data ({0} rows) <span class="code-keyword">for</span> <span class="code-keyword">this</span> many predictors ({1} predictors)"</span>),
+    NOT_ENOUGH_POINTS_IN_SPLINE_PARTITION(<span class="code-quote">"spline partition must have at least {0} points, got {1}"</span>),
+    NOT_INCREASING_NUMBER_OF_POINTS(<span class="code-quote">"points {0} and {1} are not increasing ({2} &gt; {3})"</span>),
+    NOT_INCREASING_SEQUENCE(<span class="code-quote">"points {3} and {2} are not increasing ({1} &gt; {0})"</span>), /* keep */
+    NOT_MULTIPLICATION_COMPATIBLE_MATRICES(<span class="code-quote">"{0}x{1} and {2}x{3} matrices are not multiplication compatible"</span>),
+    ALPHA(<span class="code-quote">"alpha"</span>), /* keep */
+    BETA(<span class="code-quote">"beta"</span>), /* keep */
+    NOT_POSITIVE_COLUMNDIMENSION(<span class="code-quote">"invalid column dimension: {0} (must be positive)"</span>),
+    NOT_POSITIVE_DEFINITE_MATRIX(<span class="code-quote">"not positive definite matrix"</span>),
+    NON_POSITIVE_DEFINITE_MATRIX(<span class="code-quote">"not positive definite matrix: diagonal element at ({0},{0}) is larger than {2}"</span>), /* keep */
+    NON_POSITIVE_DEFINITE_LINEAR_OPERATOR(<span class="code-quote">"non positive definite linear <span class="code-keyword">operator</span>"</span>), /* keep */
+    NON_SELF_ADJOINT_LINEAR_OPERATOR(<span class="code-quote">"non self-adjoint linear <span class="code-keyword">operator</span>"</span>), /* keep */
+    NON_SQUARE_LINEAR_OPERATOR(<span class="code-quote">"non square ({0}x{1}) linear <span class="code-keyword">operator</span>"</span>), /* keep */
+    DEGREES_OF_FREEDOM(<span class="code-quote">"degrees of freedom ({0})"</span>), /* keep */
+    NOT_POSITIVE_DEGREES_OF_FREEDOM(<span class="code-quote">"degrees of freedom must be positive ({0})"</span>),
+    NOT_POSITIVE_ELEMENT_AT_INDEX(<span class="code-quote">"element {0} is not positive: {1}"</span>),
+    NOT_POSITIVE_EXPONENT(<span class="code-quote">"invalid exponent {0} (must be positive)"</span>),
+    EXPONENT(<span class="code-quote">"exponent ({0})"</span>), /* keep */
+    NOT_POSITIVE_LENGTH(<span class="code-quote">"length must be positive ({0})"</span>),
+    LENGTH(<span class="code-quote">"length ({0})"</span>), /* keep */
+    NOT_POSITIVE_MEAN(<span class="code-quote">"mean must be positive ({0})"</span>),
+    MEAN(<span class="code-quote">"mean ({0})"</span>), /* keep */
+    NOT_POSITIVE_NUMBER_OF_SAMPLES(<span class="code-quote">"number of sample is not positive: {0}"</span>),
+    NUMBER_OF_SAMPLES(<span class="code-quote">"number of samples ({0})"</span>), /* keep */
+    NOT_POSITIVE_PERMUTATION(<span class="code-quote">"permutation k ({0}) must be positive"</span>),
+    PERMUTATION_SIZE(<span class="code-quote">"permutation size ({0}"</span>), /* keep */
+    NOT_POSITIVE_POISSON_MEAN(<span class="code-quote">"the Poisson mean must be positive ({0})"</span>),
+    NOT_POSITIVE_POPULATION_SIZE(<span class="code-quote">"population size must be positive ({0})"</span>),
+    POPULATION_SIZE(<span class="code-quote">"population size ({0})"</span>), /* keep */
+    NOT_POSITIVE_ROW_DIMENSION(<span class="code-quote">"invalid row dimension: {0} (must be positive)"</span>),
+    NOT_POSITIVE_SAMPLE_SIZE(<span class="code-quote">"sample size must be positive ({0})"</span>),
+    NOT_POSITIVE_SCALE(<span class="code-quote">"scale must be positive ({0})"</span>),
+    SCALE(<span class="code-quote">"scale ({0})"</span>), /* keep */
+    NOT_POSITIVE_SHAPE(<span class="code-quote">"shape must be positive ({0})"</span>),
+    SHAPE(<span class="code-quote">"shape ({0})"</span>), /* keep */
+    NOT_POSITIVE_STANDARD_DEVIATION(<span class="code-quote">"standard deviation must be positive ({0})"</span>),
+    STANDARD_DEVIATION(<span class="code-quote">"standard deviation ({0})"</span>), /* keep */
+    NOT_POSITIVE_UPPER_BOUND(<span class="code-quote">"upper bound must be positive ({0})"</span>),
+    NOT_POSITIVE_WINDOW_SIZE(<span class="code-quote">"window size must be positive ({0})"</span>),
+    NOT_POWER_OF_TWO(<span class="code-quote">"{0} is not a power of 2"</span>),
+    NOT_POWER_OF_TWO_CONSIDER_PADDING(<span class="code-quote">"{0} is not a power of 2, consider padding <span class="code-keyword">for</span> fix"</span>),
+    NOT_POWER_OF_TWO_PLUS_ONE(<span class="code-quote">"{0} is not a power of 2 plus one"</span>),
+    NOT_STRICTLY_DECREASING_NUMBER_OF_POINTS(<span class="code-quote">"points {0} and {1} are not strictly decreasing ({2} &lt;= {3})"</span>),
+    NOT_STRICTLY_DECREASING_SEQUENCE(<span class="code-quote">"points {3} and {2} are not strictly decreasing ({1} &lt;= {0})"</span>), /* keep */
+    NOT_STRICTLY_INCREASING_KNOT_VALUES(<span class="code-quote">"knot values must be strictly increasing"</span>),
+    NOT_STRICTLY_INCREASING_NUMBER_OF_POINTS(<span class="code-quote">"points {0} and {1} are not strictly increasing ({2} &gt;= {3})"</span>),
+    NOT_STRICTLY_INCREASING_SEQUENCE(<span class="code-quote">"points {3} and {2} are not strictly increasing ({1} &gt;= {0})"</span>), /* keep */
+    NOT_SUBTRACTION_COMPATIBLE_MATRICES(<span class="code-quote">"{0}x{1} and {2}x{3} matrices are not subtraction compatible"</span>),
+    NOT_SUPPORTED_IN_DIMENSION_N(<span class="code-quote">"method not supported in dimension {0}"</span>),
+    NOT_SYMMETRIC_MATRIX(<span class="code-quote">"not symmetric matrix"</span>),
+    NON_SYMMETRIC_MATRIX(<span class="code-quote">"non symmetric matrix: the difference between entries at ({0},{1}) and ({1},{0}) is larger than {2}"</span>), /* keep */
+    NO_BIN_SELECTED(<span class="code-quote">"no bin selected"</span>),
+    NO_CONVERGENCE_WITH_ANY_START_POINT(<span class="code-quote">"none of the {0} start points lead to convergence"</span>), /* keep */
+    NO_DATA(<span class="code-quote">"no data"</span>), /* keep */
+    NO_DEGREES_OF_FREEDOM(<span class="code-quote">"no degrees of freedom ({0} measurements, {1} parameters)"</span>),
+    NO_DENSITY_FOR_THIS_DISTRIBUTION(<span class="code-quote">"This distribution does not have a density function implemented"</span>),
+    NO_FEASIBLE_SOLUTION(<span class="code-quote">"no feasible solution"</span>),
+    NO_OPTIMUM_COMPUTED_YET(<span class="code-quote">"no optimum computed yet"</span>), /* keep */
+    NO_REGRESSORS(<span class="code-quote">"Regression model must include at least one regressor"</span>),
+    NO_RESULT_AVAILABLE(<span class="code-quote">"no result available"</span>),
+    NO_SUCH_MATRIX_ENTRY(<span class="code-quote">"no entry at indices ({0}, {1}) in a {2}x{3} matrix"</span>),
+    NULL_NOT_ALLOWED(<span class="code-quote">"<span class="code-keyword">null</span> is not allowed"</span>), /* keep */
+    COVARIANCE_MATRIX(<span class="code-quote">"covariance matrix"</span>), /* keep */
+    DENOMINATOR(<span class="code-quote">"denominator"</span>), /* keep */
+    DENOMINATOR_FORMAT(<span class="code-quote">"denominator format"</span>), /* keep */
+    FRACTION(<span class="code-quote">"fraction"</span>), /* keep */
+    FUNCTION(<span class="code-quote">"function"</span>), /* keep */
+    IMAGINARY_FORMAT(<span class="code-quote">"imaginary format"</span>), /* keep */
+    INPUT_ARRAY(<span class="code-quote">"input array"</span>), /* keep */
+    NUMERATOR(<span class="code-quote">"numerator"</span>), /* keep */
+    NUMERATOR_FORMAT(<span class="code-quote">"numerator format"</span>), /* keep */
+    OBJECT_TRANSFORMATION(<span class="code-quote">"conversion exception in transformation"</span>), /* keep */
+    REAL_FORMAT(<span class="code-quote">"real format"</span>), /* keep */
+    WHOLE_FORMAT(<span class="code-quote">"whole format"</span>), /* keep */
+    NUMBER_TOO_LARGE(<span class="code-quote">"{0} is larger than the maximum ({1})"</span>), /* keep */
+    NUMBER_TOO_SMALL(<span class="code-quote">"{0} is smaller than the minimum ({1})"</span>), /* keep */
+    NUMBER_TOO_LARGE_BOUND_EXCLUDED(<span class="code-quote">"{0} is larger than, or equal to, the maximum ({1})"</span>), /* keep */
+    NUMBER_TOO_SMALL_BOUND_EXCLUDED(<span class="code-quote">"{0} is smaller than, or equal to, the minimum ({1})"</span>), /* keep */
+    NUMBER_OF_SUCCESS_LARGER_THAN_POPULATION_SIZE(<span class="code-quote">"number of successes ({0}) must be less than or equal to population size ({1})"</span>),
+    NUMERATOR_OVERFLOW_AFTER_MULTIPLY(<span class="code-quote">"overflow, numerator too large after multiply: {0}"</span>),
+    N_POINTS_GAUSS_LEGENDRE_INTEGRATOR_NOT_SUPPORTED(<span class="code-quote">"{0} points Legendre-Gauss integrator not supported, number of points must be in the {1}-{2} range"</span>),
+    OBSERVED_COUNTS_ALL_ZERO(<span class="code-quote">"observed counts are all 0 in observed array {0}"</span>),
+    OBSERVED_COUNTS_BOTTH_ZERO_FOR_ENTRY(<span class="code-quote">"observed counts are both zero <span class="code-keyword">for</span> entry {0}"</span>),
+    BOBYQA_BOUND_DIFFERENCE_CONDITION(<span class="code-quote">"the difference between the upper and lower bound must be larger than twice the initial trust region radius ({0})"</span>),
+    OUT_OF_BOUNDS_QUANTILE_VALUE(<span class="code-quote">"out of bounds quantile value: {0}, must be in (0, 100]"</span>),
+    OUT_OF_BOUND_SIGNIFICANCE_LEVEL(<span class="code-quote">"out of bounds significance level {0}, must be between {1} and {2}"</span>),
+    SIGNIFICANCE_LEVEL(<span class="code-quote">"significance level ({0})"</span>), /* keep */
+    OUT_OF_ORDER_ABSCISSA_ARRAY(<span class="code-quote">"the abscissae array must be sorted in a strictly increasing order, but the {0}-th element is {1} whereas {2}-th is {3}"</span>),
+    OUT_OF_RANGE_ROOT_OF_UNITY_INDEX(<span class="code-quote">"out of range root of unity index {0} (must be in [{1};{2}])"</span>),
+    OUT_OF_RANGE(<span class="code-quote">"out of range"</span>), /* keep */
+    OUT_OF_RANGE_SIMPLE(<span class="code-quote">"{0} out of [{1}, {2}] range"</span>), /* keep */
+    OUTLINE_BOUNDARY_LOOP_OPEN(<span class="code-quote">"an outline boundary loop is open"</span>),
+    OVERFLOW_IN_FRACTION(<span class="code-quote">"overflow in fraction {0}/{1}, cannot negate"</span>),
+    OVERFLOW_IN_ADDITION(<span class="code-quote">"overflow in addition: {0} + {1}"</span>),
+    OVERFLOW_IN_SUBTRACTION(<span class="code-quote">"overflow in subtraction: {0} - {1}"</span>),
+    PERCENTILE_IMPLEMENTATION_CANNOT_ACCESS_METHOD(<span class="code-quote">"cannot access {0} method in percentile implementation {1}"</span>),
+    PERCENTILE_IMPLEMENTATION_UNSUPPORTED_METHOD(<span class="code-quote">"percentile implementation {0} does not support {1}"</span>),
+    PERMUTATION_EXCEEDS_N(<span class="code-quote">"permutation size ({0}) exceeds permuation domain ({1})"</span>), /* keep */
+    POLYNOMIAL(<span class="code-quote">"polynomial"</span>), /* keep */
+    POLYNOMIAL_INTERPOLANTS_MISMATCH_SEGMENTS(<span class="code-quote">"number of polynomial interpolants must match the number of segments ({0} != {1} - 1)"</span>),
+    POPULATION_LIMIT_NOT_POSITIVE(<span class="code-quote">"population limit has to be positive"</span>),
+    POSITION_SIZE_MISMATCH_INPUT_ARRAY(<span class="code-quote">"position {0} and size {1} don't fit to the size of the input array {2}"</span>),
+    POWER_NEGATIVE_PARAMETERS(<span class="code-quote">"cannot raise an integral value to a negative power ({0}^{1})"</span>),
+    PROPAGATION_DIRECTION_MISMATCH(<span class="code-quote">"propagation direction mismatch"</span>),
+    RANDOMKEY_MUTATION_WRONG_CLASS(<span class="code-quote">"RandomKeyMutation works only with RandomKeys, not {0}"</span>),
+    ROOTS_OF_UNITY_NOT_COMPUTED_YET(<span class="code-quote">"roots of unity have not been computed yet"</span>),
+    
+    ROTATION_MATRIX_DIMENSIONS(<span class="code-quote">"a {0}x{1} matrix cannot be a rotation matrix"</span>),
+    ROW_INDEX_OUT_OF_RANGE(<span class="code-quote">"row index {0} out of allowed range [{1}, {2}]"</span>),
+    SAME_SIGN_AT_ENDPOINTS(<span class="code-quote">"function values at endpoints <span class="code-keyword">do</span> not have different signs, endpoints: [{0}, {1}], values: [{2}, {3}]"</span>);
+
+   
+}
+
+</pre>
+</div></div>
+            </div>
+</div>
+</div></div><div id="linkingmodule" class="module toggle-wrap"><div id="linkingmodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Issue Links</h2></div><div class="mod-content">
+
+
+
+
+
+
+        <dl class="links-list ">
+        <dt title="is duplicated by">is duplicated by</dt>
+                    <dd id="internal-147551_10000">
+            <div class="link-content">
+                                    
+
+
+
+<p>
+            <img src="index_files/improvement.png" title="Improvement - An improvement or enhancement to an existing feature or task." alt="Improvement - An improvement or enhancement to an existing feature or task." height="16" width="16">
+        <span title="QDOX-251: Parser default stacksize too small.">
+        <a href="/Old_Qdox_Issues/251" data-issue-key="QDOX-251" class="issue-link link-title resolution">QDOX-251</a>
+        <span class="link-summary">Parser default stacksize too small.</span>
+    </span>
+</p>
+<ul class="link-snapshot">
+        <li class="priority">        <img src="index_files/major.png" title="Major - Major loss of function." alt="Major - Major loss of function." height="16" width="16">
+    </li>
+                        <li class="status">        <img src="index_files/closed.png" title="Closed - The issue is considered finished, the resolution is correct. Issues which are not closed can be reopened." alt="Closed - The issue is considered finished, the resolution is correct. Issues which are not closed can be reopened." height="16" width="16">
+    </li>
+            </ul>
+                            </div>
+                    </dd>
+            </dl>
+        
+    <script type="text/javascript"><!--
+/* Script removed by snapshot save */
+--></script>
+
+</div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+
+
+
+
+
+
+
+
+
+
+    <div class="tabwrap tabs2" style="display:none">
+                    <div class="sortwrap">
+                                    <a class="icon icon-sort-down ajax-activity-content" rel="nofollow" href="/Old_Qdox_Issues/237?actionOrder=desc" title="Ascending order - Click to sort in descending order"><span>Ascending order - Click to sort in descending order</span></a>
+                            </div>
+                <ul id="issue-tabs" class="tabs horizontal">
+                                
+            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-237">
+                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/237"><strong>All</strong></a>
+                        </li>
+                                
+            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-237">
+                            <strong>Comments</strong>
+                        </li>
+                                
+            <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-237">
+                            <a class="ajax-activity-content" id="worklog-tabpanel" href="/Old_Qdox_Issues/237"><strong>Work Log</strong></a>
+                        </li>
+                                
+            <li data-id="changehistory-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:changehistory-tabpanel" data-label="History" data-href="/browse/QDOX-237">
+                            <a class="ajax-activity-content" id="changehistory-tabpanel" href="/Old_Qdox_Issues/237"><strong>History</strong></a>
+                        </li>
+                                
+            <li data-id="activity-stream-issue-tab" data-key="com.atlassian.streams.streams-jira-plugin:activity-stream-issue-tab" data-label="Activity" data-href="/browse/QDOX-237">
+                            <a class="ajax-activity-content" id="activity-stream-issue-tab" href="/Old_Qdox_Issues/237"><strong>Activity</strong></a>
+                        </li>
+                </ul>
+    </div>
+    <div class="issuePanelWrapper">
+        <div class="issuePanelProgress"></div>
+        <div class="issuePanelContainer" id="issue_actions_container">
+                                    
+
+
+<div id="comment-278013" class="issue-data-block activity-comment twixi-block  collapsed">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/237?focusedCommentId=278013&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-278013" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_278013_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_278013_verbose subText"><span class="date user-tz" title="07/Sep/11 4:45 PM"><time class="livestamp" datetime="2011-09-07T16:45-0500">07/Sep/11 4:45 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>During the generation of the <tt>Parse</tt> we need to specify the stacksize, which is 500 by default. </p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>-Jstack=&lt;NNN&gt; Changes the stack size from default 500 to NNN.</pre>
+</div></div>
+<p> (from <a href="http://byaccj.sourceforge.net/" class="external-link" rel="nofollow">http://byaccj.sourceforge.net/</a>)<br>
+In very, very rare cases this is not enough, and it seems you have hit such case (it's a complex class).<br>
+The problem is, that is can't be set afterwards:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<pre class="code-java"><span class="code-keyword">final</span> <span class="code-keyword">static</span> <span class="code-object">int</span> YYSTACKSIZE = 500;  <span class="code-comment">//maximum stack size</span></pre>
+</div></div>
+<p>I don't feel like changing this value, because what should it be? 600, 700, 2500?<br>
+The best solution is probably to build QDox yourself and change this value. (One person listed this issue before and came with this solution all by himself)<br>
+What I can do is document it and provide a maven-property to set it.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_278013_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_278013_concise subText"><span class="date user-tz" title="07/Sep/11 4:45 PM"><time class="livestamp" datetime="2011-09-07T16:45-0500">07/Sep/11 4:45 PM</time></span></span>                    During the generation of the  Parse  we need to specify the stacksize, which is 500 by default.  
+  
+ -Jstack=&lt;NNN&gt; Changes the stack size from default 500 to NNN. 
+  
+  (from  http://byaccj.sourceforge.net/ ) 
+In very, very rare cases this is not enough, and it seems you have hit such case (it's a complex class). 
+The problem is, that is can't be set afterwards: 
+  
+  final   static   int  YYSTACKSIZE = 500;   //maximum stack size  
+  
+ I don't feel like changing this value, because what should it be? 600, 700, 2500? 
+The best solution is probably to build QDox yourself and change this value. (One person listed this issue before and came with this solution all by himself) 
+What I can do is document it and provide a maven-property to set it.              </div>
+        </div>
+    </div>
+</div>
+                             <div class="message-container">
+    <a class="collapsed-comments" href="/Old_Qdox_Issues/237&amp;showAll=true"><span class="collapsed-comments-line"></span><span class="collapsed-comments-line"></span><span class="show-more-comments" data-collapsed-count="4">4 older comments</span></a>
+</div>                             
+
+
+<div id="comment-278240" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/237?focusedCommentId=278240&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-278240" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_278240_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_278240_verbose subText"><span class="date user-tz" title="10/Sep/11 4:00 PM"><time class="livestamp" datetime="2011-09-10T16:00-0500">10/Sep/11 4:00 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Added a FAQ-entry, how to change this value. Right now this is all we can do (or we have to move to some other Parser-Generator)</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_278240_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_278240_concise subText"><span class="date user-tz" title="10/Sep/11 4:00 PM"><time class="livestamp" datetime="2011-09-10T16:00-0500">10/Sep/11 4:00 PM</time></span></span>                    Added a FAQ-entry, how to change this value. Right now this is all we can do (or we have to move to some other Parser-Generator)              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-325145" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/237?focusedCommentId=325145&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-325145" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rho" id="commentauthor_325145_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rho"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Reto Hoehener</a>
+ added a comment  - <span class="commentdate_325145_verbose subText"><span class="date user-tz" title="16/May/13 11:29 AM"><time class="livestamp" datetime="2013-05-16T11:29-0500">16/May/13 11:29 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>I cannot find that FAQ-entry. Could you please point me to it?</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rho" id="commentauthor_325145_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rho"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Reto Hoehener</a>
+ added a comment  - <span class="commentdate_325145_concise subText"><span class="date user-tz" title="16/May/13 11:29 AM"><time class="livestamp" datetime="2013-05-16T11:29-0500">16/May/13 11:29 AM</time></span></span>                    I cannot find that FAQ-entry. Could you please point me to it?              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-325389" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/237?focusedCommentId=325389&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-325389" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_325389_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_325389_verbose subText"><span class="date user-tz" title="22/May/13 5:27 AM"><time class="livestamp" datetime="2013-05-22T05:27-0500">22/May/13 5:27 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>The site shows the latest released version (1.2.1), while this issue is fixed for 2.0<br>
+<a href="http://svn.codehaus.org/qdox/trunk/qdox/src/site/fml/faq.fml" class="external-link" rel="nofollow">faq.fml</a> shows the description.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_325389_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_325389_concise subText"><span class="date user-tz" title="22/May/13 5:27 AM"><time class="livestamp" datetime="2013-05-22T05:27-0500">22/May/13 5:27 AM</time></span></span>                    The site shows the latest released version (1.2.1), while this issue is fixed for 2.0 
+ faq.fml  shows the description.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-325391" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/237?focusedCommentId=325391&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-325391" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rho" id="commentauthor_325391_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rho"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Reto Hoehener</a>
+ added a comment  - <span class="commentdate_325391_verbose subText"><span class="date user-tz" title="22/May/13 6:03 AM"><time class="livestamp" datetime="2013-05-22T06:03-0500">22/May/13 6:03 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Thanks. I checked out 1.12.1 and found this line in the pom.xml: &lt;arg value="-Jstack=500" /&gt;. Changed it to 2000, followed by a mvn clean install. It worked, but it cost me several hours.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rho" id="commentauthor_325391_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rho"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Reto Hoehener</a>
+ added a comment  - <span class="commentdate_325391_concise subText"><span class="date user-tz" title="22/May/13 6:03 AM"><time class="livestamp" datetime="2013-05-22T06:03-0500">22/May/13 6:03 AM</time></span></span>                    Thanks. I checked out 1.12.1 and found this line in the pom.xml: &lt;arg value="-Jstack=500" /&gt;. Changed it to 2000, followed by a mvn clean install. It worked, but it cost me several hours.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-328952" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/237?focusedCommentId=328952&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-328952" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="corneil.duplessis@gmail.com" id="commentauthor_328952_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=corneil.duplessis%40gmail.com"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Corneil du Plessis</a>
+ added a comment  - <span class="commentdate_328952_verbose subText"><span class="date user-tz" title="18/Jul/13 12:30 PM"><time class="livestamp" datetime="2013-07-18T12:30-0500">18/Jul/13 12:30 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Also stubbed my toe on this today.<br>
+Had to rebuild byaccj for Ubuntu 12.04 in the process.<br>
+Where is version 2.0?</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="corneil.duplessis@gmail.com" id="commentauthor_328952_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=corneil.duplessis%40gmail.com"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Corneil du Plessis</a>
+ added a comment  - <span class="commentdate_328952_concise subText"><span class="date user-tz" title="18/Jul/13 12:30 PM"><time class="livestamp" datetime="2013-07-18T12:30-0500">18/Jul/13 12:30 PM</time></span></span>                    Also stubbed my toe on this today. 
+Had to rebuild byaccj for Ubuntu 12.04 in the process. 
+Where is version 2.0?              </div>
+        </div>
+    </div>
+</div>
+                             </div>
+    </div>
+</div></div></div><div id="viewissuesidebar" class="aui-item issue-side-column"><div id="peoplemodule" class="module toggle-wrap"><div id="peoplemodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">People</h2></div><div class="mod-content"><ul class="item-details" id="peopledetails">
+    <li class="people-details">
+                <dl>
+            <dt>Assignee:</dt>
+            <dd>
+                <span id="assignee-val" class="view-issue-field">
+
+            <span class="user-hover" id="issue_summary_assignee_rfscholte" rel="rfscholte">
+            <span class="aui-avatar aui-avatar-small"><span class="aui-avatar-inner"><img src="index_files/useravatar-1.png"></span></span>
+            Robert Scholte
+        </span>
+    </span>
+                            </dd>
+        </dl>
+                        <dl>
+            <dt>Reporter:</dt>
+            <dd>
+                <span id="reporter-val" class="view-issue-field">
+
+            <span class="user-hover" id="issue_summary_reporter_lkwg82" rel="lkwg82">
+            <span class="aui-avatar aui-avatar-small"><span class="aui-avatar-inner"><img src="index_files/useravatar-1.png"></span></span>
+            Lars K. W. Gohlke
+        </span>
+    </span>
+            </dd>
+        </dl>
+                    </li>
+</ul>
+    <ul class="item-details">
+        <li>
+                            <dl>
+                    <dt>Votes:</dt>
+                    <dd>
+                                                                            <span id="vote-data" class="aui-badge vote-state-off">0</span>
+                        
+                                                                                                        <span id="vote-label" title="You have to be logged in to vote for an issue.">Vote for this issue</span>
+                                            </dd>
+                </dl>
+                                        <dl>
+                    <dt>Watchers:</dt>
+                    <dd>
+                                                                        
+                                                                            <span id="watcher-data" class="aui-badge watch-state-off">3</span>
+                        
+                                                                                <span id="watch-label" title="You have to be logged in to watch an issue.">Start watching this issue</span>
+                                            </dd>
+                </dl>
+                    </li>
+    </ul>
+</div></div><div id="datesmodule" class="module toggle-wrap"><div id="datesmodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Dates</h2></div><div class="mod-content"><ul class="item-details">
+    <li>
+            <dl class="dates">
+            <dt>Created:</dt>
+            <dd class="date user-tz" title="07/Sep/11 5:44 AM">
+
+                <span data-name="Created" id="create-date" data-fieldtype="datetime">
+                                                                        <time class="livestamp" datetime="2011-09-07T05:44-0500">07/Sep/11 5:44 AM</time>                                                             </span>
+            </dd>
+        </dl>
+            <dl class="dates">
+            <dt>Updated:</dt>
+            <dd class="date user-tz" title="18/Jul/13 1:05 PM">
+
+                <span data-name="Updated" id="updated-date" data-fieldtype="datetime">
+                                                                        <time class="livestamp" datetime="2013-07-18T13:05-0500">18/Jul/13 1:05 PM</time>                                                             </span>
+            </dd>
+        </dl>
+            <dl class="dates">
+            <dt>Resolved:</dt>
+            <dd class="date user-tz" title="10/Sep/11 4:00 PM">
+
+                <span data-name="Resolved" id="resolved-date" data-fieldtype="datetime">
+                                                                        <time class="livestamp" datetime="2011-09-10T16:00-0500">10/Sep/11 4:00 PM</time>                                                             </span>
+            </dd>
+        </dl>
+        </li>
+</ul>
+</div></div></div></div>
+                    </div>
+                </div>
+                        </div>
+
+    <fieldset class="hidden parameters">
+        <input title="autocompleteEnabled" value="true" type="hidden">
+    </fieldset>
+    
+    </section>
+    <footer id="footer" role="contentinfo">
+        
+        
+
+
+
+<div class="footer-body">
+    <ul>
+        <li>
+                        <a href="http://www.atlassian.com/software/jira">Atlassian JIRA</a>
+
+                                                    
+                        
+            <span id="footer-build-information">(v6.1.6#6162-<span title="7af547ce7c84dbb7c1e345a65437ed7b85efffa2" data-commit-id="7af547ce7c84dbb7c1e345a65437ed7b85efffa2}">sha1:7af547c</span>)</span>
+        </li>
+        <li>
+            <a id="about-link" href="https://jira.codehaus.org/secure/AboutPage.jspa">About JIRA</a>
+        </li>
+        <li>
+                                    <a id="footer-report-problem-link" href="https://jira.codehaus.org/secure/CreateIssue%21default.jspa">Report a problem</a>
+        </li>
+    </ul>
+            <ul>
+            <li class="licensemessage">
+                                    Powered by a free Atlassian <a href="http://www.atlassian.com/software/jira">JIRA</a> open source license for Codehaus. Try JIRA - <a href="http://www.atlassian.com/software/jira">bug tracking software</a> for <i>your</i> team.
+
+                            </li>
+        </ul>
+    </div>
+
+<form id="jira_request_timing_info" class="dont-default-focus">
+	<fieldset class="parameters hidden">
+
+
+
+
+		<input title="jira.session.expiry.in.mins" value="299" type="hidden">
+
+	</fieldset>
+</form>
+<!--
+	                 
+	          
+	               
+	                 
+	        CONCURRENT REQUESTS : 6
+
+
+
+-->
+
+
+
+
+
+
+
+
+
+
+<fieldset class="hidden parameters">
+    <input title="loggedInUser" value="" type="hidden">
+    <input title="ajaxTimeout" value="The call to the JIRA server did not complete within the timeout period.  We are unsure of the result of this operation." type="hidden">
+    <input title="JiraVersion" value="6.1.6" type="hidden">
+    <input title="ajaxUnauthorised" value="You are not authorised to perform this operation.  Please log in." type="hidden">
+    <input title="baseURL" value="https://jira.codehaus.org:443" type="hidden">
+    <input title="ajaxCommsError" value="The JIRA server could not be contacted.  This may be a temporary glitch or the server may be down." type="hidden">
+    <input title="ajaxServerError" value="The JIRA server was contacted but has returned an error response. We are unsure of the result of this operation." type="hidden">
+    <input title="ajaxErrorCloseDialog" value="Close this dialog and press refresh in your browser" type="hidden">
+    <input title="ajaxErrorDialogHeading" value="Communications Breakdown" type="hidden">
+
+    <input title="dirtyMessage" value="You have entered new data on this page. If you navigate away from this page without first saving your data, the changes will be lost." type="hidden">
+    <input title="dirtyDialogMessage" value="You have entered new data in this dialog. If you navigate away from this dialog without first saving your data, the changes will be lost. Click cancel to return to the dialog." type="hidden">
+    <input title="keyType" value="Type" type="hidden">
+    <input title="keyThen" value="then" type="hidden">
+    <input title="dblClickToExpand" value="Double click to expand" type="hidden">
+    <input title="actions" value="Actions" type="hidden">
+    <input title="removeItem" value="Remove" type="hidden">
+    <input title="workflow" value="Workflow" type="hidden">
+    <input title="labelNew" value="New Label" type="hidden">
+    <input title="issueActionsHint" value="Begin typing for available operations or press down to see all" type="hidden">
+    <input title="closelink" value="Close" type="hidden">
+    <input title="dotOperations" value="Operations" type="hidden">
+    <input title="dotLoading" value="Loading..." type="hidden">
+    <input title="frotherSuggestions" value="Suggestions" type="hidden">
+    <input title="frotherNomatches" value="No Matches" type="hidden">
+    <input title="multiselectVersionsError" value="{0} is not a valid version." type="hidden">
+    <input title="multiselectComponentsError" value="{0} is not a valid component." type="hidden">
+    <input title="multiselectGenericError" value="The value {0} is invalid." type="hidden">
+</fieldset>
+
+    </footer>
+</div>
+
+
+<div id="fancybox-tmp"></div><div id="fancybox-loading"><div></div></div><div id="fancybox-overlay"></div><div id="fancybox-wrap"><div id="fancybox-outer"><div class="fancybox-bg" id="fancybox-bg-n"></div><div class="fancybox-bg" id="fancybox-bg-ne"></div><div class="fancybox-bg" id="fancybox-bg-e"></div><div class="fancybox-bg" id="fancybox-bg-se"></div><div class="fancybox-bg" id="fancybox-bg-s"></div><div class="fancybox-bg" id="fancybox-bg-sw"></div><div class="fancybox-bg" id="fancybox-bg-w"></div><div class="fancybox-bg" id="fancybox-bg-nw"></div><div id="fancybox-content"></div><a id="fancybox-close"></a><div id="fancybox-title"></div><a href="javascript:void(0);" id="fancybox-left"><span class="fancy-ico" id="fancybox-left-ico"></span></a><a href="javascript:void(0);" id="fancybox-right"><span class="fancy-ico" id="fancybox-right-ico"></span></a></div></div><div class="navigator-sidebar collapsed ui-popout ui-popout-detached ui-popout-collapsed" id="navigator-sidebar"><a class="toggle-filter-panel" href="#" title="Dock the filters panel ([)"></a></div><div style="display: none;" class="jira-dialog box-shadow" id="edit-issue-dialog"><div class="jira-dialog-content"></div></div><div style="display: none;" class="jira-dialog box-shadow" id="create-subtask-dialog"><div class="jira-dialog-content"></div></div></body></html>

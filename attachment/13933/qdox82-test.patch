@@ -1,0 +1,32 @@
+Index: src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java
+===================================================================
+RCS file: /home/projects/qdox/scm/qdox/src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java,v
+retrieving revision 1.61
+diff -b -u -r1.61 JavaDocBuilderTest.java
+--- src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	6 Feb 2005 10:35:42 -0000	1.61
++++ src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	7 Feb 2005 22:29:58 -0000
+@@ -12,6 +12,8 @@
+ import java.util.HashSet;
+ 
+ /**
++ * @dummytag dummy-parameter="this is a first line
++ *      and this is a second one"
+  * @author <a href="mailto:joew@thoughtworks.com">Joe Walnes</a>
+  * @author Aslak Helles&oslash;y
+  */
+@@ -566,6 +568,15 @@
+         builder.addSource(new StringReader(source));
+         JavaClass x = builder.getClassByName("x");
+         assertEquals("foo=\"this is \nmultilined\"", x.getTagByName("bar.baz").getValue());
++    }
++
++    public void testMultineLineAttributeValuesWorksWithQDox() throws IOException {
++        JavaDocBuilder b = new JavaDocBuilder(new DefaultDocletTagFactory());
++        JavaSource src = b.addSource(new File("/Users/greg/dev/projects/xdoclet-plugins/qdox/src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java"));
++        JavaClass c = src.getClasses()[0];
++        DocletTag tag = c.getTagByName("dummytag");
++        String value = tag.getNamedParameter("dummy-parameter");
++        assertEquals("this is a first line\nand this is a second one", value);
+     }
+ 
+     public void testJiraQdox19() {

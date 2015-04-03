@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html class="mozilla"><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    
+
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<title>[QDOX-74] add parser support for enumerated types - jira.codehaus.org</title>
+<script type="text/javascript"><!--
+/* Script removed by snapshot save */
+--></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+<link rel="shortcut icon" href="index_files/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="https://jira.codehaus.org/osd.jsp" title="[QDOX-74] add parser support for enumerated types - jira.codehaus.org">
+
+    
+
+
+<!--[if IE]><![endif]-->
+<script type="text/javascript"><!--
+/* Script removed by snapshot save */
+--></script>
+<link type="text/css" rel="stylesheet" href="index_files/batch.css" media="all">
+<!--[if lte IE 8]>
+<link type="text/css" rel="stylesheet" href="/s/d41d8cd98f00b204e9800998ecf8427e/en_UK-huda6k-1988229788/6162/7/6/_/download/superbatch/css/batch.css?conditionalComment=lte+IE+8" media="all">
+<![endif]-->
+<!--[if lte IE 9]>
+<link type="text/css" rel="stylesheet" href="/s/d41d8cd98f00b204e9800998ecf8427e/en_UK-huda6k-1988229788/6162/7/6/_/download/superbatch/css/batch.css?conditionalComment=lte+IE+9" media="all">
+<![endif]-->
+<link type="text/css" rel="stylesheet" href="index_files/batch-1.css" media="all">
+<script type="text/javascript" src="index_files/batch.js"></script><style type="text/css"></style>
+<!--[if lte IE 8]>
+<script type="text/javascript" src="/s/d41d8cd98f00b204e9800998ecf8427e/en_UK-huda6k-1988229788/6162/7/6/_/download/superbatch/js/batch.js?conditionalComment=lte+IE+8" ></script>
+<![endif]-->
+<script type="text/javascript" src="index_files/batch-1.js"></script>
+<script type="text/javascript" src="index_files/jira.webresources_calendar-en.js"></script>
+<script type="text/javascript" src="index_files/com.atlassian.administraticksearch-webresources.js"></script>
+
+<script type="text/javascript" src="index_files/shortcuts.js"></script>
+
+
+    
+    
+    
+    <meta name="decorator" content="atl.general">
+    <meta id="isNavigator" name="isNavigator" content="true">
+    <meta name="ajs-user.search.mode" content="basic">
+    <meta name="ajs-issue-search-help-title" content="Searching for Issues">
+    <meta name="ajs-issue-search-help-url" content="https://docs.atlassian.com/jira/docs-061/Searching+for+Issues">
+    <meta name="ajs-advanced-search-help-title" content="Performing Advanced Searches">
+    <meta name="ajs-advanced-search-help-url" content="https://docs.atlassian.com/jira/docs-061/Advanced+Searching">
+    
+</head>
+<body data-aui-version="5.1.8" id="jira" class="aui-layout aui-theme-default ka ajax-issue-search-and-view page-type-navigator navigator-issue-only" data-version="6.1.6">
+<div id="page">
+    <header id="header" style="display:none" role="banner">
+        
+
+
+
+    
+        
+            
+        
+    
+
+
+
+
+
+
+
+        
+
+
+
+
+        
+
+
+
+
+
+<fieldset class="parameters hidden dont-default-focus">
+    <input title="tzdetect.pref.tzid" value="America/Chicago" type="hidden">
+    <input title="tzdetect.pref.tzname" value="(GMT-06:00) Chicago" type="hidden">
+    <input title="tzdetect.pref.tzoffset" value="(GMT-06:00)" type="hidden">
+    <input title="tzdetect.pref.tzdst" value="true" type="hidden">
+    <input title="tzdetect.pref.nothanks" value="" type="hidden">
+</fieldset>
+<nav data-aui-responsive="true" class="aui-header aui-dropdown2-trigger-group" role="navigation"><div class="aui-header-inner"><div class="aui-header-before"><a class="aui-dropdown2-trigger app-switcher-trigger" aria-owns="app-switcher" aria-haspopup="true" tabindex="0"><span class="aui-icon aui-icon-small aui-iconfont-appswitcher">Linked Applications</span></a><div id="app-switcher" class="aui-dropdown2 aui-style-default"><div class="aui-dropdown2-section"><ul class="nav-links"><li class="nav-link nav-link-local"><a href="https://jira.codehaus.org/" class="aui-dropdown2-radio interactive checked" title="https://jira.codehaus.org/"><span class="nav-link-label">jira.codehaus.org</span></a></li><li class="nav-link"><a href="http://jira.sonarsource.com/" class="aui-dropdown2-radio interactive" title="http://jira.sonarsource.com/"><span class="nav-link-label">SonarSource</span></a></li><li class="nav-link"><a href="http://docs.codehaus.org/" class="aui-dropdown2-radio interactive" title="http://docs.codehaus.org/"><span class="nav-link-label">Codehaus</span></a></li><li class="nav-link"><a href="http://xircles.codehaus.org/" class="aui-dropdown2-radio interactive" title="http://xircles.codehaus.org"><span class="nav-link-label">Xircles</span></a></li></ul></div></div><script><!--
+/* Script removed by snapshot save */
+--></script></div><div class="aui-header-primary"><h1 id="logo" class="aui-header-logo aui-header-logo-custom"><a href="https://jira.codehaus.org/secure/MyJiraHome.jspa"><img data-aui-responsive-header-index="0" src="urn:download-error:http://www.codehaus.org/codehaus-small.gif" alt="jira.codehaus.org"></a></h1><ul style="width: auto;" class="aui-nav">
+
+
+
+
+<li><a class="aui-nav-link aui-dropdown2-ajax jira-ajax-menu aui-dropdown2-trigger " href="https://jira.codehaus.org/secure/Dashboard.jspa" id="home_link" accesskey="d" title="View and manage your dashboards" aria-haspopup="true" aria-owns="home_link-content">Dashboards</a><div id="home_link-content" class="aui-dropdown2 aui-style-default" data-aui-dropdown2-ajax-key="home_link"></div></li><li><a class="aui-nav-link aui-dropdown2-ajax jira-ajax-menu aui-dropdown2-trigger " href="/Old_Qdox_Issues/index.html" id="browse_link" accesskey="p" title="View recent projects and browse a list of projects" aria-haspopup="true" aria-owns="browse_link-content">Projects</a><div id="browse_link-content" class="aui-dropdown2 aui-style-default" data-aui-dropdown2-ajax-key="browse_link"></div></li><li><a class="aui-nav-link aui-dropdown2-ajax jira-ajax-menu aui-dropdown2-trigger " href="https://jira.codehaus.org/secure/IssueNavigator.jspa" id="find_link" accesskey="i" title="Search for issues and view recent issues" aria-haspopup="true" aria-owns="find_link-content">Issues</a><div id="find_link-content" class="aui-dropdown2 aui-style-default" data-aui-dropdown2-ajax-key="find_link"></div></li>
+<li style="display: none;"><a id="aui-responsive-header-dropdown-trigger-0" class="aui-dropdown2-trigger" aria-owns="aui-responsive-header-dropdown-content-0" aria-haspopup="true" href="#">More<span class="icon aui-icon-dropdown"></span></a><div id="aui-responsive-header-dropdown-content-0" class="aui-dropdown2 aui-style-default"><div class="aui-dropdown2-section"><ul id="aui-responsive-header-dropdown-list-0"></ul></div></div></li></ul></div><div class="aui-header-secondary"><ul class="aui-nav"><li>
+    <form action="https://jira.codehaus.org/secure/QuickSearch.jspa" method="post" id="quicksearch" class="aui-quicksearch dont-default-focus ajs-dirty-warning-exempt">
+        <input id="quickSearchInput" class="search" title="Quick Search ( Type '/' )" placeholder="Quick Search" name="searchString" accesskey="q" type="text">
+        <input class="hidden" value="Search" type="submit">
+    </form>
+</li>
+
+
+
+    <li id="system-help-menu">
+        <a class="aui-nav-link aui-dropdown2-trigger" aria-haspopup="true" aria-owns="system-help-menu-content" href="https://docs.atlassian.com/jira/docs-061/JIRA+Documentation" target="_blank" title="Help"><span class="aui-icon aui-icon-small aui-iconfont-help">Help</span></a>
+        <div id="system-help-menu-content" class="aui-dropdown2 aui-style-default">
+                            <div class="aui-dropdown2-section">
+                                                                <ul id="jira-help" class="aui-list-truncate">
+                                                            <li>
+                                    <a id="view_help" class="interactive" title="Goto the online documentation for JIRA" href="https://docs.atlassian.com/jira/docs-061/JIRA+Documentation" target="_blank">Online Help</a>
+                                </li>
+                                                            <li>
+                                    <a id="keyshortscuthelp" class="interactive" title="Get more information about JIRA's Keyboard Shortcuts ( Type '?' )" href="https://jira.codehaus.org/secure/ViewKeyboardShortcuts%21default.jspa" target="_blank">Keyboard Shortcuts</a>
+                                </li>
+                                                            <li>
+                                    <a id="view_about" class="interactive" title="Get more information about JIRA" href="https://jira.codehaus.org/secure/AboutPage.jspa">About JIRA</a>
+                                </li>
+                                                            <li>
+                                    <a id="view_credits" class="interactive" title="See who did what" href="https://jira.codehaus.org/secure/JiraCreditsPage%21default.jspa" target="_blank">JIRA Credits</a>
+                                </li>
+                                                            <li>
+                                    <a id="whats-new-menu-link" class="interactive" href="https://docs.atlassian.com/jira/docs-061/whatsnew/iframe">What?s New</a>
+                                </li>
+                                                    </ul>
+                                    </div>
+                    </div>
+    </li>
+
+
+
+
+
+
+
+
+
+<li id="user-options">
+            <a class="aui-nav-link login-link" href="https://jira.codehaus.org/login.jsp?os_destination=%2Fbrowse%2FQDOX-74">Log In</a>
+                <div id="user-options-content" class="aui-dropdown2 aui-style-default">
+                            <div class="aui-dropdown2-section">
+                                                        </div>
+                    </div>
+    </li>
+</ul></div></div><!-- .aui-header-inner--></nav><!-- .aui-header -->
+    </header>
+    
+
+
+<div id="announcement-banner" class="alertHeader">
+    <div style="position: absolute; right: 20em; top: -2em">
+  <a href="https://xircles.codehaus.org/signup">Signup</a>
+</div>
+</div>
+
+
+    <section id="content" role="main">
+        
+    
+
+    <div class="issue-container ">
+                                    <div id="issue-content" class="issue-edit-form">
+                    <header id="stalker" class="issue-header js-stalker">
+                        <div class="issue-header-content"><header class="aui-page-header"><div class="aui-page-header-inner"><div class="aui-page-header-image"><span id="10103" class="aui-avatar aui-avatar-large aui-avatar-project jira-system-avatar"><span class="aui-avatar-inner"><img id="project-avatar" alt="QDox" src="index_files/projectavatar.png"></span></span></div><!-- .aui-page-header-image --><div class="aui-page-header-main"><ol class="aui-nav aui-nav-breadcrumbs"><li><a id="project-name-val" href="/Old_Qdox_Issues/index.html">QDox</a></li><li><a class="issue-link" data-issue-key="QDOX-74" href="#" id="key-val" rel="19883">QDOX-74</a></li></ol><h1 id="summary-val">add parser support for enumerated types</h1></div><!-- .aui-page-header-main --><div class="aui-page-header-actions"><div id="issue-header-pager"></div></div><!-- .aui-page-header-actions --></div><!-- .aui-page-header-inner --></header><!-- .aui-page-header --><div class="command-bar"><div class="ops-cont"><div class="ops-menus aui-toolbar"><div class="toolbar-split toolbar-split-left"><ul id="opsbar-ops-login-lnk_container" class="toolbar-group pluggable-ops"><li class="toolbar-item"><a id="ops-login-lnk" style="display:none" title="Log In" class="toolbar-trigger" href="https://jira.codehaus.org/login.jsp?os_destination=%2Fbrowse%2FQDOX-74"><span class="trigger-label">Log In</span></a></li></ul><ul id="opsbar-opsbar-operations" class="toolbar-group pluggable-ops"></ul><ul id="opsbar-opsbar-transitions" class="toolbar-group pluggable-ops"></ul><ul id="opsbar-opsbar-admin" class="toolbar-group pluggable-ops"></ul></div><div class="toolbar-split toolbar-split-right"><ul id="opsbar-jira.issue.tools" style="display:none" class="toolbar-group pluggable-ops"><li class="toolbar-item toolbar-dropdown"><div><a href="#" id="viewissue-export" title="Export this issue in another format" data-hide-on-scroll=".split-view .issue-container" data-contain-to-window="true" class="toolbar-trigger  js-default-dropdown"><span class="icon icon-export viewissue-export"></span> <span class="dropdown-text">Export</span><span class="icon drop-menu"></span></a><div class="aui-list hidden"><ul class="aui-list-section aui-first aui-last"><li class="aui-list-item"><a href="https://jira.codehaus.org/si/jira.issueviews:issue-xml/QDOX-74/QDOX-74.xml" class="aui-list-item-link" id="jira.issueviews:issue-xml"><span class="trigger-label">XML</span></a></li><li class="aui-list-item"><a href="https://jira.codehaus.org/si/jira.issueviews:issue-word/QDOX-74/QDOX-74.doc" class="aui-list-item-link" id="jira.issueviews:issue-word"><span class="trigger-label">Word</span></a></li><li class="aui-list-item"><a href="https://jira.codehaus.org/si/jira.issueviews:issue-html/QDOX-74/QDOX-74.html" class="aui-list-item-link" id="jira.issueviews:issue-html"><span class="trigger-label">Printable</span></a></li></ul></div></div></li></ul></div></div></div></div></div>
+                    </header>
+                    <div class="issue-body-content">
+                        <div class="aui-group issue-body"><div class="aui-item issue-main-column"><div id="details-module" class="module toggle-wrap"><div id="details-module_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Details</h2></div><div class="mod-content">
+
+
+
+
+<ul id="issuedetails" class="property-list two-cols">
+    <li class="item">
+        <div class="wrap">
+            <strong class="name">Type:</strong>
+            <span id="type-val" class="value">
+                                <img alt="New Feature" src="index_files/newfeature.png" title="New Feature - A new feature of the product, which has yet to be developed." height="16" width="16"> New Feature
+            </span>
+        </div>
+    </li>
+    <li class="item item-right">
+        <div class="wrap">
+            <strong class="name">Status:</strong>
+            <span id="status-val" class="value">
+                                
+
+<img src="index_files/closed.png" alt="Closed" title="Closed - The issue is considered finished, the resolution is correct. Issues which are closed can be reopened." height="16" width="16"> Closed
+            </span>
+                    </div>
+    </li>
+            <li class="item">
+            <div class="wrap">
+                <strong class="name">Priority:</strong>
+                <span id="priority-val" class="value">
+                                        <img alt="Major" src="index_files/major.png" title="Major - Major loss of function." height="16" width="16"> Major
+                </span>
+            </div>
+        </li>
+                                <li class="item item-right">
+            <div class="wrap">
+                <strong class="name">Resolution:</strong>
+                <span id="resolution-val" class="value resolved">
+                                     Fixed
+                                </span>
+            </div>
+        </li>
+                <li class="item">
+            <div class="wrap">
+                <strong class="name">Affects Version/s:</strong>
+                <span id="versions-val" class="value">
+                                            <span style="height: auto;" class="shorten" id="versions-field">
+                                                            <span title="1.6 ">1.6</span>                                                    </span>
+                                    </span>
+            </div>
+        </li>
+                <li class="item item-right">
+            <div class="wrap">
+                <strong class="name">Fix Version/s:</strong>
+                <span id="fixfor-val" class="value">
+                                            <span style="height: auto;" class="shorten" id="fixVersions-field">
+                                                            <a href="/Old_Qdox_Issues/index.html/fixforversion/14826" title="1.8 ">1.8</a>                                                    </span>
+                                    </span>
+            </div>
+        </li>
+                <li class="item">
+            <div class="wrap">
+                <strong class="name">Component/s:</strong>
+                <span id="components-val" class="value">
+                                            <span style="height: auto;" class="shorten" id="components-field">
+                                                            <a href="/Old_Qdox_Issues/index.html/component/10124" title="Parser ">Parser</a>                                                    </span>
+                                    </span>
+            </div>
+        </li>
+                    <li class="item full-width">
+            <div class="wrap" id="wrap-labels">
+                <strong class="name">Labels:</strong>
+                    <div class="labels-wrap value">
+            <span class="labels" id="labels-19883-value">None</span>
+                </div>
+            </div>
+        </li>
+        </ul>
+
+<div id="customfieldmodule">
+    <div class="aui-tabs horizontal-tabs" id="customfield-tabs">
+                    <div id="customfield-panel-1" class="tabs-pane active-pane">
+                        <ul class="property-list">
+                                                <li id="rowForcustomfield_10210" class="item">
+                        <div class="wrap">
+                            <strong title="Number of attachments " class="name">Number of attachments :</strong>
+                            <div id="customfield_10210-val" class="value type-attachments" data-fieldtype="attachments" data-fieldtypecompletekey="com.atlassian.jira.toolkit:attachments">
+                                    0
+
+                            </div>
+                        </div>
+                    </li>
+                                        </ul>
+        </div>
+        </div></div>
+</div></div><div id="descriptionmodule" class="module toggle-wrap"><div id="descriptionmodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Description</h2></div><div class="mod-content"><div id="description-val" class="field-ignore-highlight">
+    <div class="user-content-block">
+                    <p>To be truly Java 5.0 tolerant, we need support for enumerated types, e.g.</p>
+
+<p>    public enum Grade </p>
+{
+        A, B, C, D, F, INCOMPLETE
+    }
+<p>;</p>
+            </div>
+</div>
+</div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+
+
+
+
+
+
+
+
+
+
+    <div class="tabwrap tabs2" style="display:none">
+                    <div class="sortwrap">
+                                    <a class="icon icon-sort-down ajax-activity-content" rel="nofollow" href="/Old_Qdox_Issues/74?actionOrder=desc" title="Ascending order - Click to sort in descending order"><span>Ascending order - Click to sort in descending order</span></a>
+                            </div>
+                <ul id="issue-tabs" class="tabs horizontal">
+                                
+            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-74">
+                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/74"><strong>All</strong></a>
+                        </li>
+                                
+            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-74">
+                            <strong>Comments</strong>
+                        </li>
+                                
+            <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-74">
+                            <a class="ajax-activity-content" id="worklog-tabpanel" href="/Old_Qdox_Issues/74"><strong>Work Log</strong></a>
+                        </li>
+                                
+            <li data-id="changehistory-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:changehistory-tabpanel" data-label="History" data-href="/browse/QDOX-74">
+                            <a class="ajax-activity-content" id="changehistory-tabpanel" href="/Old_Qdox_Issues/74"><strong>History</strong></a>
+                        </li>
+                                
+            <li data-id="activity-stream-issue-tab" data-key="com.atlassian.streams.streams-jira-plugin:activity-stream-issue-tab" data-label="Activity" data-href="/browse/QDOX-74">
+                            <a class="ajax-activity-content" id="activity-stream-issue-tab" href="/Old_Qdox_Issues/74"><strong>Activity</strong></a>
+                        </li>
+                </ul>
+    </div>
+    <div class="issuePanelWrapper">
+        <div class="issuePanelProgress"></div>
+        <div class="issuePanelContainer" id="issue_actions_container">
+                                    
+
+
+<div id="comment-28546" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/74?focusedCommentId=28546&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-28546" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="jwalnes1" id="commentauthor_28546_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=jwalnes1"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Joe Walnes</a>
+ added a comment  - <span class="commentdate_28546_verbose subText"><span class="date user-tz" title="03/Jan/05 2:17 PM"><time class="livestamp" datetime="2005-01-03T14:17-0600">03/Jan/05 2:17 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Fixed. The parser now supports enums - however it does not make them available in the model. I've created another issue for this: <a href="/Old_Qdox_Issues/79" title="Expose enums in model" class="issue-link" data-issue-key="QDOX-79"><del>QDOX-79</del></a></p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="jwalnes1" id="commentauthor_28546_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=jwalnes1"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Joe Walnes</a>
+ added a comment  - <span class="commentdate_28546_concise subText"><span class="date user-tz" title="03/Jan/05 2:17 PM"><time class="livestamp" datetime="2005-01-03T14:17-0600">03/Jan/05 2:17 PM</time></span></span>                    Fixed. The parser now supports enums - however it does not make them available in the model. I've created another issue for this:   QDOX-79                </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-28685" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/74?focusedCommentId=28685&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-28685" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="jwalnes1" id="commentauthor_28685_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=jwalnes1"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Joe Walnes</a>
+ added a comment  - <span class="commentdate_28685_verbose subText"><span class="date user-tz" title="06/Jan/05 12:44 PM"><time class="livestamp" datetime="2005-01-06T12:44-0600">06/Jan/05 12:44 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>This is a bit more complicated than I thought.</p>
+
+<p>Look at this:</p>
+
+<p>/*</p>
+<ul>
+	<li>@(#)TimeUnit.java	1.6 04/02/09<br>
+ *</li>
+	<li>Copyright 2004 Sun Microsystems, Inc. All rights reserved.</li>
+	<li>SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.<br>
+ */</li>
+</ul>
+
+
+<p>package java.util.concurrent;</p>
+
+<p>/**</p>
+<ul>
+	<li>A &lt;tt&gt;TimeUnit&lt;/tt&gt; represents time durations at a given unit of</li>
+	<li>granularity and provides utility methods to convert across units,</li>
+	<li>and to perform timing and delay operations in these units.  A</li>
+	<li>&lt;tt&gt;TimeUnit&lt;/tt&gt; does not maintain time information, but only</li>
+	<li>helps organize and use time representations that may be maintained</li>
+	<li>separately across various contexts.<br>
+ *</li>
+	<li>&lt;p&gt;A &lt;tt&gt;TimeUnit&lt;/tt&gt; is mainly used to inform time-based methods</li>
+	<li>how a given timing parameter should be interpreted. For example,</li>
+	<li>the following code will timeout in 50 milliseconds if the 
+{@link
+ * java.util.concurrent.locks.Lock lock}
+<p> is not available:<br>
+ *</p></li>
+	<li>&lt;pre&gt;  Lock lock = ...;</li>
+	<li>if ( lock.tryLock(50L, TimeUnit.MILLISECONDS) ) ...</li>
+	<li>&lt;/pre&gt;</li>
+	<li>while this code will timeout in 50 seconds:</li>
+	<li>&lt;pre&gt;</li>
+	<li>Lock lock = ...;</li>
+	<li>if ( lock.tryLock(50L, TimeUnit.SECONDS) ) ...</li>
+	<li>&lt;/pre&gt;<br>
+ *</li>
+	<li>Note however, that there is no guarantee that a particular timeout</li>
+	<li>implementation will be able to notice the passage of time at the</li>
+	<li>same granularity as the given &lt;tt&gt;TimeUnit&lt;/tt&gt;.<br>
+ *</li>
+	<li>@since 1.5</li>
+	<li>@author Doug Lea<br>
+ */<br>
+public enum TimeUnit {<br>
+    NANOSECONDS(0), MICROSECONDS(1), MILLISECONDS(2), SECONDS(3);</li>
+</ul>
+
+
+<p>    /** the index of this unit */<br>
+    private final int index;</p>
+
+<p>    /** Internal constructor */<br>
+    TimeUnit(int index) </p>
+{
+        this.index = index;
+    }
+
+<p>    /** Lookup table for conversion factors */<br>
+    private static final int[] multipliers = </p>
+{
+        1,
+        1000,
+        1000 * 1000,
+        1000 * 1000 * 1000
+    }
+<p>;</p>
+
+<p>    /**</p>
+<ul>
+	<li>Lookup table to check saturation.  Note that because we are</li>
+	<li>dividing these down, we don't have to deal with asymmetry of</li>
+	<li>MIN/MAX values.<br>
+     */<br>
+    private static final long[] overflows = 
+{
+        0, // unused
+        Long.MAX_VALUE / 1000,
+        Long.MAX_VALUE / (1000 * 1000),
+        Long.MAX_VALUE / (1000 * 1000 * 1000)
+    }
+<p>;</p></li>
+</ul>
+
+
+<p>    /**</p>
+<ul>
+	<li>Perform conversion based on given delta representing the</li>
+	<li>difference between units</li>
+	<li>@param delta the difference in index values of source and target units</li>
+	<li>@param duration the duration</li>
+	<li>@return converted duration or saturated value<br>
+     */<br>
+    private static long doConvert(int delta, long duration) 
+{
+        if (delta == 0)
+            return duration;
+        if (delta &lt; 0)
+            return duration / multipliers[-delta];
+        if (duration &gt; overflows[delta])
+            return Long.MAX_VALUE;
+        if (duration &lt; -overflows[delta])
+            return Long.MIN_VALUE;
+        return duration * multipliers[delta];
+    }</li>
+</ul>
+
+
+<p>    /**</p>
+<ul>
+	<li>Convert the given time duration in the given unit to this</li>
+	<li>unit.  Conversions from finer to coarser granularities</li>
+	<li>truncate, so lose precision. For example converting</li>
+	<li>&lt;tt&gt;999&lt;/tt&gt; milliseconds to seconds results in</li>
+	<li>&lt;tt&gt;0&lt;/tt&gt;. Conversions from coarser to finer granularities</li>
+	<li>with arguments that would numerically overflow saturate to</li>
+	<li>&lt;tt&gt;Long.MIN_VALUE&lt;/tt&gt; if negative or &lt;tt&gt;Long.MAX_VALUE&lt;/tt&gt;</li>
+	<li>if positive.<br>
+     *</li>
+	<li>@param duration the time duration in the given &lt;tt&gt;unit&lt;/tt&gt;</li>
+	<li>@param unit the unit of the &lt;tt&gt;duration&lt;/tt&gt; argument</li>
+	<li>@return the converted duration in this unit,</li>
+	<li>or &lt;tt&gt;Long.MIN_VALUE&lt;/tt&gt; if conversion would negatively</li>
+	<li>overflow, or &lt;tt&gt;Long.MAX_VALUE&lt;/tt&gt; if it would positively overflow.<br>
+     */<br>
+    public long convert(long duration, TimeUnit unit) 
+{
+        return doConvert(unit.index - index, duration);
+    }</li>
+</ul>
+
+
+<p>    /**</p>
+<ul>
+	<li>Equivalent to &lt;tt&gt;NANOSECONDS.convert(duration, this)&lt;/tt&gt;.</li>
+	<li>@param duration the duration</li>
+	<li>@return the converted duration,</li>
+	<li>or &lt;tt&gt;Long.MIN_VALUE&lt;/tt&gt; if conversion would negatively</li>
+	<li>overflow, or &lt;tt&gt;Long.MAX_VALUE&lt;/tt&gt; if it would positively overflow.</li>
+	<li>@see #convert<br>
+     */<br>
+    public long toNanos(long duration) 
+{
+        return doConvert(index, duration);
+    }</li>
+</ul>
+
+
+<p>    /**</p>
+<ul>
+	<li>Equivalent to &lt;tt&gt;MICROSECONDS.convert(duration, this)&lt;/tt&gt;.</li>
+	<li>@param duration the duration</li>
+	<li>@return the converted duration,</li>
+	<li>or &lt;tt&gt;Long.MIN_VALUE&lt;/tt&gt; if conversion would negatively</li>
+	<li>overflow, or &lt;tt&gt;Long.MAX_VALUE&lt;/tt&gt; if it would positively overflow.</li>
+	<li>@see #convert<br>
+     */<br>
+    public long toMicros(long duration) 
+{
+        return doConvert(index - MICROSECONDS.index, duration);
+    }</li>
+</ul>
+
+
+<p>    /**</p>
+<ul>
+	<li>Equivalent to &lt;tt&gt;MILLISECONDS.convert(duration, this)&lt;/tt&gt;.</li>
+	<li>@param duration the duration</li>
+	<li>@return the converted duration,</li>
+	<li>or &lt;tt&gt;Long.MIN_VALUE&lt;/tt&gt; if conversion would negatively</li>
+	<li>overflow, or &lt;tt&gt;Long.MAX_VALUE&lt;/tt&gt; if it would positively overflow.</li>
+	<li>@see #convert<br>
+     */<br>
+    public long toMillis(long duration) 
+{
+        return doConvert(index - MILLISECONDS.index, duration);
+    }</li>
+</ul>
+
+
+<p>    /**</p>
+<ul>
+	<li>Equivalent to &lt;tt&gt;SECONDS.convert(duration, this)&lt;/tt&gt;.</li>
+	<li>@param duration the duration</li>
+	<li>@return the converted duration.</li>
+	<li>@see #convert<br>
+     */<br>
+    public long toSeconds(long duration) 
+{
+        return doConvert(index - SECONDS.index, duration);
+    }</li>
+</ul>
+
+
+
+<p>    /**</p>
+<ul>
+	<li>Utility method to compute the excess-nanosecond argument to</li>
+	<li>wait, sleep, join.<br>
+     */<br>
+    private int excessNanos(long time, long ms) 
+{
+        if (this == NANOSECONDS)
+            return (int) (time  - (ms * 1000 * 1000));
+        if (this == MICROSECONDS)
+            return (int) ((time * 1000) - (ms * 1000 * 1000));
+        return 0;
+    }</li>
+</ul>
+
+
+<p>    /**</p>
+<ul>
+	<li>Perform a timed &lt;tt&gt;Object.wait&lt;/tt&gt; using this time unit.</li>
+	<li>This is a convenience method that converts timeout arguments</li>
+	<li>into the form required by the &lt;tt&gt;Object.wait&lt;/tt&gt; method.<br>
+     *</li>
+	<li>&lt;p&gt;For example, you could implement a blocking &lt;tt&gt;poll&lt;/tt&gt;</li>
+	<li>method (see 
+{@link BlockingQueue#poll BlockingQueue.poll}
+<p>)</p></li>
+	<li>using:<br>
+     *</li>
+	<li>&lt;pre&gt;  public synchronized  Object poll(long timeout, TimeUnit unit) throws InterruptedException {</li>
+	<li>while (empty) 
+{
+     *      unit.timedWait(this, timeout);
+     *      ...
+     *    }</li>
+	<li>}&lt;/pre&gt;<br>
+     *</li>
+	<li>@param obj the object to wait on</li>
+	<li>@param timeout the maximum time to wait.</li>
+	<li>@throws InterruptedException if interrupted while waiting.</li>
+	<li>@see Object#wait(long, int)<br>
+     */<br>
+    public void timedWait(Object obj, long timeout)<br>
+        throws InterruptedException 
+<div class="error"><span class="error">Unknown macro: {        if (timeout &gt; 0) {
+            long ms = toMillis(timeout);
+            int ns = excessNanos(timeout, ms);
+            obj.wait(ms, ns);
+        }    }</span> </div></li>
+</ul>
+
+
+<p>    /**</p>
+<ul>
+	<li>Perform a timed &lt;tt&gt;Thread.join&lt;/tt&gt; using this time unit.</li>
+	<li>This is a convenience method that converts time arguments into the</li>
+	<li>form required by the &lt;tt&gt;Thread.join&lt;/tt&gt; method.</li>
+	<li>@param thread the thread to wait for</li>
+	<li>@param timeout the maximum time to wait</li>
+	<li>@throws InterruptedException if interrupted while waiting.</li>
+	<li>@see Thread#join(long, int)<br>
+     */<br>
+    public void timedJoin(Thread thread, long timeout)<br>
+        throws InterruptedException 
+<div class="error"><span class="error">Unknown macro: {        if (timeout &gt; 0) {
+            long ms = toMillis(timeout);
+            int ns = excessNanos(timeout, ms);
+            thread.join(ms, ns);
+        }    }</span> </div></li>
+</ul>
+
+
+<p>    /**</p>
+<ul>
+	<li>Perform a &lt;tt&gt;Thread.sleep&lt;/tt&gt; using this unit.</li>
+	<li>This is a convenience method that converts time arguments into the</li>
+	<li>form required by the &lt;tt&gt;Thread.sleep&lt;/tt&gt; method.</li>
+	<li>@param timeout the minimum time to sleep</li>
+	<li>@throws InterruptedException if interrupted while sleeping.</li>
+	<li>@see Thread#sleep<br>
+     */<br>
+    public void sleep(long timeout) throws InterruptedException 
+<div class="error"><span class="error">Unknown macro: {        if (timeout &gt; 0) {
+            long ms = toMillis(timeout);
+            int ns = excessNanos(timeout, ms);
+            Thread.sleep(ms, ns);
+        }    }</span> </div></li>
+</ul>
+
+
+<p>}</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="jwalnes1" id="commentauthor_28685_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=jwalnes1"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Joe Walnes</a>
+ added a comment  - <span class="commentdate_28685_concise subText"><span class="date user-tz" title="06/Jan/05 12:44 PM"><time class="livestamp" datetime="2005-01-06T12:44-0600">06/Jan/05 12:44 PM</time></span></span>                    This is a bit more complicated than I thought. 
+
+ Look at this: 
+
+ /* 
+ 
+	 @(#)TimeUnit.java	1.6 04/02/09 
+ * 
+	 Copyright 2004 Sun Microsystems, Inc. All rights reserved. 
+	 SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms. 
+ */ 
+ 
+
+
+ package java.util.concurrent; 
+
+ /** 
+ 
+	 A &lt;tt&gt;TimeUnit&lt;/tt&gt; represents time durations at a given unit of 
+	 granularity and provides utility methods to convert across units, 
+	 and to perform timing and delay operations in these units.  A 
+	 &lt;tt&gt;TimeUnit&lt;/tt&gt; does not maintain time information, but only 
+	 helps organize and use time representations that may be maintained 
+	 separately across various contexts. 
+ * 
+	 &lt;p&gt;A &lt;tt&gt;TimeUnit&lt;/tt&gt; is mainly used to inform time-based methods 
+	 how a given timing parameter should be interpreted. For example, 
+	 the following code will timeout in 50 milliseconds if the 
+{@link
+ * java.util.concurrent.locks.Lock lock}
+  is not available: 
+ *  
+	 &lt;pre&gt;  Lock lock = ...; 
+	 if ( lock.tryLock(50L, TimeUnit.MILLISECONDS) ) ... 
+	 &lt;/pre&gt; 
+	 while this code will timeout in 50 seconds: 
+	 &lt;pre&gt; 
+	 Lock lock = ...; 
+	 if ( lock.tryLock(50L, TimeUnit.SECONDS) ) ... 
+	 &lt;/pre&gt; 
+ * 
+	 Note however, that there is no guarantee that a particular timeout 
+	 implementation will be able to notice the passage of time at the 
+	 same granularity as the given &lt;tt&gt;TimeUnit&lt;/tt&gt;. 
+ * 
+	 @since 1.5 
+	 @author Doug Lea 
+ */ 
+public enum TimeUnit { 
+    NANOSECONDS(0), MICROSECONDS(1), MILLISECONDS(2), SECONDS(3); 
+ 
+
+
+     /** the index of this unit */ 
+    private final int index; 
+
+     /** Internal constructor */ 
+    TimeUnit(int index)  
+{
+        this.index = index;
+    }
+
+     /** Lookup table for conversion factors */ 
+    private static final int[] multipliers =  
+{
+        1,
+        1000,
+        1000 * 1000,
+        1000 * 1000 * 1000
+    }
+ ; 
+
+     /** 
+ 
+	 Lookup table to check saturation.  Note that because we are 
+	 dividing these down, we don't have to deal with asymmetry of 
+	 MIN/MAX values. 
+     */ 
+    private static final long[] overflows = 
+{
+        0, // unused
+        Long.MAX_VALUE / 1000,
+        Long.MAX_VALUE / (1000 * 1000),
+        Long.MAX_VALUE / (1000 * 1000 * 1000)
+    }
+ ;  
+ 
+
+
+     /** 
+ 
+	 Perform conversion based on given delta representing the 
+	 difference between units 
+	 @param delta the difference in index values of source and target units 
+	 @param duration the duration 
+	 @return converted duration or saturated value 
+     */ 
+    private static long doConvert(int delta, long duration) 
+{
+        if (delta == 0)
+            return duration;
+        if (delta &lt; 0)
+            return duration / multipliers[-delta];
+        if (duration &gt; overflows[delta])
+            return Long.MAX_VALUE;
+        if (duration &lt; -overflows[delta])
+            return Long.MIN_VALUE;
+        return duration * multipliers[delta];
+    } 
+ 
+
+
+     /** 
+ 
+	 Convert the given time duration in the given unit to this 
+	 unit.  Conversions from finer to coarser granularities 
+	 truncate, so lose precision. For example converting 
+	 &lt;tt&gt;999&lt;/tt&gt; milliseconds to seconds results in 
+	 &lt;tt&gt;0&lt;/tt&gt;. Conversions from coarser to finer granularities 
+	 with arguments that would numerically overflow saturate to 
+	 &lt;tt&gt;Long.MIN_VALUE&lt;/tt&gt; if negative or &lt;tt&gt;Long.MAX_VALUE&lt;/tt&gt; 
+	 if positive. 
+     * 
+	 @param duration the time duration in the given &lt;tt&gt;unit&lt;/tt&gt; 
+	 @param unit the unit of the &lt;tt&gt;duration&lt;/tt&gt; argument 
+	 @return the converted duration in this unit, 
+	 or &lt;tt&gt;Long.MIN_VALUE&lt;/tt&gt; if conversion would negatively 
+	 overflow, or &lt;tt&gt;Long.MAX_VALUE&lt;/tt&gt; if it would positively overflow. 
+     */ 
+    public long convert(long duration, TimeUnit unit) 
+{
+        return doConvert(unit.index - index, duration);
+    } 
+ 
+
+
+     /** 
+ 
+	 Equivalent to &lt;tt&gt;NANOSECONDS.convert(duration, this)&lt;/tt&gt;. 
+	 @param duration the duration 
+	 @return the converted duration, 
+	 or &lt;tt&gt;Long.MIN_VALUE&lt;/tt&gt; if conversion would negatively 
+	 overflow, or &lt;tt&gt;Long.MAX_VALUE&lt;/tt&gt; if it would positively overflow. 
+	 @see #convert 
+     */ 
+    public long toNanos(long duration) 
+{
+        return doConvert(index, duration);
+    } 
+ 
+
+
+     /** 
+ 
+	 Equivalent to &lt;tt&gt;MICROSECONDS.convert(duration, this)&lt;/tt&gt;. 
+	 @param duration the duration 
+	 @return the converted duration, 
+	 or &lt;tt&gt;Long.MIN_VALUE&lt;/tt&gt; if conversion would negatively 
+	 overflow, or &lt;tt&gt;Long.MAX_VALUE&lt;/tt&gt; if it would positively overflow. 
+	 @see #convert 
+     */ 
+    public long toMicros(long duration) 
+{
+        return doConvert(index - MICROSECONDS.index, duration);
+    } 
+ 
+
+
+     /** 
+ 
+	 Equivalent to &lt;tt&gt;MILLISECONDS.convert(duration, this)&lt;/tt&gt;. 
+	 @param duration the duration 
+	 @return the converted duration, 
+	 or &lt;tt&gt;Long.MIN_VALUE&lt;/tt&gt; if conversion would negatively 
+	 overflow, or &lt;tt&gt;Long.MAX_VALUE&lt;/tt&gt; if it would positively overflow. 
+	 @see #convert 
+     */ 
+    public long toMillis(long duration) 
+{
+        return doConvert(index - MILLISECONDS.index, duration);
+    } 
+ 
+
+
+     /** 
+ 
+	 Equivalent to &lt;tt&gt;SECONDS.convert(duration, this)&lt;/tt&gt;. 
+	 @param duration the duration 
+	 @return the converted duration. 
+	 @see #convert 
+     */ 
+    public long toSeconds(long duration) 
+{
+        return doConvert(index - SECONDS.index, duration);
+    } 
+ 
+
+
+
+     /** 
+ 
+	 Utility method to compute the excess-nanosecond argument to 
+	 wait, sleep, join. 
+     */ 
+    private int excessNanos(long time, long ms) 
+{
+        if (this == NANOSECONDS)
+            return (int) (time  - (ms * 1000 * 1000));
+        if (this == MICROSECONDS)
+            return (int) ((time * 1000) - (ms * 1000 * 1000));
+        return 0;
+    } 
+ 
+
+
+     /** 
+ 
+	 Perform a timed &lt;tt&gt;Object.wait&lt;/tt&gt; using this time unit. 
+	 This is a convenience method that converts timeout arguments 
+	 into the form required by the &lt;tt&gt;Object.wait&lt;/tt&gt; method. 
+     * 
+	 &lt;p&gt;For example, you could implement a blocking &lt;tt&gt;poll&lt;/tt&gt; 
+	 method (see 
+{@link BlockingQueue#poll BlockingQueue.poll}
+ )  
+	 using: 
+     * 
+	 &lt;pre&gt;  public synchronized  Object poll(long timeout, TimeUnit unit) throws InterruptedException { 
+	 while (empty) 
+{
+     *      unit.timedWait(this, timeout);
+     *      ...
+     *    } 
+	 }&lt;/pre&gt; 
+     * 
+	 @param obj the object to wait on 
+	 @param timeout the maximum time to wait. 
+	 @throws InterruptedException if interrupted while waiting. 
+	 @see Object#wait(long, int) 
+     */ 
+    public void timedWait(Object obj, long timeout) 
+        throws InterruptedException 
+  Unknown macro: {        if (timeout &gt; 0) {
+            long ms = toMillis(timeout);
+            int ns = excessNanos(timeout, ms);
+            obj.wait(ms, ns);
+        }    }    
+ 
+
+
+     /** 
+ 
+	 Perform a timed &lt;tt&gt;Thread.join&lt;/tt&gt; using this time unit. 
+	 This is a convenience method that converts time arguments into the 
+	 form required by the &lt;tt&gt;Thread.join&lt;/tt&gt; method. 
+	 @param thread the thread to wait for 
+	 @param timeout the maximum time to wait 
+	 @throws InterruptedException if interrupted while waiting. 
+	 @see Thread#join(long, int) 
+     */ 
+    public void timedJoin(Thread thread, long timeout) 
+        throws InterruptedException 
+  Unknown macro: {        if (timeout &gt; 0) {
+            long ms = toMillis(timeout);
+            int ns = excessNanos(timeout, ms);
+            thread.join(ms, ns);
+        }    }    
+ 
+
+
+     /** 
+ 
+	 Perform a &lt;tt&gt;Thread.sleep&lt;/tt&gt; using this unit. 
+	 This is a convenience method that converts time arguments into the 
+	 form required by the &lt;tt&gt;Thread.sleep&lt;/tt&gt; method. 
+	 @param timeout the minimum time to sleep 
+	 @throws InterruptedException if interrupted while sleeping. 
+	 @see Thread#sleep 
+     */ 
+    public void sleep(long timeout) throws InterruptedException 
+  Unknown macro: {        if (timeout &gt; 0) {
+            long ms = toMillis(timeout);
+            int ns = excessNanos(timeout, ms);
+            Thread.sleep(ms, ns);
+        }    }    
+ 
+
+
+ }              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-50683" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/74?focusedCommentId=50683&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-50683" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rich.rodriguez@gmail.com" id="commentauthor_50683_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rich.rodriguez%40gmail.com"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Rich Rodriguez</a>
+ added a comment  - <span class="commentdate_50683_verbose subText"><span class="date user-tz" title="11/Nov/05 8:23 AM"><time class="livestamp" datetime="2005-11-11T08:23-0600">11/Nov/05 8:23 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>I've received this error:</p>
+
+<p>Caused by: com.thoughtworks.qdox.parser.ParseException: syntax error @<span class="error">[5,27]</span> in <a href="file:///C:/src/sam2trunk/src/com/shps/sam/model/JobStatusCode.java" class="external-link" rel="nofollow">file:/C:/src/sam2trunk/src/com/shps/sam/model/JobStatusCode.java</a></p>
+
+<p>parsing:</p>
+
+<p>public enum JobStatusCode implements StringValuedEnum<br>
+{<br>
+    IN_PROGRESS("IP"),<br>
+    SUCCEEDED("S"),<br>
+    FAILURE("F");</p>
+
+<p>    private final String value;</p>
+
+<p>    private JobStatusCode(String value)</p>
+    {
+        this.value = value;
+    }
+
+<p>    public String getValue()</p>
+    {
+        return null;
+    }
+<p>}</p>
+
+<p>The StringValuedEnum interface consists of the "getValue" method.</p>
+
+<p>I'm using the qdox 1.6 snapshot currently bundled with XDoclet2.0.3.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rich.rodriguez@gmail.com" id="commentauthor_50683_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rich.rodriguez%40gmail.com"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Rich Rodriguez</a>
+ added a comment  - <span class="commentdate_50683_concise subText"><span class="date user-tz" title="11/Nov/05 8:23 AM"><time class="livestamp" datetime="2005-11-11T08:23-0600">11/Nov/05 8:23 AM</time></span></span>                    I've received this error: 
+
+ Caused by: com.thoughtworks.qdox.parser.ParseException: syntax error @ [5,27]  in  file:/C:/src/sam2trunk/src/com/shps/sam/model/JobStatusCode.java  
+
+ parsing: 
+
+ public enum JobStatusCode implements StringValuedEnum 
+{ 
+    IN_PROGRESS("IP"), 
+    SUCCEEDED("S"), 
+    FAILURE("F"); 
+
+     private final String value; 
+
+     private JobStatusCode(String value) 
+    {
+        this.value = value;
+    }
+
+     public String getValue() 
+    {
+        return null;
+    }
+ } 
+
+ The StringValuedEnum interface consists of the "getValue" method. 
+
+ I'm using the qdox 1.6 snapshot currently bundled with XDoclet2.0.3.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-67707" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/74?focusedCommentId=67707&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-67707" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="zutnop" id="commentauthor_67707_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=zutnop"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Erko Hansar</a>
+ added a comment  - <span class="commentdate_67707_verbose subText"><span class="date user-tz" title="20/Jun/06 3:18 AM"><time class="livestamp" datetime="2006-06-20T03:18-0500">20/Jun/06 3:18 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Same problem here. Using XDoclet2 with qdox 1.6 snapshot and parsing an enum file which starts like this </p>
+
+<p>public enum AccountType {</p>
+
+<p>  ADMINISTRATOR (1, "Administrator"),<br>
+  CUSTOMER (2, "Customer"),</p>
+
+<p>throws a ParseException at location after "ADMINISTRATOR " word.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="zutnop" id="commentauthor_67707_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=zutnop"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Erko Hansar</a>
+ added a comment  - <span class="commentdate_67707_concise subText"><span class="date user-tz" title="20/Jun/06 3:18 AM"><time class="livestamp" datetime="2006-06-20T03:18-0500">20/Jun/06 3:18 AM</time></span></span>                    Same problem here. Using XDoclet2 with qdox 1.6 snapshot and parsing an enum file which starts like this  
+
+ public enum AccountType { 
+
+   ADMINISTRATOR (1, "Administrator"), 
+  CUSTOMER (2, "Customer"), 
+
+ throws a ParseException at location after "ADMINISTRATOR " word.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-75722" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/74?focusedCommentId=75722&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-75722" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="zohar" id="commentauthor_75722_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=zohar"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Zohar Melamed</a>
+ added a comment  - <span class="commentdate_75722_verbose subText"><span class="date user-tz" title="25/Sep/06 6:15 PM"><time class="livestamp" datetime="2006-09-25T18:15-0500">25/Sep/06 6:15 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>com.thoughtworks.qdox.parser.ParseException: syntax error @<span class="error">[9,1]</span> in <a href="file:///C:/DOCUME%7E1/Sarah/LOCALS%7E1/Temp/deck-gen-1159225625203/com/ubs/eqd/data/MyEnumType.java" class="external-link" rel="nofollow">file:/C:/DOCUME~1/Sarah/LOCALS~1/Temp/deck-gen-1159225625203/com/ubs/eqd/data/MyEnumType.java</a><br>
+	at com.thoughtworks.qdox.parser.impl.Parser.yyerror(Parser.java:611)<br>
+	at com.thoughtworks.qdox.parser.impl.Parser.yyparse(Parser.java:719)<br>
+	at com.thoughtworks.qdox.parser.impl.Parser.parse(Parser.java:592)<br>
+	at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:300)<br>
+	at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:316)<br>
+	at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:312)<br>
+	at com.thoughtworks.qdox.JavaDocBuilder$1.visitFile(JavaDocBuilder.java:369)<br>
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:43)<br>
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.scan(DirectoryScanner.java:52)<br>
+	at com.thoughtworks.qdox.JavaDocBuilder.addSourceTree(JavaDocBuilder.java:366)</p>
+
+
+<p>file is :</p>
+
+<p>package moo;</p>
+
+<p>/**<br>
+  *<br>
+  *<br>
+**/</p>
+
+<p>public enum MyEnumType</p>
+{
+  BAAA, //A baaaaa baaa
+  MOO, //A mooooo mooooo
+} </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="zohar" id="commentauthor_75722_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=zohar"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Zohar Melamed</a>
+ added a comment  - <span class="commentdate_75722_concise subText"><span class="date user-tz" title="25/Sep/06 6:15 PM"><time class="livestamp" datetime="2006-09-25T18:15-0500">25/Sep/06 6:15 PM</time></span></span>                    com.thoughtworks.qdox.parser.ParseException: syntax error @ [9,1]  in  file:/C:/DOCUME~1/Sarah/LOCALS~1/Temp/deck-gen-1159225625203/com/ubs/eqd/data/MyEnumType.java  
+	at com.thoughtworks.qdox.parser.impl.Parser.yyerror(Parser.java:611) 
+	at com.thoughtworks.qdox.parser.impl.Parser.yyparse(Parser.java:719) 
+	at com.thoughtworks.qdox.parser.impl.Parser.parse(Parser.java:592) 
+	at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:300) 
+	at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:316) 
+	at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:312) 
+	at com.thoughtworks.qdox.JavaDocBuilder$1.visitFile(JavaDocBuilder.java:369) 
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:43) 
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34) 
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34) 
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34) 
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34) 
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34) 
+	at com.thoughtworks.qdox.directorywalker.DirectoryScanner.scan(DirectoryScanner.java:52) 
+	at com.thoughtworks.qdox.JavaDocBuilder.addSourceTree(JavaDocBuilder.java:366) 
+
+
+ file is : 
+
+ package moo; 
+
+ /** 
+  * 
+  * 
+**/ 
+
+ public enum MyEnumType 
+{
+  BAAA, //A baaaaa baaa
+  MOO, //A mooooo mooooo
+}             </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-88661" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/74?focusedCommentId=88661&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-88661" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="guus" id="commentauthor_88661_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=guus"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Guus der Kinderen</a>
+ added a comment  - <span class="commentdate_88661_verbose subText"><span class="date user-tz" title="27/Feb/07 6:26 AM"><time class="livestamp" datetime="2007-02-27T06:26-0600">27/Feb/07 6:26 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Please note that QDox currently requires an enum declaration to end with a semicolon. The following example will result in a syntax error:</p>
+
+<p>public enum Foo </p>
+{ "bar" }<br>
+<br>
+The following, however, doesn't:<br>
+<br>
+public enum Foo { "bar" }
+<p>;</p>
+
+<p>The semicolon doesn't do much during compilation. Eclipse, with the 'unnecessary code' warnings bumped up a bit, actually reports them as not needed.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="guus" id="commentauthor_88661_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=guus"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Guus der Kinderen</a>
+ added a comment  - <span class="commentdate_88661_concise subText"><span class="date user-tz" title="27/Feb/07 6:26 AM"><time class="livestamp" datetime="2007-02-27T06:26-0600">27/Feb/07 6:26 AM</time></span></span>                    Please note that QDox currently requires an enum declaration to end with a semicolon. The following example will result in a syntax error: 
+
+ public enum Foo  
+{ "bar" } 
+ 
+The following, however, doesn't: 
+ 
+public enum Foo { "bar" }
+ ; 
+
+ The semicolon doesn't do much during compilation. Eclipse, with the 'unnecessary code' warnings bumped up a bit, actually reports them as not needed.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-88662" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/74?focusedCommentId=88662&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-88662" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="guus" id="commentauthor_88662_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=guus"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Guus der Kinderen</a>
+ added a comment  - <span class="commentdate_88662_verbose subText"><span class="date user-tz" title="27/Feb/07 6:31 AM"><time class="livestamp" datetime="2007-02-27T06:31-0600">27/Feb/07 6:31 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Sorry, those quotes were typed by my evil twin. The example should read:</p>
+
+<p>public enum Foo </p>
+{ BAR }
+<p>; </p>
+
+<p>and not:</p>
+
+<p>public enum Foo </p>
+{"bar"}
+<p>;</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="guus" id="commentauthor_88662_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=guus"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Guus der Kinderen</a>
+ added a comment  - <span class="commentdate_88662_concise subText"><span class="date user-tz" title="27/Feb/07 6:31 AM"><time class="livestamp" datetime="2007-02-27T06:31-0600">27/Feb/07 6:31 AM</time></span></span>                    Sorry, those quotes were typed by my evil twin. The example should read: 
+
+ public enum Foo  
+{ BAR }
+ ;  
+
+ and not: 
+
+ public enum Foo  
+{"bar"}
+ ;              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-97195" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/74?focusedCommentId=97195&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-97195" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="maurotalevi" id="commentauthor_97195_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=maurotalevi"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mauro Talevi</a>
+ added a comment  - <span class="commentdate_97195_verbose subText"><span class="date user-tz" title="27/May/07 10:48 AM"><time class="livestamp" datetime="2007-05-27T10:48-0500">27/May/07 10:48 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Changed fix version to 1.7</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="maurotalevi" id="commentauthor_97195_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=maurotalevi"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mauro Talevi</a>
+ added a comment  - <span class="commentdate_97195_concise subText"><span class="date user-tz" title="27/May/07 10:48 AM"><time class="livestamp" datetime="2007-05-27T10:48-0500">27/May/07 10:48 AM</time></span></span>                    Changed fix version to 1.7              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-159674" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/74?focusedCommentId=159674&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-159674" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="maurotalevi" id="commentauthor_159674_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=maurotalevi"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mauro Talevi</a>
+ added a comment  - <span class="commentdate_159674_verbose subText"><span class="date user-tz" title="02/Jan/09 4:28 AM"><time class="livestamp" datetime="2009-01-02T04:28-0600">02/Jan/09 4:28 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Added test case to EnumsTest - now all pass.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="maurotalevi" id="commentauthor_159674_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=maurotalevi"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mauro Talevi</a>
+ added a comment  - <span class="commentdate_159674_concise subText"><span class="date user-tz" title="02/Jan/09 4:28 AM"><time class="livestamp" datetime="2009-01-02T04:28-0600">02/Jan/09 4:28 AM</time></span></span>                    Added test case to EnumsTest - now all pass.              </div>
+        </div>
+    </div>
+</div>
+                             </div>
+    </div>
+</div></div></div><div id="viewissuesidebar" class="aui-item issue-side-column"><div id="peoplemodule" class="module toggle-wrap"><div id="peoplemodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">People</h2></div><div class="mod-content"><ul class="item-details" id="peopledetails">
+    <li class="people-details">
+                <dl>
+            <dt>Assignee:</dt>
+            <dd>
+                <span id="assignee-val" class="view-issue-field">
+
+    <span class="aui-avatar aui-avatar-small"><span class="aui-avatar-inner"><img src="index_files/useravatar-1.png"></span></span>
+    Unassigned
+</span>
+                            </dd>
+        </dl>
+                        <dl>
+            <dt>Reporter:</dt>
+            <dd>
+                <span id="reporter-val" class="view-issue-field">
+
+            <span class="user-hover" id="issue_summary_reporter_mdub" rel="mdub">
+            <span class="aui-avatar aui-avatar-small"><span class="aui-avatar-inner"><img src="index_files/useravatar-2.png"></span></span>
+            Mike Williams
+        </span>
+    </span>
+            </dd>
+        </dl>
+                    </li>
+</ul>
+    <ul class="item-details">
+        <li>
+                            <dl>
+                    <dt>Votes:</dt>
+                    <dd>
+                                                                            <span id="vote-data" class="aui-badge vote-state-off">6</span>
+                        
+                                                                                                        <span id="vote-label" title="You have to be logged in to vote for an issue.">Vote for this issue</span>
+                                            </dd>
+                </dl>
+                                        <dl>
+                    <dt>Watchers:</dt>
+                    <dd>
+                                                                        
+                                                                            <span id="watcher-data" class="aui-badge watch-state-off">7</span>
+                        
+                                                                                <span id="watch-label" title="You have to be logged in to watch an issue.">Start watching this issue</span>
+                                            </dd>
+                </dl>
+                    </li>
+    </ul>
+</div></div><div id="datesmodule" class="module toggle-wrap"><div id="datesmodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Dates</h2></div><div class="mod-content"><ul class="item-details">
+    <li>
+            <dl class="dates">
+            <dt>Created:</dt>
+            <dd class="date user-tz" title="15/Dec/04 7:07 AM">
+
+                <span data-name="Created" id="create-date" data-fieldtype="datetime">
+                                                                        <time class="livestamp" datetime="2004-12-15T07:07-0600">15/Dec/04 7:07 AM</time>                                                             </span>
+            </dd>
+        </dl>
+            <dl class="dates">
+            <dt>Updated:</dt>
+            <dd class="date user-tz" title="02/Jan/09 4:28 AM">
+
+                <span data-name="Updated" id="updated-date" data-fieldtype="datetime">
+                                                                        <time class="livestamp" datetime="2009-01-02T04:28-0600">02/Jan/09 4:28 AM</time>                                                             </span>
+            </dd>
+        </dl>
+            <dl class="dates">
+            <dt>Resolved:</dt>
+            <dd class="date user-tz" title="02/Jan/09 4:28 AM">
+
+                <span data-name="Resolved" id="resolved-date" data-fieldtype="datetime">
+                                                                        <time class="livestamp" datetime="2009-01-02T04:28-0600">02/Jan/09 4:28 AM</time>                                                             </span>
+            </dd>
+        </dl>
+        </li>
+</ul>
+</div></div></div></div>
+                    </div>
+                </div>
+                        </div>
+
+    <fieldset class="hidden parameters">
+        <input title="autocompleteEnabled" value="true" type="hidden">
+    </fieldset>
+    
+    </section>
+    <footer id="footer" role="contentinfo">
+        
+        
+
+
+
+<div class="footer-body">
+    <ul>
+        <li>
+                        <a href="http://www.atlassian.com/software/jira">Atlassian JIRA</a>
+
+                                                    
+                        
+            <span id="footer-build-information">(v6.1.6#6162-<span title="7af547ce7c84dbb7c1e345a65437ed7b85efffa2" data-commit-id="7af547ce7c84dbb7c1e345a65437ed7b85efffa2}">sha1:7af547c</span>)</span>
+        </li>
+        <li>
+            <a id="about-link" href="https://jira.codehaus.org/secure/AboutPage.jspa">About JIRA</a>
+        </li>
+        <li>
+                                    <a id="footer-report-problem-link" href="https://jira.codehaus.org/secure/CreateIssue%21default.jspa">Report a problem</a>
+        </li>
+    </ul>
+            <ul>
+            <li class="licensemessage">
+                                    Powered by a free Atlassian <a href="http://www.atlassian.com/software/jira">JIRA</a> open source license for Codehaus. Try JIRA - <a href="http://www.atlassian.com/software/jira">bug tracking software</a> for <i>your</i> team.
+
+                            </li>
+        </ul>
+    </div>
+
+<form id="jira_request_timing_info" class="dont-default-focus">
+	<fieldset class="parameters hidden">
+
+
+
+
+		<input title="jira.session.expiry.in.mins" value="299" type="hidden">
+
+	</fieldset>
+</form>
+<!--
+	                 
+	          
+	               
+	                 
+	        CONCURRENT REQUESTS : 5
+
+
+
+-->
+
+
+
+
+
+
+
+
+
+
+<fieldset class="hidden parameters">
+    <input title="loggedInUser" value="" type="hidden">
+    <input title="ajaxTimeout" value="The call to the JIRA server did not complete within the timeout period.  We are unsure of the result of this operation." type="hidden">
+    <input title="JiraVersion" value="6.1.6" type="hidden">
+    <input title="ajaxUnauthorised" value="You are not authorised to perform this operation.  Please log in." type="hidden">
+    <input title="baseURL" value="https://jira.codehaus.org:443" type="hidden">
+    <input title="ajaxCommsError" value="The JIRA server could not be contacted.  This may be a temporary glitch or the server may be down." type="hidden">
+    <input title="ajaxServerError" value="The JIRA server was contacted but has returned an error response. We are unsure of the result of this operation." type="hidden">
+    <input title="ajaxErrorCloseDialog" value="Close this dialog and press refresh in your browser" type="hidden">
+    <input title="ajaxErrorDialogHeading" value="Communications Breakdown" type="hidden">
+
+    <input title="dirtyMessage" value="You have entered new data on this page. If you navigate away from this page without first saving your data, the changes will be lost." type="hidden">
+    <input title="dirtyDialogMessage" value="You have entered new data in this dialog. If you navigate away from this dialog without first saving your data, the changes will be lost. Click cancel to return to the dialog." type="hidden">
+    <input title="keyType" value="Type" type="hidden">
+    <input title="keyThen" value="then" type="hidden">
+    <input title="dblClickToExpand" value="Double click to expand" type="hidden">
+    <input title="actions" value="Actions" type="hidden">
+    <input title="removeItem" value="Remove" type="hidden">
+    <input title="workflow" value="Workflow" type="hidden">
+    <input title="labelNew" value="New Label" type="hidden">
+    <input title="issueActionsHint" value="Begin typing for available operations or press down to see all" type="hidden">
+    <input title="closelink" value="Close" type="hidden">
+    <input title="dotOperations" value="Operations" type="hidden">
+    <input title="dotLoading" value="Loading..." type="hidden">
+    <input title="frotherSuggestions" value="Suggestions" type="hidden">
+    <input title="frotherNomatches" value="No Matches" type="hidden">
+    <input title="multiselectVersionsError" value="{0} is not a valid version." type="hidden">
+    <input title="multiselectComponentsError" value="{0} is not a valid component." type="hidden">
+    <input title="multiselectGenericError" value="The value {0} is invalid." type="hidden">
+</fieldset>
+
+    </footer>
+</div>
+
+
+<div id="fancybox-tmp"></div><div id="fancybox-loading"><div></div></div><div id="fancybox-overlay"></div><div id="fancybox-wrap"><div id="fancybox-outer"><div class="fancybox-bg" id="fancybox-bg-n"></div><div class="fancybox-bg" id="fancybox-bg-ne"></div><div class="fancybox-bg" id="fancybox-bg-e"></div><div class="fancybox-bg" id="fancybox-bg-se"></div><div class="fancybox-bg" id="fancybox-bg-s"></div><div class="fancybox-bg" id="fancybox-bg-sw"></div><div class="fancybox-bg" id="fancybox-bg-w"></div><div class="fancybox-bg" id="fancybox-bg-nw"></div><div id="fancybox-content"></div><a id="fancybox-close"></a><div id="fancybox-title"></div><a href="javascript:void(0);" id="fancybox-left"><span class="fancy-ico" id="fancybox-left-ico"></span></a><a href="javascript:void(0);" id="fancybox-right"><span class="fancy-ico" id="fancybox-right-ico"></span></a></div></div><div class="navigator-sidebar collapsed ui-popout ui-popout-detached ui-popout-collapsed" id="navigator-sidebar"><a class="toggle-filter-panel" href="#" title="Dock the filters panel ([)"></a></div><div style="display: none;" class="jira-dialog box-shadow" id="edit-issue-dialog"><div class="jira-dialog-content"></div></div><div style="display: none;" class="jira-dialog box-shadow" id="create-subtask-dialog"><div class="jira-dialog-content"></div></div></body></html>

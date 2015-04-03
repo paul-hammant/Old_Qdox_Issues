@@ -1,0 +1,32 @@
+? eclipse-conf-patch.txt
+Index: maven.xml
+===================================================================
+RCS file: /cvsroot/qdox/qdox/maven.xml,v
+retrieving revision 1.13
+diff -u -r1.13 maven.xml
+--- maven.xml	10 Mar 2004 13:02:19 -0000	1.13
++++ maven.xml	6 May 2004 20:13:20 -0000
+@@ -64,5 +64,8 @@
+     <attainGoal name="parser"/>
+   </preGoal>
+   
++  <preGoal name="eclipse">
++  	<attainGoal name="parser"/>
++  </preGoal>
+ </project>
+ 
+Index: project.properties
+===================================================================
+RCS file: /cvsroot/qdox/qdox/project.properties,v
+retrieving revision 1.10
+diff -u -r1.10 project.properties
+--- project.properties	29 Apr 2004 12:34:41 -0000	1.10
++++ project.properties	6 May 2004 20:13:20 -0000
+@@ -40,3 +40,6 @@
+ 
+ # don't create coverage reports for generated code
+ clover.excludes=**/Mock*,**/*JFlexLexer*,**/*Parser*
++
++# Include generated parser in eclipse configuration generation
++maven.eclipse.classpath.include = target/src/java
+\ No newline at end of file

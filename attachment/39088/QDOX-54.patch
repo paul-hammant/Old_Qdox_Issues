@@ -1,0 +1,1679 @@
+Index: pom.xml
+===================================================================
+--- pom.xml	(revision 504)
++++ pom.xml	(working copy)
+@@ -105,6 +105,9 @@
+     <contributor>
+       <name>Eric Redmond</name>
+     </contributor>
++    <contributor>
++      <name>Robert Scholte</name>
++    </contributor>
+   </contributors>
+ 
+   <build>
+Index: src/grammar/lexer.flex
+===================================================================
+--- src/grammar/lexer.flex	(revision 504)
++++ src/grammar/lexer.flex	(working copy)
+@@ -200,7 +200,7 @@
+         pushState(ASSIGNMENT);
+     }
+ 
+-    [:jletter:] [:jletterdigit:]* {
++    {Id} {
+         annotation = at;
+         at = false;
+         
+@@ -296,7 +296,7 @@
+ 	
+ 	"class"				{ return Parser.CLASS; }
+ 
+-	[:jletter:] [:jletterdigit:]* {
++	{Id} {
+         return Parser.IDENTIFIER;
+     }
+ 
+Index: src/grammar/parser.y
+===================================================================
+--- src/grammar/parser.y	(revision 504)
++++ src/grammar/parser.y	(working copy)
+@@ -7,6 +7,7 @@
+ import java.util.LinkedList;
+ import java.util.ArrayList;
+ import java.util.List;
++import java.util.Stack;
+ %}
+ 
+ %token SEMI DOT DOTDOTDOT COMMA STAR PERCENT EQUALS ANNOSTRING ANNOCHAR SLASH PLUS MINUS
+@@ -41,10 +42,10 @@
+ %type <annoval> equalityExpression relationalExpression shiftExpression additiveExpression multiplicativeExpression
+ %type <annoval> unaryExpression unaryExpressionNotPlusMinus primary
+ %type <ival> dims
+-%type <sval> fullidentifier modifier classtype typedeclspecifier typename memberend
++%type <sval> fullidentifier modifier typedeclspecifier typename memberend
+ %type <ival> dimensions
+ %type <bval> varargs
+-%type <type> type arrayidentifier
++%type <type> type arrayidentifier classtype typearg
+ 
+ %%
+ 
+@@ -295,34 +296,43 @@
+ // ----- TYPES
+ 
+ type:
+-    classtype opt_typearguments dimensions {
+-        $$ = new TypeDef($1,$3);
++    classtype dimensions {
++    	TypeDef td = $1;
++    	td.dimensions = $2;
++        $$ = td;
+     };
+ 
+ classtype:
+-    typedeclspecifier opt_typearguments {
+-        $$ = $1; 
++    typedeclspecifier LESSTHAN {
++    		TypeDef td = new TypeDef($1,0);
++    		td.actualArgumentTypes = new ArrayList();
++    		$$ = (TypeDef) typeStack.push(td);
++    	} typearglist { 
++    		$$ = (TypeDef) typeStack.pop();
++    	} GREATERTHAN {
++         $$ = $5;
++    } |
++    typedeclspecifier {
++        $$ = new TypeDef($1,0); 
+     };
+ 
+ typedeclspecifier:
+     typename { $$ = $1; } |
+-    classtype DOT IDENTIFIER { $$ = $1 + '.' + $3; };
++    classtype DOT IDENTIFIER { $$ = $1.name + '.' + $3; };
+ 
+ typename: 
+     IDENTIFIER { $$ = $1; } |
+     typename DOT IDENTIFIER { $$ = $1 + '.' + $3; }; 
+ 
+-opt_typearguments: | LESSTHAN typearglist GREATERTHAN;
+-
+ typearglist:
+-    typearg |
+-    typearglist COMMA typearg;
++    typearg { ((TypeDef) typeStack.peek()).actualArgumentTypes.add($1);}|
++    typearglist COMMA typearg { ((TypeDef) typeStack.peek()).actualArgumentTypes.add($3);};
+ 
+ typearg:
+-    type |
+-    QUERY |
+-    QUERY EXTENDS type |
+-    QUERY SUPER type;
++    type { $$ = $1;} |
++    QUERY  { $$ = new WildcardTypeDef();} |
++    QUERY EXTENDS type { $$ = new WildcardTypeDef($3, "extends");} |
++    QUERY SUPER type { $$ = new WildcardTypeDef($3, "super");};
+ 
+ opt_typeparams: | typeparams;
+ 
+@@ -452,8 +462,8 @@
+     modifiers typeparams type IDENTIFIER methoddef dimensions opt_exceptions memberend {
+         mth.lineNumber = line;
+         mth.modifiers.addAll(modifiers); modifiers.clear(); 
+-        mth.returns = $3.name;
+-        mth.dimensions = $6 + $3.dimensions; // return dimensions can be specified after return type OR after params
++        mth.returnType = $3;
++        mth.dimensions = $6;
+         mth.name = $4;
+         mth.body = $8;
+         builder.addMethod(mth);
+@@ -462,8 +472,8 @@
+     modifiers type IDENTIFIER methoddef dimensions opt_exceptions memberend {
+         mth.lineNumber = line;
+         mth.modifiers.addAll(modifiers); modifiers.clear();
+-        mth.returns = $2.name;
+-        mth.dimensions = $5 + $2.dimensions; // return dimensions can be specified after return type OR after params
++        mth.returnType = $2;
++        mth.dimensions = $5;
+         mth.name = $3;
+         mth.body = $7;
+         builder.addMethod(mth);
+@@ -497,8 +507,8 @@
+ param: 
+     opt_annotations opt_parammodifiers type varargs arrayidentifier {
+         param.name = $5.name;
+-        param.type = $3.name;
+-        param.dimensions = $3.dimensions + $5.dimensions;
++        param.type = $3;
++        param.dimensions = $5.dimensions;
+         param.isVarArgs = $4;
+         mth.params.add(param);
+         param = new FieldDef();
+@@ -527,6 +537,7 @@
+ private FieldDef param = new FieldDef();
+ private java.util.Set modifiers = new java.util.HashSet();
+ private TypeDef fieldType;
++private Stack typeStack = new Stack();
+ private int line;
+ private int column;
+ private boolean debugLexer;
+@@ -600,9 +611,9 @@
+     FieldDef fd = new FieldDef();
+     fd.lineNumber = line;
+     fd.modifiers.addAll(modifiers); 
+-    fd.type = fieldType.name; 
+-    fd.dimensions = fieldType.dimensions + field.dimensions;
+     fd.name = field.name;
++    fd.type = fieldType;
++    fd.dimensions = field.dimensions;
+     fd.body = body;
+     builder.addField(fd);
+ }
+Index: src/java/com/thoughtworks/qdox/JavaDocBuilder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/JavaDocBuilder.java	(revision 504)
++++ src/java/com/thoughtworks/qdox/JavaDocBuilder.java	(working copy)
+@@ -17,6 +17,7 @@
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
++import com.thoughtworks.qdox.parser.structs.TypeDef;
+ 
+ import java.io.File;
+ import java.io.FileInputStream;
+@@ -73,6 +74,7 @@
+  *
+  * @author <a href="mailto:joew@thoughtworks.com">Joe Walnes</a>
+  * @author Aslak Helles&oslash;y
++ * @author Robert Scholte
+  */
+ public class JavaDocBuilder implements Serializable, JavaClassCache {
+ 
+@@ -166,17 +168,17 @@
+                 classDef.type = ClassDef.INTERFACE;
+                 for (int i = 0; i < interfaces.length; i++) {
+                     Class anInterface = interfaces[i];
+-                    classDef.extendz.add(anInterface.getName());
++                    classDef.extendz.add(new TypeDef(anInterface.getName()));
+                 }
+             } else {
+                 // It's a class
+                 for (int i = 0; i < interfaces.length; i++) {
+                     Class anInterface = interfaces[i];
+-                    classDef.implementz.add(anInterface.getName());
++                    classDef.implementz.add(new TypeDef(anInterface.getName()));
+                 }
+                 Class superclass = clazz.getSuperclass();
+                 if (superclass != null) {
+-                    classDef.extendz.add(superclass.getName());
++                    classDef.extendz.add(new TypeDef(superclass.getName()));
+                 }
+             }
+ 
+@@ -224,7 +226,7 @@
+         FieldDef fieldDef = new FieldDef();
+         Class fieldType = field.getType();
+         fieldDef.name = field.getName();
+-        fieldDef.type = getTypeName(fieldType);
++        fieldDef.type = getTypeDef(fieldType);
+         fieldDef.dimensions = getDimension(fieldType);
+         binaryBuilder.addField(fieldDef);
+     }
+@@ -248,7 +250,7 @@
+             parameterTypes = ((Method) member).getParameterTypes();
+ 
+             Class returnType = ((Method) member).getReturnType();
+-            methodDef.returns = getTypeName(returnType);
++            methodDef.returnType = getTypeDef(returnType);
+             methodDef.dimensions = getDimension(returnType);
+ 
+         } else {
+@@ -265,7 +267,7 @@
+             FieldDef param = new FieldDef();
+             Class parameterType = parameterTypes[j];
+             param.name = "p" + j;
+-            param.type = getTypeName(parameterType);
++            param.type = getTypeDef(parameterType);
+             param.dimensions = getDimension(parameterType);
+             methodDef.params.add(param);
+         }
+@@ -279,6 +281,11 @@
+     private static String getTypeName(Class c) {
+         return c.getComponentType() != null ? c.getComponentType().getName() : c.getName();
+     }
++    
++    private static TypeDef getTypeDef(Class c) {
++        return new TypeDef(getTypeName(c));
++    }
++    
+ 
+     private String getPackageName(String fullClassName) {
+         int lastDot = fullClassName.lastIndexOf('.');
+Index: src/java/com/thoughtworks/qdox/model/ModelBuilder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(revision 504)
++++ src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(working copy)
+@@ -15,9 +15,11 @@
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
++import com.thoughtworks.qdox.parser.structs.TypeDef;
+ 
+ /**
+  * @author <a href="mailto:joew@thoughtworks.com">Joe Walnes</a>
++ * @author Robert Scholte
+  */
+ public class ModelBuilder implements Builder {
+ 
+@@ -76,7 +78,7 @@
+         if (currentClass.isInterface()) {
+             currentClass.setSuperClass(null);
+         } else if (!currentClass.isEnum()) {
+-            currentClass.setSuperClass(def.extendz.size() > 0 ? createType((String) def.extendz.toArray()[0], 0) : null);
++            currentClass.setSuperClass(def.extendz.size() > 0 ? createType((TypeDef) def.extendz.toArray()[0], 0) : null);
+         }
+ 
+         // implements
+@@ -85,7 +87,7 @@
+             Iterator implementIt = implementSet.iterator();
+             Type[] implementz = new Type[implementSet.size()];
+             for (int i = 0; i < implementz.length && implementIt.hasNext(); i++) {
+-                implementz[i] = createType((String) implementIt.next(), 0);
++                implementz[i] = createType((TypeDef) implementIt.next(), 0);
+             }
+             currentClass.setImplementz(implementz);
+         }
+@@ -126,8 +128,29 @@
+     public Type createType( String typeName, int dimensions ) {
+         if( typeName == null || typeName.equals( "" ) )
+             return null;
+-        return Type.createUnresolved( typeName, dimensions, currentClass == null ? currentParent : currentClass);
++        return createType(new TypeDef(typeName), dimensions);
+     }
++    
++    public Type createType(TypeDef typeDef) {
++    	return createType(typeDef, 0);
++    }
++    
++    
++    /**
++     * this one is specific for those cases where dimensions can be part of both the type and identifier
++     * i.e. private String[] matrix[]; //field
++     * 		public abstract String[] getMatrix[](); //method  
++     *      
++     * @param typeDef
++     * @param dimensions
++     * @return
++     */
++    public Type createType(TypeDef typeDef, int dimensions) {
++    	if(typeDef == null) {
++    		return null;
++    	}
++    	return Type.createUnresolved(typeDef, dimensions, currentClass == null ? currentParent : currentClass);
++    }
+ 
+     private void addJavaDoc(AbstractJavaEntity entity) {
+         if (lastComment == null) return;
+@@ -157,7 +180,7 @@
+ 
+         // basic details
+         currentMethod.setName(def.name);
+-        currentMethod.setReturns(createType(def.returns, def.dimensions));
++        currentMethod.setReturns(createType(def.returnType, def.dimensions));
+         currentMethod.setConstructor(def.constructor);
+ 
+         // parameters
+Index: src/java/com/thoughtworks/qdox/model/Type.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/Type.java	(revision 504)
++++ src/java/com/thoughtworks/qdox/model/Type.java	(working copy)
+@@ -2,6 +2,9 @@
+ 
+ import java.io.Serializable;
+ 
++import com.thoughtworks.qdox.parser.structs.TypeDef;
++import com.thoughtworks.qdox.parser.structs.WildcardTypeDef;
++
+ public class Type implements Comparable, Serializable {
+ 
+     public static final Type[] EMPTY_ARRAY = new Type[0];
+@@ -11,6 +14,7 @@
+     private JavaClassParent context;
+     private String fullName;
+     private int dimensions;
++    private Type[] actualArgumentTypes;
+ 
+     public Type(String fullName, String name, int dimensions, JavaClassParent context) {
+         this.fullName = fullName;
+@@ -18,9 +22,23 @@
+         this.dimensions = dimensions;
+         this.context = context;
+     }
++    
++    public Type(String fullName, TypeDef typeDef, int dimensions, JavaClassParent context) {
++    	this.fullName = fullName;
++        this.name = typeDef.name;
++        this.dimensions = typeDef.dimensions + dimensions; //in some cases dimensions can be spread. Collect them here
++        if(typeDef.actualArgumentTypes != null && !typeDef.actualArgumentTypes.isEmpty()) {
++        	actualArgumentTypes = new Type[typeDef.actualArgumentTypes.size()];
++        	for(int index = 0; index < typeDef.actualArgumentTypes.size(); index++) {
++        		actualArgumentTypes[index] = createUnresolved((TypeDef) typeDef.actualArgumentTypes.get(index), context);
++        	}
++        }
++        this.context = context;
++	}
+ 
++
+     public Type(String fullName, int dimensions, JavaClassParent context) {
+-        this(fullName, null, dimensions, context);
++        this(fullName, (String) null, dimensions, context);
+     }
+ 
+     public Type(String fullName, int dimensions) {
+@@ -31,10 +49,22 @@
+         this(fullName, 0);
+     }
+     
+-    public static Type createUnresolved(String name, int dimensions, JavaClassParent context) {
++	public static Type createUnresolved(String name, int dimensions, JavaClassParent context) {
+         return new Type(null, name, dimensions, context);
+     }
+     
++	public static Type createUnresolved(TypeDef typeDef, int dimensions, JavaClassParent context) {
++        return new Type(null, typeDef, dimensions, context);
++	}
++	
++	public static Type createUnresolved(TypeDef typeDef, JavaClassParent context) {
++		if(typeDef instanceof WildcardTypeDef) {
++			return new WildcardType((WildcardTypeDef) typeDef, context);
++		}
++        return new Type(null, typeDef, 0, context);
++	}
++
++    
+     public JavaClassParent getJavaClassParent() {
+         return context;
+     }
+@@ -42,6 +72,24 @@
+     public String getValue() {
+         return isResolved() ? fullName : name;
+     }
++    
++    /**
++     * @since 1.8
++     */
++    public String getGenericValue() {
++    	StringBuffer result = new StringBuffer(getValue());
++    	if(actualArgumentTypes != null && actualArgumentTypes.length > 0) {
++    		result.append("<");
++    		for(int index = 0;index < actualArgumentTypes.length; index++) {
++    			result.append(actualArgumentTypes[index].getGenericValue());
++    			if(index + 1 != actualArgumentTypes.length) {
++    				result.append(",");
++    			}
++    		}
++    		result.append(">");
++    	}
++        return result.toString();
++    }
+ 
+     public boolean isResolved() {
+         if (fullName == null && context != null) {
+Index: src/java/com/thoughtworks/qdox/model/WildcardType.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/WildcardType.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/WildcardType.java	(revision 0)
+@@ -0,0 +1,38 @@
++package com.thoughtworks.qdox.model;
++
++import com.thoughtworks.qdox.parser.structs.WildcardTypeDef;
++
++/**
++ * This class supports both the 'super' and 'extends' wildcards.
++ * For &lt;?&gt; you must use the normal Type, because ? itself can't be generic 
++ * 
++ * @author Robert Scholte
++ *
++ */
++public class WildcardType extends Type {
++
++	private String wildcardExpressionType = null;
++	
++	public WildcardType() {
++		super("?");
++	}
++	
++	
++	public WildcardType(WildcardTypeDef typeDef) {
++		this(typeDef, null);
++	}
++
++	public WildcardType(WildcardTypeDef typeDef, JavaClassParent context) {
++		super(null, typeDef, 0, context);
++		this.wildcardExpressionType = typeDef.getWildcardExpressionType();
++	}
++
++	public String getGenericValue() {
++		String result = "";
++		if(wildcardExpressionType != null) {
++			result += "? " + wildcardExpressionType+ " ";
++		}
++		result += super.getGenericValue();
++		return result;
++	}
++}
+Index: src/java/com/thoughtworks/qdox/parser/Builder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/parser/Builder.java	(revision 504)
++++ src/java/com/thoughtworks/qdox/parser/Builder.java	(working copy)
+@@ -6,6 +6,7 @@
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
++import com.thoughtworks.qdox.parser.structs.TypeDef;
+ 
+ public interface Builder {
+ 
+@@ -27,5 +28,10 @@
+ 
+     void addAnnotation(Annotation annotation);
+     
++    /**
++     * @deprecated
++     */
+     Type createType(String name, int dimensions);
++    
++    Type createType(TypeDef name);
+ }
+Index: src/java/com/thoughtworks/qdox/parser/structs/FieldDef.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/parser/structs/FieldDef.java	(revision 504)
++++ src/java/com/thoughtworks/qdox/parser/structs/FieldDef.java	(working copy)
+@@ -5,7 +5,7 @@
+ 
+ public class FieldDef extends LocatedDef {
+     public String name = "";
+-    public String type = "";
++    public TypeDef type;
+     public Set modifiers = new HashSet();
+     public int dimensions;
+     public boolean isVarArgs;
+@@ -13,15 +13,24 @@
+ 
+     public boolean equals(Object obj) {
+         FieldDef paramDef = (FieldDef) obj;
+-        return paramDef.name.equals(name)
+-                && paramDef.type.equals(type)
+-                && paramDef.dimensions == dimensions
++        boolean result = paramDef.name.equals(name)
+                 && paramDef.modifiers.equals(modifiers)
+                 && paramDef.isVarArgs == isVarArgs;
++        if(paramDef.type == null) {
++        	result &= (type == null)
++        		&& paramDef.dimensions == dimensions;
++        }
++        else {
++        	result &= (type != null)
++        		&&(paramDef.type.name.equals(type.name))
++        		&&(paramDef.type.actualArgumentTypes == null ? type.actualArgumentTypes == null: paramDef.type.actualArgumentTypes.equals(type.actualArgumentTypes))
++        		&&(paramDef.type.dimensions + paramDef.dimensions == dimensions + type.dimensions);
++        }
++        return result;
+     }
+ 
+     public int hashCode() {
+-        return name.hashCode() + type.hashCode() +
++        return name.hashCode() + (type != null ? type.hashCode() : 0) +
+                 dimensions + modifiers.hashCode() + (isVarArgs ? 79769989 : 0);
+     }
+ 
+Index: src/java/com/thoughtworks/qdox/parser/structs/MethodDef.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/parser/structs/MethodDef.java	(revision 504)
++++ src/java/com/thoughtworks/qdox/parser/structs/MethodDef.java	(working copy)
+@@ -5,9 +5,11 @@
+ import java.util.List;
+ import java.util.Set;
+ 
++import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
++
+ public class MethodDef extends LocatedDef {
+     public String name = "";
+-    public String returns = "";
++    public TypeDef returnType;
+     public Set modifiers = new HashSet();
+     public List params = new ArrayList();
+     public Set exceptions = new HashSet();
+@@ -17,17 +19,29 @@
+ 
+     public boolean equals(Object obj) {
+         MethodDef methodDef = (MethodDef) obj;
+-        return methodDef.name.equals(name)
+-                && methodDef.returns.equals(returns)
++        boolean result;
++        result = methodDef.name.equals(name)
+                 && methodDef.modifiers.equals(modifiers)
+                 && methodDef.params.equals(params)
+                 && methodDef.exceptions.equals(exceptions)
+-                && methodDef.constructor == constructor
+-                && methodDef.dimensions == dimensions;
++                && methodDef.constructor == constructor;
++        if(methodDef.returnType == null) {
++        	result &= (returnType == null)
++        		&& methodDef.dimensions == dimensions;
++        	
++        }
++        else {
++        	result &= (returnType != null)        		
++        			&&(methodDef.returnType.name.equals(returnType.name))
++        			&&(methodDef.returnType.actualArgumentTypes == null ? returnType.actualArgumentTypes == null: methodDef.returnType.actualArgumentTypes.equals(returnType.actualArgumentTypes))
++        			&&(methodDef.returnType.dimensions + methodDef.dimensions == dimensions + returnType.dimensions);
++        }
++        return result;
+     }
+ 
+     public int hashCode() {
+-        return name.hashCode() + returns.hashCode() +
++        return name.hashCode() + 
++        		(returnType != null ? returnType.hashCode() : 0) +
+                 modifiers.hashCode() + params.hashCode() +
+                 params.hashCode() + exceptions.hashCode() +
+                 dimensions + (constructor ? 0 : 1);
+@@ -37,7 +51,7 @@
+         StringBuffer result = new StringBuffer();
+         result.append(modifiers);
+         result.append(' ');
+-        result.append(returns);
++        result.append((returnType != null ? returnType.toString() : ""));
+         for (int i = 0; i < dimensions; i++) result.append("[]");
+         result.append(' ');
+         result.append(name);
+Index: src/java/com/thoughtworks/qdox/parser/structs/TypeDef.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/parser/structs/TypeDef.java	(revision 504)
++++ src/java/com/thoughtworks/qdox/parser/structs/TypeDef.java	(working copy)
+@@ -1,15 +1,31 @@
+ package com.thoughtworks.qdox.parser.structs;
+ 
++import java.util.List;
++
+ public class TypeDef {
+ 
+     public String name;
+     public int dimensions;
+-    public boolean isVarArgs;
++    public List actualArgumentTypes; 
+ 
+     public TypeDef(String name, int dimensions) {
+         this.name = name;
+         this.dimensions = dimensions;
+-        //this.isVarArgs = isVarArgs;
+     }
+ 
++	public TypeDef(String name) {
++		this(name, 0);
++	}
++	
++	public boolean equals(Object obj) {
++		TypeDef typeDef = (TypeDef) obj;
++        return typeDef.name.equals(name)
++                && typeDef.dimensions == dimensions
++                && (typeDef.actualArgumentTypes != null ? typeDef.actualArgumentTypes.equals(actualArgumentTypes): actualArgumentTypes == null);
++	}
++
++	public int hashCode() {
++        return name.hashCode() + 
++                dimensions + (actualArgumentTypes == null ? 0 : actualArgumentTypes.hashCode());
++    }
+ }
+Index: src/java/com/thoughtworks/qdox/parser/structs/WildcardTypeDef.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/parser/structs/WildcardTypeDef.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/parser/structs/WildcardTypeDef.java	(revision 0)
+@@ -0,0 +1,35 @@
++package com.thoughtworks.qdox.parser.structs;
++
++/**
++ * WildcardTypeDef must be a subclass of TypeDef, so it can be used in other classes.
++ * But here are only 2 fields interesting: typeDef and wildcardExpressionType
++ * typeDef itself can be generic, so it must be resolvable
++ * wildcardExpressionType is super or extends
++ * 
++ * 
++ * @author Robert Scholte
++ *
++ */
++public class WildcardTypeDef extends TypeDef {
++
++	private TypeDef typeDef;
++	private String wildcardExpressionType; //super or extends
++	
++	public WildcardTypeDef() {
++		super("?");
++	}
++	
++	public WildcardTypeDef(TypeDef typeDef, String wildcardExpressionType) {
++		super(typeDef.name, typeDef.dimensions);
++		this.typeDef = typeDef;
++		this.wildcardExpressionType = wildcardExpressionType;
++	}
++	
++	public TypeDef getTypeDef() {
++		return typeDef;
++	}
++	
++	public String getWildcardExpressionType() {
++		return wildcardExpressionType;
++	}
++}
+Index: src/test/com/thoughtworks/qdox/JSR14Test.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/JSR14Test.java	(revision 0)
++++ src/test/com/thoughtworks/qdox/JSR14Test.java	(revision 0)
+@@ -0,0 +1,287 @@
++package com.thoughtworks.qdox;
++
++import java.io.StringReader;
++
++import com.thoughtworks.qdox.model.JavaClass;
++import com.thoughtworks.qdox.model.JavaField;
++import com.thoughtworks.qdox.model.JavaMethod;
++import com.thoughtworks.qdox.model.JavaSource;
++import com.thoughtworks.qdox.model.Type;
++
++import junit.framework.TestCase;
++/**
++ * QDOX-54 Support for retrieval of generic type information (JSR 14)
++ * 
++ * Some core-classes have been changed, but most interfaces are kept the same.
++ * Most important is the method Type.getGenericValue(), which does exactly what it says.
++ * The WildcardType is added as a subclass of Type. This way we can easily define these types of Types
++ * 
++ * 
++ * @author Robert Scholte
++ *
++ */
++public class JSR14Test extends TestCase {
++	
++	private JavaDocBuilder builder = new JavaDocBuilder();
++
++	public void testSimpleSingleParameterizedTypeMethod() throws Exception {
++    	JavaMethod javaMethod = buildMethod("java.util.List<String> getList();");
++    	assertEquals("java.util.List<java.lang.String>", javaMethod.getReturns().getGenericValue());
++    }
++
++	public void testSimpleWildcardTypeMethod() throws Exception {
++    	JavaMethod javaMethod = buildMethod("java.util.List<?> getList();");
++    	assertEquals("java.util.List<?>", javaMethod.getReturns().getGenericValue());
++    }
++
++	public void testSimpleExtendsWildcardTypeMethod() throws Exception {
++    	JavaMethod javaMethod = buildMethod("java.util.List<? extends Number> getList();");
++    	assertEquals("java.util.List<? extends java.lang.Number>", javaMethod.getReturns().getGenericValue());
++    }
++	
++	public void testSimpleSuperWildcardTypeMethod() throws Exception {
++    	JavaMethod javaMethod = buildMethod("java.util.List<? super Integer> getList();");
++    	assertEquals("java.util.List<? super java.lang.Integer>", javaMethod.getReturns().getGenericValue());
++    }
++
++    public void testSimpleMultiParameterizedTypeMethod() throws Exception {
++    	JavaMethod javaMethod = buildMethod("java.util.Map<String, Object> getMap();");
++    	assertEquals("java.util.Map<java.lang.String,java.lang.Object>", javaMethod.getReturns().getGenericValue());
++    }
++
++    public void testComplexSingleParameterizedTypeMethod() throws Exception {
++    	JavaMethod javaMethod = buildMethod("java.util.List<java.util.Set<String>> getList();");
++    	assertEquals("java.util.List<java.util.Set<java.lang.String>>", javaMethod.getReturns().getGenericValue());
++    }
++    
++    public void testComplexMultiParameterizedTypeMethod() throws Exception {
++    	JavaMethod javaMethod = buildMethod("java.util.Map<String, java.util.Iterator<Number>> getMap();");
++    	assertEquals("java.util.Map<java.lang.String,java.util.Iterator<java.lang.Number>>", javaMethod.getReturns().getGenericValue());
++    }
++    
++    private JavaMethod buildMethod(String methodSource) {
++        String source = "interface Something { " + methodSource + " }";
++        JavaSource javaSource = builder.addSource(new StringReader(source));
++        JavaClass javaClass = javaSource.getClasses()[0];
++        JavaMethod javaMethod = javaClass.getMethods()[0];
++        return javaMethod;
++    }
++    
++    public void testSimpleSingleParameterizedTypeField() throws Exception {
++        String source = "public class Something { " +
++		"public java.util.List<String> aList;" + 
++		" }";
++        JavaSource javaSource = builder.addSource(new StringReader(source));
++        JavaClass javaClass = javaSource.getClasses()[0];
++        JavaField javaField = javaClass.getFieldByName("aList");
++        assertEquals("java.util.List<java.lang.String>", javaField.getType().getGenericValue());
++    }
++    
++    public void testSimpleMultiParameterizedTypeField() { 
++        String source = "public class Something { " +
++        		"public java.util.Map<String, Object> aMap;" + 
++        		" }";
++        JavaSource javaSource = builder.addSource(new StringReader(source));
++        JavaClass javaClass = javaSource.getClasses()[0];
++        JavaField javaField = javaClass.getFieldByName("aMap");
++        assertEquals("java.util.Map<java.lang.String,java.lang.Object>", javaField.getType().getGenericValue());
++    }
++    
++    public void testSimpleWildcardTypeField() throws Exception {
++    	String source = "public class Something { " +
++		"public java.util.List<?> aList;" + 
++		" }";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	JavaField javaField = javaClass.getFieldByName("aList");
++    	assertEquals("java.util.List<?>", javaField.getType().getGenericValue());
++    }
++
++	public void testSimpleExtendsWildcardTypeField() throws Exception {
++		String source = "public class Something { " +
++		"public java.util.List<? extends Number> aList;" + 
++		" }";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	JavaField javaField = javaClass.getFieldByName("aList");
++    	assertEquals("java.util.List<? extends java.lang.Number>", javaField.getType().getGenericValue());
++    }
++	
++	public void testSimpleSuperWildcardTypeField() throws Exception {
++		String source = "public class Something { " +
++		"public java.util.List<? super Integer> aList;" + 
++		" }";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	JavaField javaField = javaClass.getFieldByName("aList");
++    	assertEquals("java.util.List<? super java.lang.Integer>", javaField.getType().getGenericValue());
++    }
++	
++	public void testComplexSingleParameterizedTypeField() throws Exception {
++		String source = "public class Something { " +
++		"public java.util.List<java.util.Set<String>> aList;" + 
++		" }";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	JavaField javaField = javaClass.getFieldByName("aList");
++    	assertEquals("java.util.List<java.util.Set<java.lang.String>>", javaField.getType().getGenericValue());
++    }
++    
++    public void testComplexMultiParameterizedTypeField() throws Exception {
++		String source = "public class Something { " +
++		"public java.util.List<java.util.Set<String>> aList;" + 
++		" }";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	JavaField javaField = javaClass.getFieldByName("aList");
++    	assertEquals("java.util.List<java.util.Set<java.lang.String>>", javaField.getType().getGenericValue());
++    }
++    
++    public void testSimpleSingleParameterizedTypeParameter() throws Exception {
++    	JavaMethod javaMethod = buildMethod("void setList(java.util.List<String> aList);");
++    	assertEquals("java.util.List<java.lang.String>", javaMethod.getParameterByName("aList").getType().getGenericValue());
++    }
++
++	public void testSimpleWildcardTypeParameter() throws Exception {
++    	JavaMethod javaMethod = buildMethod("void setList(java.util.List<?> aList);");
++    	assertEquals("java.util.List<?>", javaMethod.getParameterByName("aList").getType().getGenericValue());
++    }
++
++	public void testSimpleExtendsWildcardTypeParameter() throws Exception {
++    	JavaMethod javaMethod = buildMethod("void setList(java.util.List<? extends Number> aList);");
++    	assertEquals("java.util.List<? extends java.lang.Number>", javaMethod.getParameterByName("aList").getType().getGenericValue());
++    }
++	
++	public void testSimpleSuperWildcardTypeParameter() throws Exception {
++    	JavaMethod javaMethod = buildMethod("void setList(java.util.List<? super Integer> aList);");
++    	assertEquals("java.util.List<? super java.lang.Integer>", javaMethod.getParameterByName("aList").getType().getGenericValue());
++    }
++
++    public void testSimpleMultiParameterizedTypeParameter() throws Exception {
++    	JavaMethod javaMethod = buildMethod("void setMap(java.util.Map<String, Object> aMap);");
++    	assertEquals("java.util.Map<java.lang.String,java.lang.Object>", javaMethod.getParameterByName("aMap").getType().getGenericValue());
++    }
++
++    public void testComplexSingleParameterizedTypeParameter() throws Exception {
++    	JavaMethod javaMethod = buildMethod("void setList(java.util.List<java.util.Set<String>> aList);");
++    	assertEquals("java.util.List<java.util.Set<java.lang.String>>", javaMethod.getParameterByName("aList").getType().getGenericValue());
++    }
++    
++    public void testComplexMultiParameterizedTypeParameter() throws Exception {
++    	JavaMethod javaMethod = buildMethod("void setMap(java.util.Map<String, java.util.Iterator<Number>> aMap);");
++    	assertEquals("java.util.Map<java.lang.String,java.util.Iterator<java.lang.Number>>", javaMethod.getParameterByName("aMap").getType().getGenericValue());
++    }
++    
++    public void testSimpleSingleParameterizedTypeClassExtends() throws Exception {
++        String source = "public class Something extends java.util.List<String> {}";
++        JavaSource javaSource = builder.addSource(new StringReader(source));
++        JavaClass javaClass = javaSource.getClasses()[0];
++        Type superClass = javaClass.getSuperClass();
++        assertEquals("java.util.List<java.lang.String>", superClass.getGenericValue());
++    }
++    
++    public void testSimpleMultiParameterizedTypeClassExtends() { 
++        String source = "public class Something extends java.util.Map<String, Object> {}";
++        JavaSource javaSource = builder.addSource(new StringReader(source));
++        JavaClass javaClass = javaSource.getClasses()[0];
++        Type superClass = javaClass.getSuperClass();
++        assertEquals("java.util.Map<java.lang.String,java.lang.Object>", superClass.getGenericValue());
++    }
++    
++    public void testSimpleWildcardTypeClassExtends() throws Exception {
++    	String source = "public class Something extends java.util.List<?>{}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	Type superClass = javaClass.getSuperClass();
++    	assertEquals("java.util.List<?>", superClass.getGenericValue());
++    }
++
++	public void testSimpleExtendsWildcardTypeClassExtends() throws Exception {
++		String source = "public class Something extends java.util.List<? extends Number> {}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	Type superClass = javaClass.getSuperClass();
++    	assertEquals("java.util.List<? extends java.lang.Number>", superClass.getGenericValue());
++    }
++	
++	public void testSimpleSuperWildcardTypeClassExtends() throws Exception {
++		String source = "public class Something extends java.util.List<? super Integer> {}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	Type superClass = javaClass.getSuperClass();
++    	assertEquals("java.util.List<? super java.lang.Integer>", superClass.getGenericValue());
++    }
++	
++	public void testComplexSingleParameterizedTypeClassExtends() throws Exception {
++		String source = "public class Something extends java.util.List<java.util.Set<String>> {}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	Type superClass = javaClass.getSuperClass();
++    	assertEquals("java.util.List<java.util.Set<java.lang.String>>", superClass.getGenericValue());
++    }
++    
++    public void testComplexMultiParameterizedTypeClassExtends() throws Exception {
++		String source = "public class Something extends java.util.List<java.util.Set<String>> {}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	Type superClass = javaClass.getSuperClass();
++    	assertEquals("java.util.List<java.util.Set<java.lang.String>>", superClass.getGenericValue());
++    }
++    
++    public void testSimpleSingleParameterizedTypeClassImplements() throws Exception {
++        String source = "public class Something implements java.util.List<String> {}";
++        JavaSource javaSource = builder.addSource(new StringReader(source));
++        JavaClass javaClass = javaSource.getClasses()[0];
++        Type implementsClass = javaClass.getImplements()[0];
++        assertEquals("java.util.List<java.lang.String>", implementsClass.getGenericValue());
++    }
++    
++    public void testSimpleMultiParameterizedTypeClassImplements() { 
++        String source = "public class Something implements java.util.Map<String, Object> {}";
++        JavaSource javaSource = builder.addSource(new StringReader(source));
++        JavaClass javaClass = javaSource.getClasses()[0];
++        Type implementsClass = javaClass.getImplements()[0];
++        assertEquals("java.util.Map<java.lang.String,java.lang.Object>", implementsClass.getGenericValue());
++    }
++    
++    public void testSimpleWildcardTypeClassImplements() throws Exception {
++    	String source = "public class Something implements java.util.List<?>{}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	Type implementsClass = javaClass.getImplements()[0];
++    	assertEquals("java.util.List<?>", implementsClass.getGenericValue());
++    }
++
++	public void testSimpleExtendsWildcardTypeClassImplements() throws Exception {
++		String source = "public class Something implements java.util.List<? extends Number> {}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	Type implementsClass = javaClass.getImplements()[0];
++    	assertEquals("java.util.List<? extends java.lang.Number>", implementsClass.getGenericValue());
++    }
++	
++	public void testSimpleSuperWildcardTypeClassImplements() throws Exception {
++		String source = "public class Something implements java.util.List<? super Integer> {}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	Type implementsClass = javaClass.getImplements()[0];
++    	assertEquals("java.util.List<? super java.lang.Integer>", implementsClass.getGenericValue());
++    }
++	
++	public void testComplexSingleParameterizedTypeClassImplements() throws Exception {
++		String source = "public class Something implements java.util.List<java.util.Set<String>> {}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	Type implementsClass = javaClass.getImplements()[0];
++    	assertEquals("java.util.List<java.util.Set<java.lang.String>>", implementsClass.getGenericValue());
++    }
++    
++    public void testComplexMultiParameterizedTypeClassImplements() throws Exception {
++		String source = "public class Something implements java.util.List<java.util.Set<String>> {}";
++    	JavaSource javaSource = builder.addSource(new StringReader(source));
++    	JavaClass javaClass = javaSource.getClasses()[0];
++    	Type implementsClass = javaClass.getImplements()[0];
++    	assertEquals("java.util.List<java.util.Set<java.lang.String>>", implementsClass.getGenericValue());
++    }
++    
++}
+Index: src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java	(revision 504)
++++ src/test/com/thoughtworks/qdox/model/ModelBuilderTest.java	(working copy)
+@@ -4,6 +4,8 @@
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
++import com.thoughtworks.qdox.parser.structs.TypeDef;
++
+ import java.util.Arrays;
+ import junit.framework.TestCase;
+ 
+@@ -97,7 +99,7 @@
+         builder.endClass();
+ 
+         ClassDef cls2 = new ClassDef();
+-        cls2.extendz.add("Another");
++        cls2.extendz.add(new TypeDef("Another"));
+         builder.beginClass(cls2);
+         builder.endClass();
+         builder.addImport("com.thoughtworks.*");
+@@ -128,7 +130,7 @@
+ 
+         ClassDef cls2 = new ClassDef();
+         cls2.type = ClassDef.INTERFACE;
+-        cls2.extendz.add("Another");
++        cls2.extendz.add(new TypeDef("Another"));
+         builder.beginClass(cls2);
+         builder.endClass();
+ 
+@@ -145,9 +147,9 @@
+     public void testInterfaceExtendsMultiple() throws Exception {
+         ClassDef cls = new ClassDef();
+         cls.type = ClassDef.INTERFACE;
+-        cls.extendz.add("Another");
+-        cls.extendz.add("java.io.Serializable");
+-        cls.extendz.add("BottleOpener");
++        cls.extendz.add(new TypeDef("Another"));
++        cls.extendz.add(new TypeDef("java.io.Serializable"));
++        cls.extendz.add(new TypeDef("BottleOpener"));
+         builder.beginClass(cls);
+         builder.endClass();
+ 
+@@ -169,7 +171,7 @@
+         builder.endClass();
+ 
+         ClassDef cls2 = new ClassDef();
+-        cls2.implementz.add("SomeInterface");
++        cls2.implementz.add(new TypeDef("SomeInterface"));
+         builder.beginClass(cls2);
+         builder.endClass();
+ 
+@@ -186,8 +188,8 @@
+ 
+     public void testClassImplementsMultiple() throws Exception {
+         ClassDef cls = new ClassDef();
+-        cls.implementz.add("SomeInterface");
+-        cls.implementz.add("XX");
++        cls.implementz.add(new TypeDef("SomeInterface"));
++        cls.implementz.add(new TypeDef("XX"));
+         builder.beginClass(cls);
+         builder.endClass();
+ 
+@@ -202,9 +204,9 @@
+ 
+     public void testClassExtendsAndImplements() throws Exception {
+         ClassDef cls = new ClassDef();
+-        cls.extendz.add("SubClass");
+-        cls.implementz.add("SomeInterface");
+-        cls.implementz.add("XX");
++        cls.extendz.add(new TypeDef("SubClass"));
++        cls.implementz.add(new TypeDef("SomeInterface"));
++        cls.implementz.add(new TypeDef("XX"));
+         builder.beginClass(cls);
+         builder.endClass();
+ 
+@@ -301,7 +303,7 @@
+         builder.beginClass(new ClassDef());
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         builder.addMethod(mth);
+         builder.endClass();
+ 
+@@ -320,7 +322,7 @@
+         builder.beginClass(new ClassDef());
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         mth.dimensions = 0;
+         builder.addMethod(mth);
+         builder.endClass();
+@@ -334,7 +336,7 @@
+         builder.beginClass(new ClassDef());
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         mth.dimensions = 1;
+         builder.addMethod(mth);
+         builder.endClass();
+@@ -348,7 +350,7 @@
+         builder.beginClass(new ClassDef());
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         mth.dimensions = 2;
+         builder.addMethod(mth);
+         builder.endClass();
+@@ -364,13 +366,13 @@
+ 
+         FieldDef f1 = new FieldDef();
+         f1.name = "count";
+-        f1.type = "int";
++        f1.type = new TypeDef("int");
+         f1.modifiers.add("final");
+         mth.params.add(f1);
+ 
+         FieldDef f2 = new FieldDef();
+         f2.name = "name";
+-        f2.type = "String";
++        f2.type = new TypeDef("String");
+         mth.params.add(f2);
+ 
+         builder.addMethod(mth);
+@@ -391,14 +393,14 @@
+ 
+         FieldDef f1 = new FieldDef();
+         f1.name = "count";
+-        f1.type = "int";
++        f1.type = new TypeDef("int");
+         f1.modifiers.add("final");
+         f1.dimensions = 1;
+         mth.params.add(f1);
+ 
+         FieldDef f2 = new FieldDef();
+         f2.name = "name";
+-        f2.type = "String";
++        f2.type = new TypeDef("String");
+         f2.dimensions = 2;
+         mth.params.add(f2);
+ 
+@@ -457,7 +459,7 @@
+ 
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         builder.addField(fld);
+         builder.endClass();
+ 
+@@ -494,7 +496,7 @@
+ 
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         fld.dimensions = 0;
+         builder.addField(fld);
+         builder.endClass();
+@@ -511,7 +513,7 @@
+ 
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         fld.dimensions = 1;
+         builder.addField(fld);
+         builder.endClass();
+@@ -528,7 +530,7 @@
+ 
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         fld.dimensions = 2;
+         builder.addField(fld);
+         builder.endClass();
+@@ -549,7 +551,7 @@
+ 
+         MethodDef mth2 = new MethodDef();
+         mth2.name = "method";
+-        mth2.returns = "void";
++        mth2.returnType = new TypeDef("void");
+         builder.addMethod(mth2);
+         builder.endClass();
+ 
+Index: src/test/com/thoughtworks/qdox/parser/MockBuilder.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/parser/MockBuilder.java	(revision 504)
++++ src/test/com/thoughtworks/qdox/parser/MockBuilder.java	(working copy)
+@@ -9,6 +9,7 @@
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
++import com.thoughtworks.qdox.parser.structs.TypeDef;
+ 
+ class MockBuilder implements Builder {
+     private ExpectationCounter myAddPackageCalls = new ExpectationCounter("com.thoughtworks.qdox.parser.Builder AddPackageCalls");
+@@ -153,4 +154,8 @@
+     public Type createType( String name, int dimensions ) {
+         return null;
+     }
++    
++    public Type createType(TypeDef name) {
++    	return null;
++    }
+ }
+Index: src/test/com/thoughtworks/qdox/parser/ParserTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/parser/ParserTest.java	(revision 504)
++++ src/test/com/thoughtworks/qdox/parser/ParserTest.java	(working copy)
+@@ -1,11 +1,15 @@
+ package com.thoughtworks.qdox.parser;
+ 
++import java.util.ArrayList;
++
+ import junit.framework.TestCase;
+ import com.thoughtworks.qdox.parser.impl.Parser;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
++import com.thoughtworks.qdox.parser.structs.TypeDef;
++import com.thoughtworks.qdox.parser.structs.WildcardTypeDef;
+ 
+ public class ParserTest extends TestCase {
+ 
+@@ -438,7 +442,7 @@
+         // expectations
+         ClassDef cls = new ClassDef();
+         cls.name = "MySubClass";
+-        cls.extendz.add("com.blah.MyBaseClass");
++        cls.extendz.add(new TypeDef("com.blah.MyBaseClass"));
+         builder.addExpectedBeginClassValues(cls);
+ 
+         // execute
+@@ -471,8 +475,8 @@
+         ClassDef cls = new ClassDef();
+         cls.name = "MyInterface";
+         cls.type = ClassDef.INTERFACE;
+-        cls.extendz.add("com.blah.AnotherInterface");
+-        cls.extendz.add("Serializable");
++        cls.extendz.add(new TypeDef("com.blah.AnotherInterface"));
++        cls.extendz.add(new TypeDef("Serializable"));
+         builder.addExpectedBeginClassValues(cls);
+ 
+         // execute
+@@ -502,7 +506,7 @@
+         // expectations
+         ClassDef cls = new ClassDef();
+         cls.name = "MyClass";
+-        cls.implementz.add("com.blah.AnInterface");
++        cls.implementz.add(new TypeDef("com.blah.AnInterface"));
+         builder.addExpectedBeginClassValues(cls);
+ 
+         // execute
+@@ -540,9 +544,9 @@
+         // expectations
+         ClassDef cls = new ClassDef();
+         cls.name = "MyClass";
+-        cls.implementz.add("com.blah.AnInterface");
+-        cls.implementz.add("java.io.Serializable");
+-        cls.implementz.add("Eatable");
++        cls.implementz.add(new TypeDef("com.blah.AnInterface"));
++        cls.implementz.add(new TypeDef("java.io.Serializable"));
++        cls.implementz.add(new TypeDef("Eatable"));
+         builder.addExpectedBeginClassValues(cls);
+ 
+         // execute
+@@ -576,8 +580,8 @@
+         // expectations
+         ClassDef cls = new ClassDef();
+         cls.name = "MyClass";
+-        cls.extendz.add("mypackage.BaseClass");
+-        cls.implementz.add("com.blah.AnInterface");
++        cls.extendz.add(new TypeDef("mypackage.BaseClass"));
++        cls.implementz.add(new TypeDef("com.blah.AnInterface"));
+         builder.addExpectedBeginClassValues(cls);
+ 
+         // execute
+@@ -619,10 +623,10 @@
+         // expectations
+         ClassDef cls = new ClassDef();
+         cls.name = "MyClass";
+-        cls.extendz.add("mypackage.BaseClass");
+-        cls.implementz.add("com.blah.AnInterface");
+-        cls.implementz.add("java.io.Serializable");
+-        cls.implementz.add("Eatable");
++        cls.extendz.add(new TypeDef("mypackage.BaseClass"));
++        cls.implementz.add(new TypeDef("com.blah.AnInterface"));
++        cls.implementz.add(new TypeDef("java.io.Serializable"));
++        cls.implementz.add(new TypeDef("Eatable"));
+         builder.addExpectedBeginClassValues(cls);
+ 
+         // execute
+@@ -726,7 +730,7 @@
+         cls2.name = "Class2";
+         cls2.type = ClassDef.CLASS;
+         cls2.modifiers.add("public");
+-        cls2.extendz.add("SubClass");
++        cls2.extendz.add(new TypeDef("SubClass"));
+         builder.addExpectedBeginClassValues(cls2);
+ 
+         ClassDef cls3 = new ClassDef();
+@@ -891,7 +895,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         builder.addExpectedAddMethodValues(mth);
+ 
+         // execute
+@@ -921,7 +925,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         builder.addExpectedAddMethodValues(mth);
+ 
+         // execute
+@@ -951,7 +955,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "Something";
++        mth.returnType = new TypeDef("Something");
+         builder.addExpectedAddMethodValues(mth);
+ 
+         // execute
+@@ -985,7 +989,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "com.blah.Something";
++        mth.returnType = new TypeDef("com.blah.Something");
+         builder.addExpectedAddMethodValues(mth);
+ 
+         // execute
+@@ -1028,7 +1032,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "com.blah.Something";
++        mth.returnType = new TypeDef("com.blah.Something");
+         mth.modifiers.add("public");
+         mth.modifiers.add("protected");
+         mth.modifiers.add("private");
+@@ -1069,10 +1073,10 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         FieldDef p1 = new FieldDef();
+         p1.name = "numberOfTimes";
+-        p1.type = "int";
++        p1.type = new TypeDef("int");
+         mth.params.add(p1);
+         builder.addExpectedAddMethodValues(mth);
+ 
+@@ -1109,10 +1113,10 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         FieldDef p1 = new FieldDef();
+         p1.name = "numberOfTimes";
+-        p1.type = "java.lang.String";
++        p1.type = new TypeDef("java.lang.String");
+         mth.params.add(p1);
+         builder.addExpectedAddMethodValues(mth);
+ 
+@@ -1148,14 +1152,14 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         FieldDef p1 = new FieldDef();
+         p1.name = "numberOfTimes";
+-        p1.type = "int";
++        p1.type = new TypeDef("int");
+         mth.params.add(p1);
+         FieldDef p2 = new FieldDef();
+         p2.name = "name";
+-        p2.type = "String";
++        p2.type = new TypeDef("String");
+         mth.params.add(p2);
+         builder.addExpectedAddMethodValues(mth);
+ 
+@@ -1194,18 +1198,18 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         FieldDef p1 = new FieldDef();
+         p1.name = "numberOfTimes";
+-        p1.type = "int";
++        p1.type = new TypeDef("int");
+         mth.params.add(p1);
+         FieldDef p2 = new FieldDef();
+         p2.name = "name";
+-        p2.type = "String";
++        p2.type = new TypeDef("String");
+         mth.params.add(p2);
+         FieldDef p3 = new FieldDef();
+         p3.name = "x";
+-        p3.type = "boolean";
++        p3.type = new TypeDef("boolean");
+         mth.params.add(p3);
+         builder.addExpectedAddMethodValues(mth);
+ 
+@@ -1240,10 +1244,10 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         FieldDef p1 = new FieldDef();
+         p1.name = "numberOfTimes";
+-        p1.type = "int";
++        p1.type = new TypeDef("int");
+         p1.modifiers.add("final");
+         p1.modifiers.add("volatile");
+         mth.params.add(p1);
+@@ -1278,7 +1282,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         mth.exceptions.add("IOException");
+         builder.addExpectedAddMethodValues(mth);
+ 
+@@ -1313,7 +1317,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         mth.exceptions.add("IOException");
+         mth.exceptions.add("MyException");
+         builder.addExpectedAddMethodValues(mth);
+@@ -1351,7 +1355,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         mth.exceptions.add("IOException");
+         mth.exceptions.add("MyException");
+         mth.exceptions.add("AnotherException");
+@@ -1390,7 +1394,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         mth.exceptions.add("java.io.IOException");
+         builder.addExpectedAddMethodValues(mth);
+ 
+@@ -1433,7 +1437,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doSomething";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         mth.exceptions.add("java.io.IOException");
+         mth.exceptions.add("java.lang.RuntimeException");
+         builder.addExpectedAddMethodValues(mth);
+@@ -1500,7 +1504,7 @@
+         mth.modifiers.add("public");
+         FieldDef p1 = new FieldDef();
+         p1.name = "count";
+-        p1.type = "int";
++        p1.type = new TypeDef("int");
+         mth.params.add(p1);
+ 
+         builder.addExpectedAddMethodValues(mth);
+@@ -1545,11 +1549,11 @@
+         mth.modifiers.add("public");
+         FieldDef p1 = new FieldDef();
+         p1.name = "count";
+-        p1.type = "int";
++        p1.type = new TypeDef("int");
+         mth.params.add(p1);
+         FieldDef p2 = new FieldDef();
+         p2.name = "thingy";
+-        p2.type = "java.lang.String";
++        p2.type = new TypeDef("java.lang.String");
+         mth.params.add(p2);
+ 
+         builder.addExpectedAddMethodValues(mth);
+@@ -1652,7 +1656,7 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+ 
+         builder.addExpectedAddFieldValues(fld);
+ 
+@@ -1685,7 +1689,7 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "java.lang.String";
++        fld.type = new TypeDef("java.lang.String");
+ 
+         builder.addExpectedAddFieldValues(fld);
+ 
+@@ -1721,7 +1725,7 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         fld.modifiers.add("public");
+         fld.modifiers.add("protected");
+         fld.modifiers.add("private");
+@@ -1759,11 +1763,11 @@
+         // expectations
+         FieldDef fld1 = new FieldDef();
+         fld1.name = "thing";
+-        fld1.type = "String";
++        fld1.type = new TypeDef("String");
+         builder.addExpectedAddFieldValues(fld1);
+         FieldDef fld2 = new FieldDef();
+         fld2.name = "another";
+-        fld2.type = "String";
++        fld2.type = new TypeDef("String");
+         builder.addExpectedAddFieldValues(fld2);
+ 
+         // execute
+@@ -1795,7 +1799,10 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "l";
+-        fld.type = "List";
++        fld.type = new TypeDef("List");
++        fld.type.actualArgumentTypes = new ArrayList();
++        fld.type.actualArgumentTypes.add(new TypeDef("String"));
++        
+ 
+         builder.addExpectedAddFieldValues(fld);
+ 
+@@ -1830,8 +1837,10 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "l";
+-        fld.type = "List";
+-
++        fld.type = new TypeDef("List");
++        fld.type.actualArgumentTypes = new ArrayList();
++        fld.type.actualArgumentTypes.add(new WildcardTypeDef(new TypeDef("A"), "extends"));
++        
+         builder.addExpectedAddFieldValues(fld);
+ 
+         // execute
+@@ -1865,7 +1874,7 @@
+         // expect no the method, and it shouldn't be static.
+         MethodDef method = new MethodDef();
+         method.name = "doStuff";
+-        method.returns = "void";
++        method.returnType = new TypeDef("void");
+         builder.addExpectedAddMethodValues(method);
+ 
+         // execute
+@@ -1956,7 +1965,7 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         fld.dimensions = 0;
+ 
+         builder.addExpectedAddFieldValues(fld);
+@@ -1988,7 +1997,7 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         fld.dimensions = 1;
+ 
+         builder.addExpectedAddFieldValues(fld);
+@@ -2022,7 +2031,7 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         fld.dimensions = 2;
+ 
+         builder.addExpectedAddFieldValues(fld);
+@@ -2054,7 +2063,7 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         fld.dimensions = 1;
+ 
+         builder.addExpectedAddFieldValues(fld);
+@@ -2089,7 +2098,7 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         fld.dimensions = 3;
+ 
+         builder.addExpectedAddFieldValues(fld);
+@@ -2125,12 +2134,12 @@
+         // expectations
+         FieldDef fld = new FieldDef();
+         fld.name = "count";
+-        fld.type = "int";
++        fld.type = new TypeDef("int");
+         fld.dimensions = 1;
+ 
+         FieldDef fld2 = new FieldDef();
+         fld2.name = "count2";
+-        fld2.type = "int";
++        fld2.type = new TypeDef("int");
+         fld2.dimensions = 0;
+ 
+         builder.addExpectedAddFieldValues(fld);
+@@ -2163,7 +2172,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "count";
+-        mth.returns = "int";
++        mth.returnType = new TypeDef("int");
+         mth.dimensions = 0;
+ 
+         builder.addExpectedAddMethodValues(mth);
+@@ -2197,7 +2206,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "count";
+-        mth.returns = "int";
++        mth.returnType = new TypeDef("int");
+         mth.dimensions = 1;
+ 
+         builder.addExpectedAddMethodValues(mth);
+@@ -2236,7 +2245,7 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "count";
+-        mth.returns = "int";
++        mth.returnType = new TypeDef("int");
+         mth.dimensions = 1;
+ 
+         builder.addExpectedAddMethodValues(mth);
+@@ -2274,11 +2283,11 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "count";
+-        mth.returns = "int";
++        mth.returnType = new TypeDef("int");
+         mth.dimensions = 1;
+         FieldDef p1 = new FieldDef();
+         p1.name = "p1";
+-        p1.type = "int";
++        p1.type = new TypeDef("int");
+         p1.dimensions = 0;
+         mth.params.add(p1);
+ 
+@@ -2317,11 +2326,11 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "count";
+-        mth.returns = "int";
++        mth.returnType = new TypeDef("int");
+         mth.dimensions = 0;
+         FieldDef p1 = new FieldDef();
+         p1.name = "p1";
+-        p1.type = "int";
++        p1.type = new TypeDef("int");
+         p1.dimensions = 1;
+         mth.params.add(p1);
+ 
+@@ -2364,11 +2373,11 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "count";
+-        mth.returns = "int";
++        mth.returnType = new TypeDef("int");
+         mth.dimensions = 1;
+         FieldDef p1 = new FieldDef();
+         p1.name = "p1";
+-        p1.type = "int";
++        p1.type = new TypeDef("int");
+         p1.dimensions = 2;
+         mth.params.add(p1);
+ 
+@@ -2406,10 +2415,10 @@
+         // expectations
+         MethodDef mth = new MethodDef();
+         mth.name = "doStuff";
+-        mth.returns = "void";
++        mth.returnType = new TypeDef("void");
+         FieldDef p1 = new FieldDef();
+         p1.name = "stuff";
+-        p1.type = "int";
++        p1.type = new TypeDef("int");
+         p1.dimensions = 0;
+         p1.isVarArgs = true;
+         mth.params.add(p1);

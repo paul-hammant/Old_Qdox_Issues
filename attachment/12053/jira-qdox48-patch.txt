@@ -1,0 +1,33 @@
+Index: JavaDocBuilderTest.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java,v
+retrieving revision 1.51
+diff -u -r1.51 JavaDocBuilderTest.java
+--- JavaDocBuilderTest.java	26 Apr 2004 18:50:45 -0000	1.51
++++ JavaDocBuilderTest.java	6 May 2004 20:56:16 -0000
+@@ -632,6 +632,25 @@
+ 
+         assertEquals(1, clazz.getInnerClasses().length);
+     }
++    
++    public void testJiraQdox48() {
++    	String sourceCode = " public class A { "
++		    +"/**"
++		    +" * @mytag no-access=\"true\""
++		    +" */" 
++    		+"private int field1;" 
++    		+"private int field2;" 
++    		+"private int field3;" 
++    		+"} ";
++    	JavaDocBuilder builder = new JavaDocBuilder();
++    	builder.addSource(new StringReader(sourceCode));
++    	JavaClass clazz = builder.getClassByName("A");
++    	JavaField[] fields = clazz.getFields();
++    	
++    	assertEquals(1, fields[0].getTags().length);
++    	assertNull(fields[1].getTags());
++    	assertNull(fields[2].getTags());
++    }
+ 
+     public void testParseErrorLocationShouldBeAvailable() {
+         String badSource = ""

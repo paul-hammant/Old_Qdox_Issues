@@ -1,0 +1,112 @@
+Index: src/grammar/lexer.flex
+===================================================================
+--- src/grammar/lexer.flex	(revision 461)
++++ src/grammar/lexer.flex	(working copy)
+@@ -24,6 +24,7 @@
+     private StringBuffer codeBody = new StringBuffer(8192);
+ 	private boolean annoExpected;
+     private boolean newMode;
++    private boolean anonymousMode;
+     private boolean enumMode;
+     private boolean appendingToCodeBody;
+     private boolean shouldCaptureCodeBody;
+@@ -300,8 +301,23 @@
+             codeBody.append(',');
+         }
+     }
+-    "{"                 { codeBody.append('{'); nestingDepth++; }
+-    "}"                 { codeBody.append('}'); nestingDepth--; }
++    "{"                 {
++        codeBody.append('{');
++		anonymousMode = newMode;
++        if (anonymousMode) {
++	        nestingDepth++;
++        }
++    }
++    "}"                 {
++		codeBody.append('}');
++        if (anonymousMode) {
++            nestingDepth--;
++        	if (nestingDepth==assignmentDepth) { 
++                anonymousMode=false;
++            }
++        }
++    }
++
+     "("                 { codeBody.append('('); nestingDepth++; }
+     ")"                 {
+         codeBody.append(')');
+@@ -322,17 +338,19 @@
+     }
+     "<"                 {
+         codeBody.append('<');
+-        if (newMode) { 
++        if (newMode && !anonymousMode) { 
+             nestingDepth++; 
+-        } 
++        }
+     }
+     ">"                 {
+         codeBody.append('>');
+-        if (newMode) {
+-            nestingDepth--;
+-        	if (nestingDepth==assignmentDepth) { 
+-                newMode=false;
+-            }
++        if (!anonymousMode) {
++	        if (newMode) {
++    	        nestingDepth--;
++    	    	if (nestingDepth==assignmentDepth) { 
++    	            newMode=false;
++    	        }
++        	}
+         }
+     }
+ }
+Index: src/test/com/thoughtworks/qdox/ClassResolutionTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/ClassResolutionTest.java	(revision 461)
++++ src/test/com/thoughtworks/qdox/ClassResolutionTest.java	(working copy)
+@@ -1,9 +1,9 @@
+ package com.thoughtworks.qdox;
+ 
++import java.io.StringReader;
++
+ import junit.framework.TestCase;
+ 
+-import java.io.StringReader;
+-
+ import com.thoughtworks.qdox.model.JavaClass;
+ import com.thoughtworks.qdox.model.JavaMethod;
+ import com.thoughtworks.qdox.model.JavaParameter;
+@@ -41,7 +41,7 @@
+         // verify
+         assertEquals("Should include fully qualified name", "package1.Class1$NestedClass", type.getValue());
+     }
+-    
++
+     public void testSurvivesStaticImports() {
+ 
+         // input sources
+@@ -60,4 +60,21 @@
+         JavaClass class2 = builder.getClassByName("package2.Class2");
+         assertNotNull(class2);
+     }
++
++    public void testAnonymousClass() {
++        JavaDocBuilder builder = new JavaDocBuilder();
++
++    	String source = ""
++        	+ "public class AnimatedAlgorithm {\n"
++        	+ "    private SelectionListener mySelectionListener = new SelectionListenerAdapter() {\n"
++        	+ "        public void selectionEvent() {\n"
++        	+ "            for (int i = 0; i < recalcers.size(); i++) {\n"
++        	+ "              int something = 5;"
++        	+ "            }\n"
++        	+ "        }\n"
++        	+ "    };\n"
++        	+ "}";
++
++        builder.addSource(new StringReader(source));
++    }
+ }

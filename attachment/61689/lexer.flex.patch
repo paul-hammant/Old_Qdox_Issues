@@ -1,0 +1,15 @@
+Index: lexer.flex
+===================================================================
+--- lexer.flex	(revision 1524)
++++ lexer.flex	(working copy)
+@@ -168,8 +168,8 @@
+ IntegerLiteral			        = ( {DecimalNumeral} | {BinaryNumeral} | {HexNumeral} | {OctalNumeral} ) ([lL])?
+ Exponent				        = [eE] [+-]? {DecimalNumeral}
+ FloatingPointLiteral            = ( {DecimalFloatingPointLiteral} | {HexadecimalFloatingPointLiteral} )
+-DecimalFloatingPointLiteral	    = ( {DecimalNumeral} ("." {DecimalNumeral})? ({Exponent})? ([dDfF])? ) |
+-						          ( "." {DecimalNumeral} ({Exponent})? ([dDfF])?) |
++DecimalFloatingPointLiteral	    = ( {DecimalNumeral} ("." [0]* {DecimalNumeral})? ({Exponent})? ([dDfF])? ) |
++						          ( "." [0]* {DecimalNumeral} ({Exponent})? ([dDfF])?) |
+ 						          ( {DecimalNumeral} {Exponent} ([dDfF])?) |
+ 						          ( {DecimalNumeral} ({Exponent} )? ([dDfF]) )
+ BinaryExponent                  = [pP] [+-]? ({DecimalNumeral})+					          

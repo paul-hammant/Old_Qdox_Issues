@@ -1,0 +1,13 @@
+Index: src/grammar/parser.y
+===================================================================
+--- src/grammar/parser.y	(revision 510)
++++ src/grammar/parser.y	(working copy)
+@@ -437,7 +437,7 @@
+     };
+ 
+ static_block:
+-    modifiers CODEBLOCK { modifiers.clear(); };
++    modifiers CODEBLOCK { lexer.getCodeBody(); modifiers.clear(); };
+ 
+ // ----- FIELD
+ 

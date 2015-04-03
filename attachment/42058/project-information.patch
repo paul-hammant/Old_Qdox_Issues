@@ -1,0 +1,67 @@
+Index: pom.xml
+===================================================================
+--- pom.xml	(revision 596)
++++ pom.xml	(working copy)
+@@ -233,6 +233,13 @@
+         </executions>
+       </plugin>
+       <plugin>
++        <artifactId>maven-site-plugin</artifactId>
++        <version>2.0</version>
++        <configuration>
++          <templateFile>${basedir}/src/site/templates/site-template.vm</templateFile>
++        </configuration>
++      </plugin>
++      <plugin>
+         <groupId>org.codehaus.xsite</groupId>
+         <artifactId>xsite-maven-plugin</artifactId>
+         <version>1.0</version>
+@@ -245,7 +252,7 @@
+         </configuration>
+         <executions>
+           <execution>
+-            <phase>install</phase>
++            <phase>site</phase>
+             <goals>
+               <goal>run</goal>
+             </goals>
+Index: src/site/content/website.xml
+===================================================================
+--- src/site/content/website.xml	(revision 554)
++++ src/site/content/website.xml	(working copy)
+@@ -12,6 +12,15 @@
+         <page>whouses.html</page>
+     </section>
+     <section>
++      <name>Project Information</name>
++      <page>dependencies.html</page>      
++      <page>issue-tracking.html</page>
++      <page>mail-lists.html</page>
++      <page>license.html</page>
++      <page>team-list</page>
++      <page>source-repository</page>
++    </section>
++    <section>
+         <name>Using QDox</name>
+         <page>usage.html</page>
+         <page>model.html</page>
+Index: src/site/templates/site-template.vm
+===================================================================
+--- src/site/templates/site-template.vm	(revision 0)
++++ src/site/templates/site-template.vm	(revision 0)
+@@ -0,0 +1,15 @@
++<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
++<html xmlns="http://www.w3.org/1999/xhtml">
++  <head>
++    <title>$title</title>
++    <style type="text/css" media="all">
++      @import url("$relativePath/css/maven-base.css");
++      @import url("$relativePath/css/maven-theme.css");
++      @import url("$relativePath/css/site.css");
++    </style>
++  </head>
++  <body>
++     $bodyContent
++  </body>
++</html>
++

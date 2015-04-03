@@ -1,0 +1,85 @@
+Index: src/java/com/thoughtworks/qdox/model/JavaClass.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/JavaClass.java	(revision 515)
++++ src/java/com/thoughtworks/qdox/model/JavaClass.java	(working copy)
+@@ -424,13 +424,20 @@
+ 
+     public JavaClass getNestedClassByName(String name) {
+         JavaClass[] classes = getNestedClasses();
+-
++        
++        int separatorIndex = name.indexOf('.');
++        String directInnerClassName = (separatorIndex > 0 ? name.substring(0, separatorIndex) : name); 
+         for (int i = 0; i < classes.length; i++) {
+-            if (classes[i].getName().equals(name)) {
+-                return classes[i];
++        	JavaClass jClass = classes[i];
++            if (jClass.getName().equals(directInnerClassName)) {
++            	if(separatorIndex > 0) {
++                    return jClass.getNestedClassByName(name.substring(separatorIndex+1));
++            	}
++            	else {
++                    return jClass;
++            	}
+             }
+         }
+-
+         return null;
+     }
+ 
+Index: src/java/com/thoughtworks/qdox/model/Type.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/Type.java	(revision 515)
++++ src/java/com/thoughtworks/qdox/model/Type.java	(working copy)
+@@ -135,15 +135,19 @@
+     }
+ 
+     public JavaClass getJavaClass() {
++    	JavaClass result = null;
++    	
+         JavaClassParent javaClassParent = getJavaClassParent();
+-        if (javaClassParent == null) {
+-            return null;
++        if (javaClassParent != null) {
++        	result = javaClassParent.getNestedClassByName(getValue());
++	        if(result == null) {
++	            ClassLibrary classLibrary = javaClassParent.getClassLibrary();
++	            if (classLibrary != null) {
++	            	result = classLibrary.getClassByName(getValue());
++	            }
++	        }
+         }
+-        ClassLibrary classLibrary = javaClassParent.getClassLibrary();
+-        if (classLibrary == null) {
+-            return null;
+-        }
+-        return classLibrary.getClassByName(getValue());
++        return result;
+     }
+ 
+     /**
+Index: src/test/com/thoughtworks/qdox/ClassResolutionTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/ClassResolutionTest.java	(revision 515)
++++ src/test/com/thoughtworks/qdox/ClassResolutionTest.java	(working copy)
+@@ -77,4 +77,20 @@
+ 
+         builder.addSource(new StringReader(source));
+     }
++    
++    //from QDOX-86
++    public void testInnerClassInMethod() throws Exception {
++    	JavaDocBuilder builder = new JavaDocBuilder();
++    	String source = "package some.pack;\n" +
++    	"class Test {\n" +
++    	"void some(Inner.Inner2 a) {}\n" +
++    	"static interface Inner {\n" +
++    	"static interface Inner2 { }\n" +
++    	"}\n" +
++    	"}";
++    	builder.addSource(new StringReader(source));
++    	JavaMethod method = builder.getClassByName("some.pack.Test").getMethods()[0];
++    	JavaParameter parameter = method.getParameters()[0];
++    	assertEquals("some.pack.Test$Inner$Inner2", parameter.getType().getJavaClass().getFullyQualifiedName());
++    }
+ }

@@ -1,0 +1,20 @@
+Index: C:/CodeLab/qdox/qdox/src/grammar/parser.y
+===================================================================
+--- C:/CodeLab/qdox/qdox/src/grammar/parser.y	(revision 457)
++++ C:/CodeLab/qdox/qdox/src/grammar/parser.y	(working copy)
+@@ -105,11 +105,11 @@
+     ;
+ 
+ 
+-// ----- ANNOTATIONS 
+-
++// ----- ANNOTATIONS
++//IDENTIFIER
+ annotation:
+-    AT IDENTIFIER |
+-    AT IDENTIFIER PARENOPEN annotationarglist PARENCLOSE;
++    AT typename |
++    AT typename PARENOPEN annotationarglist PARENCLOSE;
+     
+ annotationarglist:
+     |

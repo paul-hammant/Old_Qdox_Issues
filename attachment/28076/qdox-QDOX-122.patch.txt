@@ -1,0 +1,123 @@
+Index: qdox-1.6.3/src/java/com/thoughtworks/qdox/model/ModelBuilder.java
+===================================================================
+--- qdox-1.6.3/src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(revision 483)
++++ qdox-1.6.3/src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(working copy)
+@@ -5,6 +5,7 @@
+ import java.util.Iterator;
+ import java.util.LinkedList;
+ import java.util.List;
++import java.util.ListIterator;
+ import java.util.Map;
+ import java.util.Set;
+ 
+@@ -244,28 +245,43 @@
+     	Map args = new HashMap();
+         for (Iterator iter = def.args.entrySet().iterator(); iter.hasNext();) {
+         	Map.Entry entry = (Map.Entry)iter.next();
+-        	Object value = entry.getValue();
+-
+-        	if( value instanceof AnnoDef ) {
+-        		args.put( entry.getKey(), buildAnnotation( (AnnoDef)value, entity ) );
+-        	}
+-        	else if( value instanceof List ) {
+-        		List values = (List)value;
+-        		if( values.size() == 1 ) {
+-        			// TODO: what about types?
+-        			args.put( entry.getKey(), values.get( 0 ) );
+-        		}
+-        		else {
+-        			args.put( entry.getKey(), values );
+-        		}
+-        	}
++            Object value = convertAnnotationValue( entry.getValue(), entity );
++   			args.put( entry.getKey(), value );
+         }
+ 
+     	Annotation anno = new Annotation( annoType, entity, args, def.lineNumber );
+         return anno;
+     }
++    
++    private Object convertAnnotationValue( Object value, AbstractJavaEntity entity ) {
++        Object result = value;
++        
++        if( value instanceof AnnoDef ) {
++            result = buildAnnotation( (AnnoDef)value, entity );
++        }
++        else if( value instanceof List ) {
++            List values = (List)value;
++            
++            if( values.size() == 1 ) {
++                result = convertAnnotationValue( values.get( 0 ), entity );
++            }
++            else {
++                List convertedList = new ArrayList();
+ 
++                for( ListIterator i = values.listIterator(); i.hasNext(); ) {
++                    Object entry = i.next();
++                    convertedList.add( convertAnnotationValue( entry, entity ) );             
++                    result = convertedList;
++                }
++                
++                result = convertedList;
++            }
++        }
++        
++        return result;
++    }
+ 
++
+     // Don't resolve until we need it... class hasn't been defined yet.
+     public void addAnnotation( AnnoDef def ) {
+     	currentAnnoDefs.add( def );
+Index: qdox-1.6.3/src/java/com/thoughtworks/qdox/parser/structs/AnnoDef.java
+===================================================================
+--- qdox-1.6.3/src/java/com/thoughtworks/qdox/parser/structs/AnnoDef.java	(revision 483)
++++ qdox-1.6.3/src/java/com/thoughtworks/qdox/parser/structs/AnnoDef.java	(working copy)
+@@ -1,7 +1,9 @@
+ package com.thoughtworks.qdox.parser.structs;
+ 
++import java.util.ArrayList;
+ import java.util.HashMap;
+ import java.util.Iterator;
++import java.util.List;
+ import java.util.Map;
+ 
+ public class AnnoDef extends LocatedDef
+@@ -9,6 +11,7 @@
+     public String name = "";
+     public Map args = new HashMap();
+     public AnnoDef tempAnno = null;	// holds an annotation to construct nested values
++    public List tempValues = new ArrayList(); // Holds collected valus for nested annotation construction
+ 
+     public boolean equals(Object obj) {
+         AnnoDef annoDef = (AnnoDef) obj;
+Index: qdox-1.6.3/src/grammar/parser.y
+===================================================================
+--- qdox-1.6.3/src/grammar/parser.y	(revision 483)
++++ qdox-1.6.3/src/grammar/parser.y	(working copy)
+@@ -175,14 +175,14 @@
+ 		tmpAno.tempAnno = ano;
+ 		ano = tmpAno;
+ 	} annotationWork { $$ = ano; ano = ano.tempAnno; } |
+-	annoElementValueArrayInitializer { $$ = annoValues; annoValues = new LinkedList(); };
++	annoElementValueArrayInitializer { $$ = ano.tempValues; };
+ 
+ annoElementValueArrayInitializer:
+     BRACEOPEN annoElementValues BRACECLOSE;
+ 
+ annoElementValues:
+-	annoElementValue { annoValues.add( $1 ); } |
+-	annoElementValues COMMA annoElementValue { annoValues.add( $3 ); };
++	annoElementValue { ano.tempValues.add( $1 ); } |
++	annoElementValues COMMA annoElementValue { ano.tempValues.add( $3 ); };
+ 
+ // ----- TYPES
+ 
+@@ -418,7 +418,6 @@
+ private boolean debugLexer;
+ 
+ private LinkedList annoConstants = new LinkedList();
+-private LinkedList annoValues = new LinkedList();
+ 
+ private void appendToBuffer(String word) {
+     if (textBuffer.length() > 0) {

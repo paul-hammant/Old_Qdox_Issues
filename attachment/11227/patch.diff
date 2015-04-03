@@ -1,0 +1,503 @@
+Index: src/java/com/thoughtworks/qdox/JavaDocBuilder.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/JavaDocBuilder.java,v
+retrieving revision 1.24
+diff -u -r1.24 JavaDocBuilder.java
+--- src/java/com/thoughtworks/qdox/JavaDocBuilder.java	9 Nov 2003 14:47:55 -0000	1.24
++++ src/java/com/thoughtworks/qdox/JavaDocBuilder.java	7 Jan 2004 01:22:39 -0000
+@@ -283,7 +283,6 @@
+     public JavaSource addSource(File file) throws UnsupportedEncodingException, FileNotFoundException {
+         JavaSource source = addSource(new InputStreamReader(new FileInputStream(file),encoding));
+         source.setFile(file);
+-        source.setEncoding(encoding);
+         return source;
+     }
+ 
+Index: src/java/com/thoughtworks/qdox/model/AbstractInheritableJavaEntity.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/AbstractInheritableJavaEntity.java,v
+retrieving revision 1.2
+diff -u -r1.2 AbstractInheritableJavaEntity.java
+--- src/java/com/thoughtworks/qdox/model/AbstractInheritableJavaEntity.java	8 Oct 2003 22:46:07 -0000	1.2
++++ src/java/com/thoughtworks/qdox/model/AbstractInheritableJavaEntity.java	7 Jan 2004 01:22:39 -0000
+@@ -10,5 +10,9 @@
+         return tags.length > 0 ? tags[0] : null;
+     }
+ 
++    protected AbstractInheritableJavaEntity(JavaClassParent source) {
++        super(source);
++    }
++
+     public abstract DocletTag[] getTagsByName(String name, boolean inherited);
+ }
+Index: src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java,v
+retrieving revision 1.13
+diff -u -r1.13 AbstractJavaEntity.java
+--- src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java	14 Dec 2003 16:29:44 -0000	1.13
++++ src/java/com/thoughtworks/qdox/model/AbstractJavaEntity.java	7 Jan 2004 01:22:39 -0000
+@@ -12,6 +12,11 @@
+     protected List modifiers = new ArrayList();
+     private String comment;
+     private DocletTag[] tags = new DocletTag[0];
++    private final JavaClassParent parent;
++
++    protected AbstractJavaEntity(JavaClassParent owner) {
++        this.parent = owner;
++    }
+ 
+     public String getName() {
+         return name;
+@@ -128,9 +133,12 @@
+         this.comment = comment;
+     }
+ 
+-    public void setTags(List tags) {
+-        this.tags = new DocletTag[tags.size()];
+-        tags.toArray(this.tags);
++    public void setTags(List tagList) {
++        tags = new DocletTag[tagList.size()];
++        tagList.toArray(tags);
++        for (int i = 0; i < tags.length; i++) {
++              tags[i].setOwner(this);
++        }
+     }
+ 
+     //helper methods for querying the modifiers
+@@ -217,6 +225,18 @@
+             String modifier = (String) iter.next();
+             result.write(modifier);
+             result.write(' ');
++        }
++    }
++
++    public JavaClassParent getParent() {
++        return parent;
++    }
++
++    public JavaSource getSource() {
++        if(parent instanceof JavaSource) {
++            return (JavaSource) parent;
++        } else {
++            return parent.getParentSource();
+         }
+     }
+ 
+Index: src/java/com/thoughtworks/qdox/model/DefaultDocletTag.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/DefaultDocletTag.java,v
+retrieving revision 1.5
+diff -u -r1.5 DefaultDocletTag.java
+--- src/java/com/thoughtworks/qdox/model/DefaultDocletTag.java	9 Nov 2003 14:47:55 -0000	1.5
++++ src/java/com/thoughtworks/qdox/model/DefaultDocletTag.java	7 Jan 2004 01:22:39 -0000
+@@ -11,21 +11,20 @@
+     private final String name;
+     private final String value;
+     private final int lineNumber;
+-    private final JavaSource javaSource;
+ 
+     private String[] parameters;
+     private Map namedParameters;
+     private String[] quotes = new String[]{"\"", "'"};
++    private AbstractJavaEntity owner;
+ 
+-    public DefaultDocletTag(String name, String value, int lineNumber, JavaSource javaSource) {
++    public DefaultDocletTag(String name, String value, int lineNumber) {
+         this.name = name;
+         this.value = value;
+         this.lineNumber = lineNumber;
+-        this.javaSource = javaSource;
+     }
+ 
+     public DefaultDocletTag(String name, String value) {
+-        this(name, value, 0, null);
++        this(name, value, 0);
+     }
+ 
+     public String getName() {
+@@ -87,10 +86,6 @@
+         return lineNumber;
+     }
+ 
+-    public JavaSource getJavaSource() {
+-        return javaSource;
+-    }
+-
+     private String trim(String value, String[] strings) {
+         for (int i = 0; i < strings.length; i++) {
+             String string = strings[i];
+@@ -102,6 +97,14 @@
+             }
+         }
+         return value;
++    }
++
++    public final AbstractJavaEntity getOwner() {
++        return owner;
++    }
++
++    public void setOwner(AbstractJavaEntity owner) {
++        this.owner = owner;
+     }
+ }
+ 
+Index: src/java/com/thoughtworks/qdox/model/DefaultDocletTagFactory.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/DefaultDocletTagFactory.java,v
+retrieving revision 1.4
+diff -u -r1.4 DefaultDocletTagFactory.java
+--- src/java/com/thoughtworks/qdox/model/DefaultDocletTagFactory.java	28 Sep 2003 20:32:28 -0000	1.4
++++ src/java/com/thoughtworks/qdox/model/DefaultDocletTagFactory.java	7 Jan 2004 01:22:39 -0000
+@@ -5,11 +5,11 @@
+  * @version $Revision: 1.4 $
+  */
+ public class DefaultDocletTagFactory implements DocletTagFactory {
+-    public DocletTag createDocletTag(String tag, String text, int lineNumber, JavaSource javaSource) {
+-        return new DefaultDocletTag(tag, text, lineNumber, javaSource);
++    public DocletTag createDocletTag(String tag, String text, int lineNumber) {
++        return new DefaultDocletTag(tag, text, lineNumber);
+     }
+ 
+     public DocletTag createDocletTag(String tag, String text) {
+-        return createDocletTag(tag, text, 0, null);
++        return createDocletTag(tag, text, 0);
+     }
+ }
+Index: src/java/com/thoughtworks/qdox/model/DocletTag.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/DocletTag.java,v
+retrieving revision 1.12
+diff -u -r1.12 DocletTag.java
+--- src/java/com/thoughtworks/qdox/model/DocletTag.java	28 Sep 2003 20:32:28 -0000	1.12
++++ src/java/com/thoughtworks/qdox/model/DocletTag.java	7 Jan 2004 01:22:39 -0000
+@@ -3,7 +3,6 @@
+ import java.io.Serializable;
+ 
+ /**
+- *
+  * @author Aslak Helles&oslash;y
+  * @version $Revision: 1.12 $
+  */
+@@ -18,5 +17,7 @@
+ 
+     int getLineNumber();
+ 
+-    JavaSource getJavaSource();
++    AbstractJavaEntity getOwner();
++
++    void setOwner(AbstractJavaEntity abstractJavaEntity);
+ }
+Index: src/java/com/thoughtworks/qdox/model/DocletTagFactory.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/DocletTagFactory.java,v
+retrieving revision 1.3
+diff -u -r1.3 DocletTagFactory.java
+--- src/java/com/thoughtworks/qdox/model/DocletTagFactory.java	28 Sep 2003 20:32:28 -0000	1.3
++++ src/java/com/thoughtworks/qdox/model/DocletTagFactory.java	7 Jan 2004 01:22:39 -0000
+@@ -10,6 +10,6 @@
+     /**
+      * @since 1.3
+      */ 
+-    DocletTag createDocletTag(String tag, String text, int lineNumber, JavaSource javaSource);
++    DocletTag createDocletTag(String tag, String text, int lineNumber);
+     DocletTag createDocletTag(String tag, String text);
+ }
+Index: src/java/com/thoughtworks/qdox/model/JavaClass.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/JavaClass.java,v
+retrieving revision 1.38
+diff -u -r1.38 JavaClass.java
+--- src/java/com/thoughtworks/qdox/model/JavaClass.java	30 Dec 2003 11:39:47 -0000	1.38
++++ src/java/com/thoughtworks/qdox/model/JavaClass.java	7 Jan 2004 01:22:40 -0000
+@@ -31,11 +31,10 @@
+     private Type type;
+     private Type superClass;
+     private Type[] implementz = new Type[0];
+-    private final JavaClassParent parent;
+     private JavaClassCache javaClassCache;
+ 
+     public JavaClass(JavaClassParent parent) {
+-        this.parent = parent;
++        super(parent);
+     }
+ 
+     public void setJavaClassCache(JavaClassCache javaClassCache) {
+@@ -159,7 +158,7 @@
+ 
+     public void addMethod(JavaMethod meth) {
+         methods.add(meth);
+-        meth.setParentClass(this);
++//        meth.setParentClass(this);
+         methodsArray = null;
+     }
+ 
+@@ -173,14 +172,10 @@
+ 
+     public void addField(JavaField javaField) {
+         fields.add(javaField);
+-        javaField.setParentClass(this);
++//        javaField.setParentClass(this);
+         fieldsArray = null;
+     }
+ 
+-    public JavaClassParent getParent() {
+-        return parent;
+-    }
+-
+     public JavaSource getParentSource() {
+         JavaClassParent parent = getParent();
+ 
+@@ -211,11 +206,11 @@
+             }
+         }
+ 
+-        return parent.resolveType(typeName);
++        return getParent().resolveType(typeName);
+     }
+ 
+     public ClassLibrary getClassLibrary() {
+-        return parent.getClassLibrary();
++        return getParent().getClassLibrary();
+     }
+ 
+     public String getClassNamePrefix() {
+Index: src/java/com/thoughtworks/qdox/model/JavaField.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/JavaField.java,v
+retrieving revision 1.7
+diff -u -r1.7 JavaField.java
+--- src/java/com/thoughtworks/qdox/model/JavaField.java	14 Dec 2003 16:29:44 -0000	1.7
++++ src/java/com/thoughtworks/qdox/model/JavaField.java	7 Jan 2004 01:22:40 -0000
+@@ -3,7 +3,14 @@
+ public class JavaField extends AbstractJavaEntity {
+ 
+     private Type type;
+-    private JavaClass parentClass;
++
++    public JavaField(JavaClass parent) {
++        super(parent);
++    }
++
++    public JavaField() {
++        this(null);
++    }
+ 
+     public Type getType() {
+         return type;
+@@ -20,14 +27,6 @@
+ 
+     public void setType(Type type) {
+         this.type = type;
+-    }
+-
+-    public JavaClass getParentClass() {
+-        return parentClass;
+-    }
+-
+-    public void setParentClass(JavaClass parentClass) {
+-        this.parentClass = parentClass;
+     }
+ 
+     public int compareTo(Object o) {
+Index: src/java/com/thoughtworks/qdox/model/JavaMethod.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/JavaMethod.java,v
+retrieving revision 1.18
+diff -u -r1.18 JavaMethod.java
+--- src/java/com/thoughtworks/qdox/model/JavaMethod.java	14 Dec 2003 16:29:44 -0000	1.18
++++ src/java/com/thoughtworks/qdox/model/JavaMethod.java	7 Jan 2004 01:22:41 -0000
+@@ -11,7 +11,13 @@
+     private Type[] exceptions = Type.EMPTY_ARRAY;
+     private boolean constructor;
+ 
+-    private JavaClass parentClass;
++    public JavaMethod(JavaClass parent) {
++        super(parent);
++    }
++
++    public JavaMethod() {
++        this(null);
++    }
+ 
+     public Type getReturns() {
+         return returns;
+@@ -175,15 +181,18 @@
+     }
+ 
+     public JavaClass getParentClass() {
+-        return parentClass;
++        return (JavaClass) getParent();
+     }
+ 
++    /**
++     * @deprecated Don't call this - the parent is set in the constructor.
++     */
+     public void setParentClass(JavaClass parentClass) {
+-        this.parentClass = parentClass;
++        throw new UnsupportedOperationException();
+     }
+ 
+     public boolean isPublic() {
+-        return super.isPublic() || parentClass.isInterface();
++        return super.isPublic() || getParentClass().isInterface();
+     }
+ 
+     /**
+Index: src/java/com/thoughtworks/qdox/model/JavaSource.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/JavaSource.java,v
+retrieving revision 1.18
+diff -u -r1.18 JavaSource.java
+--- src/java/com/thoughtworks/qdox/model/JavaSource.java	20 Dec 2003 14:05:38 -0000	1.18
++++ src/java/com/thoughtworks/qdox/model/JavaSource.java	7 Jan 2004 01:22:41 -0000
+@@ -26,7 +26,6 @@
+     }
+ 
+     private File file;
+-    private String encoding = null;
+     private String packge;
+     private List imports = new LinkedList();
+     private String[] importsArray;
+@@ -195,10 +194,6 @@
+ 
+     public JavaSource getParentSource() {
+         return this;
+-    }
+-
+-    public void setEncoding(String encoding) {
+-        this.encoding = encoding;
+     }
+ 
+ }
+Index: src/java/com/thoughtworks/qdox/model/ModelBuilder.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/ModelBuilder.java,v
+retrieving revision 1.22
+diff -u -r1.22 ModelBuilder.java
+--- src/java/com/thoughtworks/qdox/model/ModelBuilder.java	18 Dec 2003 13:15:30 -0000	1.22
++++ src/java/com/thoughtworks/qdox/model/ModelBuilder.java	7 Jan 2004 01:22:41 -0000
+@@ -49,7 +49,7 @@
+     }
+ 
+     public void addJavaDocTag(String tag, String text, int lineNumber) {
+-        DocletTag docletTag = docletTagFactory.createDocletTag(tag, text, lineNumber, source);
++        DocletTag docletTag = docletTagFactory.createDocletTag(tag, text, lineNumber);
+         lastTagSet.add(docletTag);
+     }
+ 
+@@ -116,7 +116,7 @@
+     }
+ 
+     public void addMethod(MethodDef def) {
+-        JavaMethod currentMethod = new JavaMethod();
++        JavaMethod currentMethod = new JavaMethod(currentClass);
+ 
+         // basic details
+         currentMethod.setName(def.name);
+@@ -158,7 +158,8 @@
+     }
+ 
+     public void addField(FieldDef def) {
+-        JavaField currentField = new JavaField();
++        JavaField currentField = new JavaField(currentClass);
++
+         currentField.setName(def.name);
+         currentField.setType(createType(def.type, def.dimensions));
+ 
+Index: src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java,v
+retrieving revision 1.42
+diff -u -r1.42 JavaDocBuilderTest.java
+--- src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	28 Dec 2003 21:56:31 -0000	1.42
++++ src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	7 Jan 2004 01:22:42 -0000
+@@ -501,7 +501,7 @@
+         JavaClass jalla = builder.getClassByName("x.Jalla");
+         DocletTag line4 = jalla.getTagByName("line");
+         assertEquals(4, line4.getLineNumber());
+-        assertSame(line4.getJavaSource().getClasses()[0], jalla);
++        assertSame(line4.getOwner(), jalla);
+     }
+ 
+     public void testJiraQdox14() {
+Index: src/test/com/thoughtworks/qdox/ant/AbstractQdoxTaskTest.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/test/com/thoughtworks/qdox/ant/AbstractQdoxTaskTest.java,v
+retrieving revision 1.12
+diff -u -r1.12 AbstractQdoxTaskTest.java
+--- src/test/com/thoughtworks/qdox/ant/AbstractQdoxTaskTest.java	30 Sep 2003 13:50:31 -0000	1.12
++++ src/test/com/thoughtworks/qdox/ant/AbstractQdoxTaskTest.java	7 Jan 2004 01:22:42 -0000
+@@ -45,7 +45,7 @@
+             // Tag factory that returns tags with "aslak." prefixed to their "original" name.
+             // Not useful at all, only to test that we can actually plug in any tag factory.
+             return new DocletTagFactory() {
+-                public DocletTag createDocletTag(String tag, String text, int lineNumber, JavaSource javaSource) {
++                public DocletTag createDocletTag(String tag, String text, int lineNumber) {
+                     return new DefaultDocletTag("aslak." + tag, text);
+                 }
+ 
+Index: src/test/com/thoughtworks/qdox/model/JavaFieldTest.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/test/com/thoughtworks/qdox/model/JavaFieldTest.java,v
+retrieving revision 1.5
+diff -u -r1.5 JavaFieldTest.java
+--- src/test/com/thoughtworks/qdox/model/JavaFieldTest.java	28 Sep 2003 23:29:22 -0000	1.5
++++ src/test/com/thoughtworks/qdox/model/JavaFieldTest.java	7 Jan 2004 01:22:42 -0000
+@@ -53,14 +53,4 @@
+         String expected = "int[][] count;\n";
+         assertEquals(expected, fld.toString());
+     }
+-
+-    public void testParentClass() throws Exception {
+-        JavaField fld = new JavaField();
+-        assertNull(fld.getParentClass());
+-
+-        JavaClass cls = new JavaClass(null);
+-        cls.addField(fld);
+-        assertSame(cls, fld.getParentClass());
+-    }
+-
+ }
+Index: src/test/com/thoughtworks/qdox/model/JavaMethodTest.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/test/com/thoughtworks/qdox/model/JavaMethodTest.java,v
+retrieving revision 1.12
+diff -u -r1.12 JavaMethodTest.java
+--- src/test/com/thoughtworks/qdox/model/JavaMethodTest.java	28 Sep 2003 23:29:22 -0000	1.12
++++ src/test/com/thoughtworks/qdox/model/JavaMethodTest.java	7 Jan 2004 01:22:43 -0000
+@@ -7,6 +7,8 @@
+ public class JavaMethodTest extends TestCase {
+ 
+     private JavaMethod mth;
++    private JavaSource source;
++    private JavaClass clazz;
+ 
+     public JavaMethodTest(String s) {
+         super(s);
+@@ -14,7 +16,9 @@
+ 
+     protected void setUp() throws Exception {
+         super.setUp();
+-        mth = new JavaMethod();
++        source = new JavaSource();
++        clazz = new JavaClass(source);
++        mth = new JavaMethod(clazz);
+     }
+ 
+     public void testDeclarationSignatureWithModifiers() {
+@@ -311,13 +315,8 @@
+     }
+ 
+     public void testParentClass() throws Exception {
+-        assertNull(mth.getParentClass());
+-
+-        JavaClass cls = new JavaClass(null);
+-        cls.addMethod(mth);
+-        assertSame(cls, mth.getParentClass());
++        assertSame(clazz, mth.getParentClass());
+     }
+-
+ 
+     public void testCanGetParameterByName() throws Exception {
+         JavaParameter paramX =

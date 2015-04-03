@@ -1,0 +1,72 @@
+? patch.diff
+Index: src/java/com/thoughtworks/qdox/model/BeanProperty.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/BeanProperty.java,v
+retrieving revision 1.2
+diff -b -u -r1.2 BeanProperty.java
+--- src/java/com/thoughtworks/qdox/model/BeanProperty.java	22 Jul 2003 00:37:33 -0000	1.2
++++ src/java/com/thoughtworks/qdox/model/BeanProperty.java	15 Sep 2003 19:32:45 -0000
+@@ -9,6 +9,7 @@
+     private final String name;
+     private JavaMethod accessor;
+     private JavaMethod mutator;
++    private Type type;
+ 
+     public BeanProperty(String name) {
+         this.name = name;
+@@ -18,6 +19,14 @@
+         return name;
+     }
+ 
++    public void setType(Type type) {
++        this.type = type;
++    }
++
++    public Type getType() {
++        return type;
++    }
++
+     public JavaMethod getAccessor() {
+         return accessor;
+     }
+Index: src/java/com/thoughtworks/qdox/model/JavaClass.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/JavaClass.java,v
+retrieving revision 1.24
+diff -b -u -r1.24 JavaClass.java
+--- src/java/com/thoughtworks/qdox/model/JavaClass.java	17 Aug 2003 16:18:01 -0000	1.24
++++ src/java/com/thoughtworks/qdox/model/JavaClass.java	15 Sep 2003 19:32:52 -0000
+@@ -348,10 +348,12 @@
+                     String propertyName = getPropertyName(method);
+                     BeanProperty beanProperty = getOrCreateProperty(propertyName);
+                     beanProperty.setAccessor(method);
++                    beanProperty.setType(getPropertyType(method));
+                 } else if (isPropertyMutator(method)) {
+                     String propertyName = getPropertyName(method);
+                     BeanProperty beanProperty = getOrCreateProperty(propertyName);
+                     beanProperty.setMutator(method);
++					beanProperty.setType(getPropertyType(method));
+                 }
+             }
+         }
+@@ -416,6 +418,20 @@
+         return Introspector.decapitalize(method.getName().substring(start));
+     }
+ 
++    // This method will fail if the method isn't an accessor or mutator, but
++    // it will only be called with methods that are, so we're safe.
++    private Type getPropertyType(JavaMethod method) {
++        Type result = null;
++        if (isPropertyAccessor(method)){
++            result = method.getReturns();
++        } else if(isPropertyMutator(method)){
++            result = method.getParameters()[0].getType();
++        } else {
++            throw new IllegalStateException("Shouldn't happen");
++        }
++        return result;
++    }
++
+     public JavaClass[] getDerivedClasses() {
+         List result = new ArrayList();
+         JavaDocBuilder builder = (JavaDocBuilder) javaClassCache;

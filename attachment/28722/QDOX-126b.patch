@@ -1,0 +1,3526 @@
+Index: src/test/com/thoughtworks/qdox/parser/LexerTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/parser/LexerTest.java	(revision 483)
++++ src/test/com/thoughtworks/qdox/parser/LexerTest.java	(working copy)
+@@ -552,7 +552,8 @@
+             + "public class LexerTest extends TestCase {}\n";
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+ 
+-        assertLex(Parser.ANNOTATION, "@Copyright", lexer);
++        assertLex(Parser.AT, "@", lexer);
++        assertLex(Parser.IDENTIFIER, "Copyright", lexer);
+         assertLex(Parser.PARENOPEN, lexer);
+         assertLex(Parser.IDENTIFIER, "year", lexer);
+         assertLex(Parser.EQUALS, lexer);
+@@ -560,11 +561,12 @@
+         assertLex(Parser.COMMA, lexer);
+         assertLex(Parser.IDENTIFIER, "month", lexer);
+         assertLex(Parser.EQUALS, lexer);
+-        assertLex(Parser.ANNOSTRING, lexer);
++        assertLex(Parser.STRING_LITERAL, lexer);
+         assertLex(Parser.PARENCLOSE, lexer);
+-        assertLex(Parser.ANNOTATION, "@Note", lexer);
++        assertLex(Parser.AT, "@", lexer);
++        assertLex(Parser.IDENTIFIER, "Note", lexer);
+         assertLex(Parser.PARENOPEN, lexer);
+-        assertLex(Parser.ANNOSTRING, lexer);
++        assertLex(Parser.STRING_LITERAL, lexer);
+         assertLex(Parser.PARENCLOSE, lexer);
+         assertLex(Parser.PUBLIC, lexer);
+         assertLex(Parser.CLASS, lexer);
+Index: src/test/com/thoughtworks/qdox/parser/MockBuilder.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/parser/MockBuilder.java	(revision 483)
++++ src/test/com/thoughtworks/qdox/parser/MockBuilder.java	(working copy)
+@@ -1,12 +1,14 @@
+ package com.thoughtworks.qdox.parser;
+ 
+-import com.thoughtworks.qdox.parser.structs.AnnoDef;
++import org.jmock.expectation.ExpectationCounter;
++import org.jmock.expectation.ExpectationList;
++
++import com.thoughtworks.qdox.model.Annotation;
++import com.thoughtworks.qdox.model.Type;
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
++import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+-import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.TagDef;
+-import org.jmock.expectation.ExpectationCounter;
+-import org.jmock.expectation.ExpectationList;
+ 
+ class MockBuilder implements Builder {
+     private ExpectationCounter myAddPackageCalls = new ExpectationCounter("com.thoughtworks.qdox.parser.Builder AddPackageCalls");
+@@ -125,8 +127,8 @@
+         myAddFieldParameter0Values.addActual(arg0);
+     }
+ 
+-    public void addAnnotation( AnnoDef def ) {
+-        
++    public void addAnnotation( Annotation annotation ) {
++        // Empty
+     }
+     
+     public void verify() {
+@@ -147,4 +149,8 @@
+         myAddFieldCalls.verify();
+         myAddFieldParameter0Values.verify();
+     }
++
++    public Type createType( String name, int dimensions ) {
++        return null;
++    }
+ }
+Index: src/test/com/thoughtworks/qdox/AnnotationsModelTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/AnnotationsModelTest.java	(revision 0)
++++ src/test/com/thoughtworks/qdox/AnnotationsModelTest.java	(revision 0)
+@@ -0,0 +1,299 @@
++package com.thoughtworks.qdox;
++
++import java.io.StringReader;
++import java.util.ListIterator;
++
++import junit.framework.TestCase;
++
++import com.thoughtworks.qdox.model.Annotation;
++import com.thoughtworks.qdox.model.JavaClass;
++import com.thoughtworks.qdox.model.JavaField;
++import com.thoughtworks.qdox.model.annotation.AnnotationAdd;
++import com.thoughtworks.qdox.model.annotation.AnnotationConstant;
++import com.thoughtworks.qdox.model.annotation.AnnotationFieldRef;
++import com.thoughtworks.qdox.model.annotation.AnnotationTypeRef;
++import com.thoughtworks.qdox.model.annotation.AnnotationValue;
++import com.thoughtworks.qdox.model.annotation.AnnotationValueList;
++import com.thoughtworks.qdox.model.annotation.EvaluatingVisitor;
++
++public class AnnotationsModelTest extends TestCase {
++
++    private JavaDocBuilder builder;
++
++    private EvaluatingVisitor evaluatingVisitor = new EvaluatingVisitor() {
++        protected Object getFieldReferenceValue( JavaField javaField ) {
++            throw new UnsupportedOperationException();
++        }
++    };
++
++    protected void setUp() throws Exception {
++        super.setUp();
++        builder = new JavaDocBuilder();
++        builder.setDebugLexer( true );
++        builder.setDebugParser( true );
++    }
++
++    protected Annotation checkClassAnnotation( String source ) {
++        builder.addSource( new StringReader( source ) );
++        JavaClass clazz = builder.getClassByName( "Foo" );
++        assertEquals( "Annotations", 1, clazz.getAnnotations().length );
++        Annotation annotation = clazz.getAnnotations()[0];
++        assertEquals( "Annotation name", "Annotation", annotation.getType().getJavaClass().getFullyQualifiedName() );
++
++        return annotation;
++    }
++
++    public void testMarkerAnnotation() {
++        checkClassAnnotation( "@Annotation\nclass Foo {}" );
++    }
++
++    public void testEmptyAnnotation() {
++        checkClassAnnotation( "@Annotation()\nclass Foo {}" );
++    }
++
++    public void testAnnotationAnnotation() {
++        checkClassAnnotation( "@Annotation(@NestedAnnotation)\nclass Foo {}" );
++    }
++
++    public void testConstAnnotation() {
++        checkClassAnnotation( "@Annotation(1)\nclass Foo {}" );
++    }
++
++    public void testAnnotationConstants() {
++        String source = "@Annotation( f = 1.0, d = 1.0d, i = 1, ix = 0x1, l = 1L, lx = 0x1L, c = 'c', s = \"string\" )\nclass Foo {}";
++        builder.addSource( new StringReader( source ) );
++        JavaClass clazz = builder.getClassByName( "Foo" );
++        assertEquals( "Annotations", 1, clazz.getAnnotations().length );
++        Annotation annotation = clazz.getAnnotations()[0];
++        assertEquals( "Annotation name", "Annotation", annotation.getType().getJavaClass().getFullyQualifiedName() );
++        assertEquals( "Properties", 8, annotation.getNamedParameterMap().size() );
++
++        AnnotationConstant f = (AnnotationConstant) annotation.getProperty( "f" );
++        assertEquals( "f", new Float( 1 ), f.getValue() );
++
++        AnnotationConstant d = (AnnotationConstant) annotation.getProperty( "d" );
++        assertEquals( "d", new Double( 1 ), d.getValue() );
++
++        AnnotationConstant i = (AnnotationConstant) annotation.getProperty( "i" );
++        assertEquals( "i", new Integer( 1 ), i.getValue() );
++
++        AnnotationConstant ix = (AnnotationConstant) annotation.getProperty( "ix" );
++        assertEquals( "ix", new Integer( 1 ), ix.getValue() );
++
++        AnnotationConstant l = (AnnotationConstant) annotation.getProperty( "l" );
++        assertEquals( "l", new Long( 1 ), l.getValue() );
++
++        AnnotationConstant lx = (AnnotationConstant) annotation.getProperty( "lx" );
++        assertEquals( "lx", new Long( 1 ), lx.getValue() );
++
++        AnnotationConstant c = (AnnotationConstant) annotation.getProperty( "c" );
++        assertEquals( "c", new Character( 'c' ), c.getValue() );
++
++        AnnotationConstant s = (AnnotationConstant) annotation.getProperty( "s" );
++        assertEquals( "s", "string", s.getValue() );
++    }
++
++    public void testAnnotationConstantsControlChars() {
++        String source = "@Annotation( s1 = \"a\\nb\", s2 = \"a\\nb\", s3 = \"a\\rb\", s4 = \"a\\tb\", s5 = \"a\\u0009b\" ) class Foo {}";
++        builder.addSource( new StringReader( source ) );
++        JavaClass clazz = builder.getClassByName( "Foo" );
++        assertEquals( "Annotations", 1, clazz.getAnnotations().length );
++        Annotation annotation = clazz.getAnnotations()[0];
++        assertEquals( "Annotation name", "Annotation", annotation.getType().getJavaClass().getFullyQualifiedName() );
++        assertEquals( "Properties", 5, annotation.getPropertyMap().size() );
++
++        AnnotationConstant s1 = (AnnotationConstant) annotation.getProperty( "s1" );
++        assertEquals( "s1", "a\nb", s1.getValue() );
++
++        AnnotationConstant s2 = (AnnotationConstant) annotation.getProperty( "s2" );
++        assertEquals( "s2", "a\nb", s2.getValue() );
++
++        AnnotationConstant s3 = (AnnotationConstant) annotation.getProperty( "s3" );
++        assertEquals( "s3", "a\rb", s3.getValue() );
++
++        AnnotationConstant s4 = (AnnotationConstant) annotation.getProperty( "s4" );
++        assertEquals( "s4", "a\tb", s4.getValue() );
++
++        AnnotationConstant s5 = (AnnotationConstant) annotation.getProperty( "s5" );
++        assertEquals( "s5", "a\u0009b", s5.getValue() );
++    }
++
++    public void testNestedAnnotation() {
++        String source = "@Annotation( { @Inner(1), @Inner(2) } ) class Foo {}";
++        builder.addSource( new StringReader( source ) );
++        JavaClass clazz = builder.getClassByName( "Foo" );
++        assertEquals( "Annotations", 1, clazz.getAnnotations().length );
++        Annotation annotation = clazz.getAnnotations()[0];
++        assertEquals( "Annotation name", "Annotation", annotation.getType().getJavaClass().getFullyQualifiedName() );
++        assertEquals( "Properties", 1, annotation.getPropertyMap().size() );
++
++        AnnotationValueList list = (AnnotationValueList) annotation.getProperty( "value" );
++        assertEquals( "Inner Annotations", 2, list.getValueList().size() );
++
++        for( ListIterator i = list.getValueList().listIterator(); i.hasNext(); ) {
++            Annotation inner = (Annotation) i.next();
++            assertEquals( "Inner " + i.previousIndex(), "Inner", inner.getType().getValue() );
++        }
++    }
++
++    public void testExpressionAnnotation1() {
++        String source = "@Annotation( 1 + 1 ) class Foo {}";
++        builder.addSource( new StringReader( source ) );
++        JavaClass clazz = builder.getClassByName( "Foo" );
++        assertEquals( "Annotations", 1, clazz.getAnnotations().length );
++        Annotation annotation = clazz.getAnnotations()[0];
++        assertEquals( "Annotation name", "Annotation", annotation.getType().getJavaClass().getFullyQualifiedName() );
++        assertEquals( "Properties", 1, annotation.getPropertyMap().size() );
++
++        AnnotationAdd add = (AnnotationAdd) annotation.getProperty( "value" );
++        assertEquals( "Left", new Integer( 1 ), ((AnnotationConstant) add.getLeft()).getValue() );
++        assertEquals( "Right", new Integer( 1 ), ((AnnotationConstant) add.getRight()).getValue() );
++    }
++
++    public void testExpressionAnnotation2() {
++        String source = "@Annotation( \"value = \" + 1 ) class Foo {}";
++        builder.addSource( new StringReader( source ) );
++        JavaClass clazz = builder.getClassByName( "Foo" );
++        assertEquals( "Annotations", 1, clazz.getAnnotations().length );
++        Annotation annotation = clazz.getAnnotations()[0];
++        assertEquals( "Annotation name", "Annotation", annotation.getType().getJavaClass().getFullyQualifiedName() );
++        assertEquals( "Properties", 1, annotation.getPropertyMap().size() );
++
++        AnnotationAdd add = (AnnotationAdd) annotation.getProperty( "value" );
++        assertEquals( "Left", "value = ", ((AnnotationConstant) add.getLeft()).getValue() );
++        assertEquals( "Right", new Integer( 1 ), ((AnnotationConstant) add.getRight()).getValue() );
++    }
++
++    public void testFieldRefAnnotation() {
++        String source = "@Annotation( java.lang.Math.E ) class Foo {}";
++        builder.addSource( new StringReader( source ) );
++        JavaClass clazz = builder.getClassByName( "Foo" );
++        assertEquals( "Annotations", 1, clazz.getAnnotations().length );
++        Annotation annotation = clazz.getAnnotations()[0];
++        assertEquals( "Annotation name", "Annotation", annotation.getType().getJavaClass().getFullyQualifiedName() );
++        assertEquals( "Properties", 1, annotation.getPropertyMap().size() );
++
++        AnnotationFieldRef value = (AnnotationFieldRef) annotation.getProperty( "value" );
++        assertEquals( "type", "double", value.getField().getType().getValue() );
++        assertEquals( "class part", "java.lang.Math", value.getClassPart() );
++        assertEquals( "field part", "E", value.getFieldPart() );
++    }
++
++    public void testPrimitiveClassAnnotation() {
++        String source = "@Annotation( int.class ) class Foo {}";
++        builder.addSource( new StringReader( source ) );
++        JavaClass clazz = builder.getClassByName( "Foo" );
++        assertEquals( "Annotations", 1, clazz.getAnnotations().length );
++        Annotation annotation = clazz.getAnnotations()[0];
++        assertEquals( "Annotation name", "Annotation", annotation.getType().getJavaClass().getFullyQualifiedName() );
++        assertEquals( "Properties", 1, annotation.getPropertyMap().size() );
++
++        Object value = annotation.getProperty( "value" );
++        AnnotationTypeRef ref = (AnnotationTypeRef) value;
++        assertEquals( "value", "int", ref.getType().getValue() );
++    }
++
++    public void testClassAnnotation() {
++        String source = "@Annotation( java.util.Set.class ) class Foo {}";
++        builder.addSource( new StringReader( source ) );
++        JavaClass clazz = builder.getClassByName( "Foo" );
++        assertEquals( "Annotations", 1, clazz.getAnnotations().length );
++        Annotation annotation = clazz.getAnnotations()[0];
++        assertEquals( "Annotation name", "Annotation", annotation.getType().getJavaClass().getFullyQualifiedName() );
++        assertEquals( "Properties", 1, annotation.getPropertyMap().size() );
++
++        Object value = annotation.getProperty( "value" );
++        AnnotationTypeRef ref = (AnnotationTypeRef) value;
++        assertEquals( "value", "java.util.Set", ref.getType().getValue() );
++    }
++
++    protected void assertAnnotationValue( Object expected ) {
++        JavaClass clazz = builder.getClassByName( "Foo" );
++        assertEquals( "Annotations", 1, clazz.getAnnotations().length );
++        Annotation annotation = clazz.getAnnotations()[0];
++        assertEquals( "Annotation name", "Annotation", annotation.getType().getJavaClass().getFullyQualifiedName() );
++        assertEquals( "Properties", 1, annotation.getPropertyMap().size() );
++
++        AnnotationValue value = annotation.getProperty( "value" );
++        Object v = value.accept( evaluatingVisitor );
++        assertEquals( "Value", expected, v );
++    }
++
++    protected void assertAnnotationExpression( String expression, Object expected ) {
++        String source = "@Annotation(\n" + expression + "\n) class Foo {}";
++        builder.addSource( new StringReader( source ) );
++        assertAnnotationValue( expected );
++    }
++
++    public void testPrecedence() {
++        assertAnnotationExpression( "2 + 2 * 5", new Integer( 12 ) );
++        assertAnnotationExpression( "2 * 5 + 2", new Integer( 12 ) );
++    }
++
++    public void testLogicalExpression() {
++        assertAnnotationExpression( "true && false", Boolean.FALSE );
++        assertAnnotationExpression( "true || false", Boolean.TRUE );
++        assertAnnotationExpression( "!true", Boolean.FALSE );
++    }
++
++    public void testBitExpression() {
++        assertAnnotationExpression( "1 & 3", new Integer( 1 & 3 ) );
++        assertAnnotationExpression( "1 | 3", new Integer( 1 | 3 ) );
++        assertAnnotationExpression( "1 ^ 3", new Integer( 1 ^ 3 ) );
++        assertAnnotationExpression( "~1", new Integer( ~1 ) );
++    }
++
++    public void testSignExpression() {
++        assertAnnotationExpression( "+1", new Integer( 1 ) );
++        assertAnnotationExpression( "-1", new Integer( -1 ) );
++        assertAnnotationExpression( "--1", new Integer( 1 ) );
++    }
++
++    public void testAddSubMultDivExpression() {
++        assertAnnotationExpression( "8 / 3", new Integer( 8 / 3 ) );
++        assertAnnotationExpression( "8 * 3", new Integer( 8 * 3 ) );
++        assertAnnotationExpression( "8 + 3", new Integer( 8 + 3 ) );
++        assertAnnotationExpression( "8 - 3", new Integer( 8 - 3 ) );
++        assertAnnotationExpression( "8 % 3", new Integer( 8 % 3 ) );
++        assertAnnotationExpression( "\"a\" + \"b\"", "a" + "b" );
++    }
++
++    public void testShiftExpression() {
++        assertAnnotationExpression( "8 << 2", new Integer( 8 << 2 ) );
++        assertAnnotationExpression( "8 >> 2", new Integer( 8 >> 2 ) );
++        assertAnnotationExpression( "-1 >> 2", new Integer( -1 >> 2 ) );
++        assertAnnotationExpression( "-1 >>> 2", new Integer( -1 >>> 2 ) );
++    }
++
++    public void testLiteral() {
++        assertAnnotationExpression( "1", new Integer( 1 ) );
++        assertAnnotationExpression( "1l", new Long( 1 ) );
++        assertAnnotationExpression( "1.0", new Float( 1 ) );
++        assertAnnotationExpression( "1.0d", new Double( 1 ) );
++    }
++
++    public void testParenExpression() {
++        assertAnnotationExpression( "2 + (2 * 5)", new Integer( 12 ) );
++        assertAnnotationExpression( "(2 + 2) * 5", new Integer( 20 ) );
++    }
++
++    public void testCompareExpression() {
++        assertAnnotationExpression( "1 < 2", Boolean.TRUE );
++        assertAnnotationExpression( "1 > 2", Boolean.FALSE );
++        assertAnnotationExpression( "1 <= 2", Boolean.TRUE );
++        assertAnnotationExpression( "1 >= 2", Boolean.FALSE );
++        assertAnnotationExpression( "1 == 2", Boolean.FALSE );
++        assertAnnotationExpression( "1 != 2", Boolean.TRUE );
++    }
++
++    public void testQueryExpression() {
++        assertAnnotationExpression( "1 < 2 ? 0 : 3", new Integer( 0 ) );
++        assertAnnotationExpression( "1 > 2 ? 0 : 3", new Integer( 3 ) );
++    }
++
++    public void testCastExpression() {
++        assertAnnotationExpression( "(short)1", new Short( (short) 1 ) );
++        assertAnnotationExpression( "(long)(short)1", new Long( 1 ) );
++        assertAnnotationExpression( "(int)((short)1 + (long)3)", new Integer( 4 ) );
++    }
++}
+Index: src/java/com/thoughtworks/qdox/model/JavaSource.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/JavaSource.java	(revision 483)
++++ src/java/com/thoughtworks/qdox/model/JavaSource.java	(working copy)
+@@ -2,14 +2,15 @@
+ 
+ import java.io.File;
+ import java.io.Serializable;
++import java.net.MalformedURLException;
++import java.net.URL;
+ import java.util.HashMap;
+ import java.util.HashSet;
+ import java.util.LinkedList;
+ import java.util.List;
++import java.util.ListIterator;
+ import java.util.Map;
+ import java.util.Set;
+-import java.net.URL;
+-import java.net.MalformedURLException;
+ 
+ public class JavaSource implements Serializable, JavaClassParent {
+ 
+@@ -246,4 +247,20 @@
+     public JavaSource getParentSource() {
+         return this;
+     }
++    
++    public JavaClass getNestedClassByName(String name) {
++        JavaClass result = null;
++        
++        for (ListIterator i = classes.listIterator(); i.hasNext(); ) {
++            JavaClass candidateClass = (JavaClass) i.next();
++            
++            if (candidateClass.getName().equals(name)) {
++                result = candidateClass;
++                break;
++            }
++        }
++
++        return result;
++    }
++
+ }
+Index: src/java/com/thoughtworks/qdox/model/ModelBuilder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(revision 483)
++++ src/java/com/thoughtworks/qdox/model/ModelBuilder.java	(working copy)
+@@ -1,15 +1,16 @@
+ package com.thoughtworks.qdox.model;
+ 
+ import java.util.ArrayList;
+-import java.util.HashMap;
+ import java.util.Iterator;
+ import java.util.LinkedList;
+ import java.util.List;
+-import java.util.Map;
++import java.util.ListIterator;
+ import java.util.Set;
+ 
++import com.thoughtworks.qdox.model.annotation.AnnotationFieldRef;
++import com.thoughtworks.qdox.model.annotation.AnnotationVisitor;
++import com.thoughtworks.qdox.model.annotation.RecursiveAnnotationVisitor;
+ import com.thoughtworks.qdox.parser.Builder;
+-import com.thoughtworks.qdox.parser.structs.AnnoDef;
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+@@ -122,9 +123,10 @@
+         }
+     }
+ 
+-    private Type createType(String typeName, int dimensions) {
+-        if (typeName == null || typeName.equals("")) return null;
+-        return Type.createUnresolved(typeName, dimensions, currentClass);
++    public Type createType( String typeName, int dimensions ) {
++        if( typeName == null || typeName.equals( "" ) )
++            return null;
++        return Type.createUnresolved( typeName, dimensions, currentClass == null ? currentParent : currentClass);
+     }
+ 
+     private void addJavaDoc(AbstractJavaEntity entity) {
+@@ -224,13 +226,25 @@
+         currentClass.addField(currentField);
+     }
+ 
+-    private void setAnnotations( AbstractJavaEntity entity ) {
++    private void setAnnotations( final AbstractJavaEntity entity ) {
+         if( !currentAnnoDefs.isEmpty() ) {
++            AnnotationVisitor visitor = new RecursiveAnnotationVisitor() {
++                public Object visitAnnotation( Annotation annotation ) {
++                    annotation.setContext( entity );
++                    return super.visitAnnotation( annotation );
++                }
++                
++                public Object visitAnnotationFieldRef( AnnotationFieldRef fieldRef ) {
++                    fieldRef.setContext( entity );
++                    return super.visitAnnotationFieldRef( fieldRef );
++                }
++            };
++
+             Annotation[] annotations = new Annotation[currentAnnoDefs.size()];
+-            int index = 0;
+-            for (Iterator iter = currentAnnoDefs.iterator(); iter.hasNext();) {
+-            	AnnoDef def = (AnnoDef)iter.next();
+-            	annotations[index++] = buildAnnotation( def, entity );
++            for( ListIterator iter = currentAnnoDefs.listIterator(); iter.hasNext(); ) {
++                Annotation annotation = (Annotation) iter.next();
++                annotation.accept(visitor);
++                annotations[iter.previousIndex()] = annotation;
+             }
+ 
+             entity.setAnnotations( annotations );
+@@ -238,37 +252,9 @@
+         }
+     }
+ 
+-    private Annotation buildAnnotation( AnnoDef def, AbstractJavaEntity entity ) {
+-    	Type annoType = createType(def.name, 0);
+-
+-    	Map args = new HashMap();
+-        for (Iterator iter = def.args.entrySet().iterator(); iter.hasNext();) {
+-        	Map.Entry entry = (Map.Entry)iter.next();
+-        	Object value = entry.getValue();
+-
+-        	if( value instanceof AnnoDef ) {
+-        		args.put( entry.getKey(), buildAnnotation( (AnnoDef)value, entity ) );
+-        	}
+-        	else if( value instanceof List ) {
+-        		List values = (List)value;
+-        		if( values.size() == 1 ) {
+-        			// TODO: what about types?
+-        			args.put( entry.getKey(), values.get( 0 ) );
+-        		}
+-        		else {
+-        			args.put( entry.getKey(), values );
+-        		}
+-        	}
+-        }
+-
+-    	Annotation anno = new Annotation( annoType, entity, args, def.lineNumber );
+-        return anno;
+-    }
+-
+-
+     // Don't resolve until we need it... class hasn't been defined yet.
+-    public void addAnnotation( AnnoDef def ) {
+-    	currentAnnoDefs.add( def );
++    public void addAnnotation( Annotation annotation ) {
++        currentAnnoDefs.add( annotation );
+     }
+ 
+     public JavaSource getSource() {
+@@ -276,3 +262,4 @@
+     }
+ 
+ }
++
+Index: src/java/com/thoughtworks/qdox/model/Annotation.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/Annotation.java	(revision 483)
++++ src/java/com/thoughtworks/qdox/model/Annotation.java	(working copy)
+@@ -1,20 +1,36 @@
+ package com.thoughtworks.qdox.model;
+ 
+ import java.io.Serializable;
+-import java.util.HashMap;
+ import java.util.Iterator;
++import java.util.LinkedHashMap;
+ import java.util.Map;
++import java.util.Map.Entry;
+ 
++import com.thoughtworks.qdox.model.annotation.AnnotationValue;
++import com.thoughtworks.qdox.model.annotation.AnnotationVisitor;
++
+ /**
+  * 
+  * @author Eric Redmond
+  */
+-public class Annotation implements Serializable
++public class Annotation implements AnnotationValue, Serializable
+ {
+     private final Type type;
+     private final int lineNumber;
+ 
+-    private Map namedParameters;
++    /**
++     * Annotation properties as AnnotationValues
++     * <p>
++     * This map contains the parsed AnnotationValue for each property and allows
++     * access to the full parse tree, including typerefs and expressions.
++     */
++    private final Map properties = new LinkedHashMap();
++
++    /**
++     * Annotation properties as Parameters
++     */
++    private final Map namedParameters = new LinkedHashMap();
++
+     private AbstractJavaEntity context;
+ 
+     public Annotation(Type type,
+@@ -22,12 +38,30 @@
+             Map namedParameters,
+             int lineNumber)
+ 	{
+-		this.type = type;
+-		this.context = context;
+-    	this.namedParameters = namedParameters == null ? new HashMap(0) : namedParameters;
+-		this.lineNumber = lineNumber;
++        this.type = type;
++        this.context = context;
++        this.lineNumber = lineNumber;
++        
++        if(properties != null) {
++            for(Iterator i = this.properties.entrySet().iterator(); i.hasNext(); ) {
++                Entry entry = (Entry) i.next();
++                String name = (String) entry.getKey();
++                AnnotationValue value = (AnnotationValue) entry.getValue();
++                
++                setProperty(name, value);
++            }
++        }
+ 	}
+ 
++    public Annotation( Type type, int line ) {
++        this(type, null, null, line);
++    }
++
++    public void setProperty(String name, AnnotationValue value) {
++        properties.put( name, value );
++        namedParameters.put( name, value.getParameterValue() );
++    }
++
+     /**
+      * @return the annotation type
+      */
+@@ -59,6 +93,26 @@
+         return lineNumber;
+     }
+ 
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotation( this );
++    }
++
++    public Object getParameterValue() {
++        return this;
++    }
++    
++    public Map getPropertyMap() {
++        return properties;
++    }
++    
++    public AnnotationValue getProperty(String name) {
++        return (AnnotationValue) properties.get( name );
++    }
++
++    public void setContext( AbstractJavaEntity context ) {
++        this.context = context;
++    }
++
+     public String toString() {
+         StringBuffer result = new StringBuffer();
+         result.append('@');
+Index: src/java/com/thoughtworks/qdox/model/JavaClassParent.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/JavaClassParent.java	(revision 483)
++++ src/java/com/thoughtworks/qdox/model/JavaClassParent.java	(working copy)
+@@ -17,5 +17,7 @@
+     public JavaSource getParentSource();
+ 
+     public void addClass(JavaClass cls);
++    
++    public JavaClass getNestedClassByName(String name);
+ 
+ }
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationPlusSign.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationPlusSign.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationPlusSign.java	(revision 0)
+@@ -0,0 +1,20 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationPlusSign extends AnnotationUnaryOperator {
++
++    public AnnotationPlusSign( AnnotationValue value ) {
++        super( value );
++    }
++
++    public String toString() {
++        return "+" + getValue().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationPlusSign( this );
++    }
++
++    public Object getParameterValue() {
++        return "+" + getValue().toString();
++    }
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationGreaterThan.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationGreaterThan.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationGreaterThan.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationGreaterThan extends AnnotationBinaryOperator {
++
++    public AnnotationGreaterThan( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " > " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationGreaterThan( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " > " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationDivide.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationDivide.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationDivide.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationDivide extends AnnotationBinaryOperator {
++
++    public AnnotationDivide( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " / " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationDivide( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " / " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationGreaterEquals.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationGreaterEquals.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationGreaterEquals.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationGreaterEquals extends AnnotationBinaryOperator {
++
++    public AnnotationGreaterEquals( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " >= " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationGreaterEquals( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " >= " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationRemainder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationRemainder.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationRemainder.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationRemainder extends AnnotationBinaryOperator {
++
++    public AnnotationRemainder( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " * " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationRemainder( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " * " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationUnsignedShiftRight.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationUnsignedShiftRight.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationUnsignedShiftRight.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationUnsignedShiftRight extends AnnotationBinaryOperator {
++
++    public AnnotationUnsignedShiftRight( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " >>> " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationUnsignedShiftRight( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " >>> " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationExclusiveOr.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationExclusiveOr.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationExclusiveOr.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationExclusiveOr extends AnnotationBinaryOperator {
++
++    public AnnotationExclusiveOr( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " ^ " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationExclusiveOr( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " ^ " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationValueList.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationValueList.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationValueList.java	(revision 0)
+@@ -0,0 +1,54 @@
++package com.thoughtworks.qdox.model.annotation;
++
++import java.util.ArrayList;
++import java.util.List;
++import java.util.ListIterator;
++
++public class AnnotationValueList implements AnnotationValue {
++
++    private final List valueList;
++
++    public AnnotationValueList( List valueList ) {
++        this.valueList = valueList;
++    }
++
++    public List getValueList() {
++        return valueList;
++    }
++
++    public String toString() {
++        StringBuffer buf = new StringBuffer();
++
++        buf.append( "{" );
++
++        int pos = buf.length();
++
++        for( ListIterator i = valueList.listIterator(); i.hasNext(); ) {
++            buf.append( i.next().toString() );
++            buf.append( ", " );
++        }
++
++        if( buf.length() > pos ) {
++            buf.setLength( buf.length() - 2 );
++        }
++
++        buf.append( "}" );
++
++        return buf.toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationValueList( this );
++    }
++
++    public Object getParameterValue() {
++        List list = new ArrayList();
++
++        for( ListIterator i = valueList.listIterator(); i.hasNext(); ) {
++            AnnotationValue value = (AnnotationValue) i.next();
++            list.add( value.getParameterValue() );
++        }
++
++        return list;
++    }
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationValue.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationValue.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationValue.java	(revision 0)
+@@ -0,0 +1,27 @@
++package com.thoughtworks.qdox.model.annotation;
++
++import com.thoughtworks.qdox.model.Annotation;
++
++/**
++ * Interface for all annotation model elements
++ * 
++ * @author Jochen Kuhnle
++ */
++public interface AnnotationValue {
++
++    /**
++     * Accept a visitor for this value.
++     * 
++     * @param visitor Visitor
++     * @return Visitor result
++     */
++    public Object accept( AnnotationVisitor visitor );
++
++    /**
++     * Get a parameter value for {@link Annotation#getNamedParameter(String)}.
++     * 
++     * @return Parameter value
++     */
++    public Object getParameterValue();
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationOr.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationOr.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationOr.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationOr extends AnnotationBinaryOperator {
++
++    public AnnotationOr( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " | " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationOr( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " | " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/EvaluatingVisitor.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/EvaluatingVisitor.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/EvaluatingVisitor.java	(revision 0)
+@@ -0,0 +1,740 @@
++package com.thoughtworks.qdox.model.annotation;
++
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.List;
++import java.util.ListIterator;
++
++import com.thoughtworks.qdox.model.Annotation;
++import com.thoughtworks.qdox.model.JavaClass;
++import com.thoughtworks.qdox.model.JavaField;
++
++/**
++ * Visitor that evaluates annotation expressions.
++ * <p>
++ * Users of this class must override
++ * {@link EvaluatingVisitor#getFieldReferenceValue(JavaField)} to return values
++ * for referenced fields.
++ * 
++ * @author Jochen Kuhnle
++ */
++public abstract class EvaluatingVisitor implements AnnotationVisitor {
++
++    public Object getValue( Annotation annotation, String property ) {
++        Object result = null;
++        AnnotationValue value = annotation.getProperty( property );
++
++        if( value != null ) {
++            result = value.accept( this );
++        }
++
++        return result;
++    }
++
++    public List getListValue( Annotation annotation, String property ) {
++        Object value = getValue( annotation, property );
++        List list = null;
++
++        if( value != null ) {
++            if( value instanceof List ) {
++                list = (List) value;
++            }
++            else {
++                list = Collections.singletonList( value );
++            }
++        }
++
++        return list;
++    }
++
++    /**
++     * Return the result type of a binary operator
++     * <p>
++     * Performs binary numeric promotion as specified in the Java Language
++     * Specification, <a
++     * href="http://java.sun.com/docs/books/jls/second_edition/html/conversions.doc.html#170983">section
++     * 5.6.1<a>
++     */
++    protected static Class resultType( Object left, Object right ) {
++        Class type = void.class;
++
++        if( left instanceof String || right instanceof String ) {
++            type = String.class;
++        }
++        else if( left instanceof Number && right instanceof Number ) {
++            if( left instanceof Double || right instanceof Double ) {
++                type = Double.class;
++            }
++            else if( left instanceof Float || right instanceof Float ) {
++                type = Float.class;
++            }
++            else if( left instanceof Long || right instanceof Long ) {
++                type = Long.class;
++            }
++            else {
++                type = Integer.class;
++            }
++        }
++
++        return type;
++    }
++
++    /**
++     * Return the numeric result type of a binary operator
++     * <p>
++     * Performs binary numeric promotion as specified in the Java Language
++     * Specification, <a
++     * href="http://java.sun.com/docs/books/jls/second_edition/html/conversions.doc.html#170983">section
++     * 5.6.1<a>
++     */
++    protected static Class numericResultType( Object left, Object right ) {
++        Class type = void.class;
++
++        if( left instanceof Number && right instanceof Number ) {
++            if( left instanceof Long || right instanceof Long ) {
++                type = Long.class;
++            }
++            else if( left instanceof Integer || right instanceof Integer ) {
++                type = Integer.class;
++            }
++        }
++
++        return type;
++    }
++
++    /**
++     * Return the result type of an unary operator
++     * <p>
++     * Performs unary numeric promotion as specified in the Java Language
++     * Specification, <a
++     * href="http://java.sun.com/docs/books/jls/second_edition/html/conversions.doc.html#170952">section
++     * 5.6.2<a>
++     */
++    protected static Class unaryNumericResultType( Object value ) {
++        Class type = void.class;
++
++        if( value instanceof Byte || value instanceof Short || value instanceof Character || value instanceof Integer ) {
++            type = Integer.class;
++        }
++        else if( value instanceof Long ) {
++            value = Long.class;
++        }
++
++        return type;
++    }
++
++    protected static Class unaryResultType( Object value ) {
++        Class type = unaryNumericResultType( value );
++
++        if( type == void.class ) {
++            if( value instanceof Float ) {
++                value = Float.class;
++            }
++            else if( value instanceof Double ) {
++                value = Double.class;
++            }
++        }
++
++        return type;
++    }
++
++    public Object visitAnnotation( Annotation annotation ) {
++        throw new UnsupportedOperationException( "Illegal annotation value '" + annotation + "'." );
++    }
++
++    public Object visitAnnotationAdd( AnnotationAdd op ) {
++        Object left = op.getLeft().accept( this );
++        Object right = op.getRight().accept( this );
++        Class type = resultType( left, right );
++        Object result;
++
++        if( type == String.class ) {
++            result = left.toString() + right.toString();
++        }
++        else if( type == Double.class ) {
++            result = new Double( ((Number) left).doubleValue() + ((Number) right).doubleValue() );
++        }
++        else if( type == Float.class ) {
++            result = new Float( ((Number) left).floatValue() + ((Number) right).floatValue() );
++        }
++        else if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() + ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() + ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + op + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationConstant( AnnotationConstant constant ) {
++        return constant.getValue();
++    }
++
++    public Object visitAnnotationDivide( AnnotationDivide op ) {
++        Object left = op.getLeft().accept( this );
++        Object right = op.getRight().accept( this );
++        Class type = resultType( left, right );
++        Object result;
++
++        if( type == Double.class ) {
++            result = new Double( ((Number) left).doubleValue() / ((Number) right).doubleValue() );
++        }
++        else if( type == Float.class ) {
++            result = new Float( ((Number) left).floatValue() / ((Number) right).floatValue() );
++        }
++        else if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() / ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() / ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + op + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationFieldRef( AnnotationFieldRef fieldRef ) {
++        JavaField javaField = fieldRef.getField();
++
++        if( javaField == null ) {
++            throw new IllegalArgumentException( "Cannot resolve field reference '" + fieldRef + "'." );
++        }
++
++        if( !javaField.isFinal() || !javaField.isStatic() ) {
++            throw new IllegalArgumentException( "Field reference '" + fieldRef + "' must be static and final." );
++        }
++
++        Object result = getFieldReferenceValue( javaField );
++        return result;
++    }
++
++    protected abstract Object getFieldReferenceValue( JavaField javaField );
++
++    public Object visitAnnotationGreaterThan( AnnotationGreaterThan op ) {
++        Object left = op.getLeft().accept( this );
++        Object right = op.getRight().accept( this );
++        Class type = resultType( left, right );
++        boolean result;
++
++        if( type == Double.class ) {
++            result = ((Number) left).doubleValue() > ((Number) right).doubleValue();
++        }
++        else if( type == Float.class ) {
++            result = ((Number) left).floatValue() > ((Number) right).floatValue();
++        }
++        else if( type == Long.class ) {
++            result = ((Number) left).longValue() > ((Number) right).longValue();
++        }
++        else if( type == Integer.class ) {
++            result = ((Number) left).intValue() > ((Number) right).intValue();
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + op + "'." );
++        }
++
++        return result ? Boolean.TRUE : Boolean.FALSE;
++    }
++
++    public Object visitAnnotationLessThan( AnnotationLessThan op ) {
++        Object left = op.getLeft().accept( this );
++        Object right = op.getRight().accept( this );
++        Class type = resultType( left, right );
++        boolean result;
++
++        if( type == Double.class ) {
++            result = ((Number) left).doubleValue() < ((Number) right).doubleValue();
++        }
++        else if( type == Float.class ) {
++            result = ((Number) left).floatValue() < ((Number) right).floatValue();
++        }
++        else if( type == Long.class ) {
++            result = ((Number) left).longValue() < ((Number) right).longValue();
++        }
++        else if( type == Integer.class ) {
++            result = ((Number) left).intValue() < ((Number) right).intValue();
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + op + "'." );
++        }
++
++        return result ? Boolean.TRUE : Boolean.FALSE;
++    }
++
++    public Object visitAnnotationMultiply( AnnotationMultiply op ) {
++        Object left = op.getLeft().accept( this );
++        Object right = op.getRight().accept( this );
++        Class type = resultType( left, right );
++        Object result;
++
++        if( type == Double.class ) {
++            result = new Double( ((Number) left).doubleValue() * ((Number) right).doubleValue() );
++        }
++        else if( type == Float.class ) {
++            result = new Float( ((Number) left).floatValue() * ((Number) right).floatValue() );
++        }
++        else if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() * ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() * ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + op + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationParenExpression( AnnotationParenExpression parenExpression ) {
++        return parenExpression.getValue().accept( this );
++    }
++
++    public Object visitAnnotationSubtract( AnnotationSubtract op ) {
++        Object left = op.getLeft().accept( this );
++        Object right = op.getRight().accept( this );
++        Class type = resultType( left, right );
++        Object result;
++
++        if( type == Double.class ) {
++            result = new Double( ((Number) left).doubleValue() - ((Number) right).doubleValue() );
++        }
++        else if( type == Float.class ) {
++            result = new Float( ((Number) left).floatValue() - ((Number) right).floatValue() );
++        }
++        else if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() - ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() - ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + op + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationTypeRef( AnnotationTypeRef typeRef ) {
++        JavaClass javaClass = typeRef.getType().getJavaClass();
++        return javaClass;
++    }
++
++    public Object visitAnnotationValueList( AnnotationValueList valueList ) {
++        List list = new ArrayList();
++
++        for( ListIterator i = valueList.getValueList().listIterator(); i.hasNext(); ) {
++            AnnotationValue value = (AnnotationValue) i.next();
++            Object v = value.accept( this );
++            list.add( v );
++        }
++
++        return list;
++    }
++
++    public Object visitAnnotationAnd( AnnotationAnd and ) {
++        Object left = and.getLeft().accept( this );
++        Object right = and.getRight().accept( this );
++        Class type = numericResultType( left, right );
++        Object result;
++
++        if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() & ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() & ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + and + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationGreaterEquals( AnnotationGreaterEquals greaterEquals ) {
++        Object left = greaterEquals.getLeft().accept( this );
++        Object right = greaterEquals.getRight().accept( this );
++        Class type = resultType( left, right );
++        boolean result;
++
++        if( type == Double.class ) {
++            result = ((Number) left).doubleValue() >= ((Number) right).doubleValue();
++        }
++        else if( type == Float.class ) {
++            result = ((Number) left).floatValue() >= ((Number) right).floatValue();
++        }
++        else if( type == Long.class ) {
++            result = ((Number) left).longValue() >= ((Number) right).longValue();
++        }
++        else if( type == Integer.class ) {
++            result = ((Number) left).intValue() >= ((Number) right).intValue();
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + greaterEquals + "'." );
++        }
++
++        return result ? Boolean.TRUE : Boolean.FALSE;
++    }
++
++    public Object visitAnnotationLessEquals( AnnotationLessEquals lessEquals ) {
++        Object left = lessEquals.getLeft().accept( this );
++        Object right = lessEquals.getRight().accept( this );
++        Class type = resultType( left, right );
++        boolean result;
++
++        if( type == Double.class ) {
++            result = ((Number) left).doubleValue() <= ((Number) right).doubleValue();
++        }
++        else if( type == Float.class ) {
++            result = ((Number) left).floatValue() <= ((Number) right).floatValue();
++        }
++        else if( type == Long.class ) {
++            result = ((Number) left).longValue() <= ((Number) right).longValue();
++        }
++        else if( type == Integer.class ) {
++            result = ((Number) left).intValue() <= ((Number) right).intValue();
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + lessEquals + "'." );
++        }
++
++        return result ? Boolean.TRUE : Boolean.FALSE;
++    }
++
++    public Object visitAnnotationLogicalAnd( AnnotationLogicalAnd and ) {
++        Object left = and.getLeft().accept( this );
++        Object right = and.getRight().accept( this );
++        boolean result;
++
++        if( left instanceof Boolean && right instanceof Boolean ) {
++            result = ((Boolean) left).booleanValue() && ((Boolean) right).booleanValue();
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + and + "'." );
++        }
++
++        return result ? Boolean.TRUE : Boolean.FALSE;
++    }
++
++    public Object visitAnnotationLogicalNot( AnnotationLogicalNot not ) {
++        Object value = not.getValue().accept( this );
++        boolean result;
++
++        if( value instanceof Boolean ) {
++            result = !((Boolean) value).booleanValue();
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + not + "'." );
++        }
++
++        return result ? Boolean.TRUE : Boolean.FALSE;
++    }
++
++    public Object visitAnnotationLogicalOr( AnnotationLogicalOr or ) {
++        Object left = or.getLeft().accept( this );
++        Object right = or.getRight().accept( this );
++        boolean result;
++
++        if( left instanceof Boolean && right instanceof Boolean ) {
++            result = ((Boolean) left).booleanValue() || ((Boolean) right).booleanValue();
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + or + "'." );
++        }
++
++        return result ? Boolean.TRUE : Boolean.FALSE;
++    }
++
++    public Object visitAnnotationMinusSign( AnnotationMinusSign sign ) {
++        Object value = sign.getValue().accept( this );
++        Class type = unaryResultType( value );
++        Object result;
++
++        if( type == Integer.class ) {
++            result = new Integer( -((Integer) value).intValue() );
++        }
++        else if( type == Long.class ) {
++            result = new Long( -((Long) value).longValue() );
++        }
++        else if( type == Float.class ) {
++            result = new Float( -((Float) value).floatValue() );
++        }
++        else if( type == Double.class ) {
++            result = new Double( -((Double) value).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + sign + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationNot( AnnotationNot not ) {
++        Object value = not.getValue().accept( this );
++        Object type = unaryNumericResultType( value );
++        Object result;
++
++        if( type == Long.class ) {
++            result = new Long( ~((Long) value).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ~((Integer) value).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + not + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationOr( AnnotationOr or ) {
++        Object left = or.getLeft().accept( this );
++        Object right = or.getRight().accept( this );
++        Class type = numericResultType( left, right );
++        Object result;
++
++        if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() | ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() | ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + or + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationPlusSign( AnnotationPlusSign sign ) {
++        Object value = sign.getValue().accept( this );
++        Object result;
++
++        if( value instanceof Number ) {
++            result = value;
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + sign + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationRemainder( AnnotationRemainder remainder ) {
++        Object left = remainder.getLeft().accept( this );
++        Object right = remainder.getRight().accept( this );
++        Class type = resultType( left, right );
++        Object result;
++
++        if( type == Double.class ) {
++            result = new Double( ((Number) left).doubleValue() % ((Number) right).doubleValue() );
++        }
++        else if( type == Float.class ) {
++            result = new Float( ((Number) left).floatValue() % ((Number) right).floatValue() );
++        }
++        else if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() % ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() % ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + remainder + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationShiftLeft( AnnotationShiftLeft shiftLeft ) {
++        Object left = shiftLeft.getLeft().accept( this );
++        Object right = shiftLeft.getRight().accept( this );
++        Class type = numericResultType( left, right );
++        Object result;
++
++        if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() << ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() << ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + shiftLeft + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationShiftRight( AnnotationShiftRight shiftRight ) {
++        Object left = shiftRight.getLeft().accept( this );
++        Object right = shiftRight.getRight().accept( this );
++        Class type = numericResultType( left, right );
++        Object result;
++
++        if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() >> ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() >> ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + shiftRight + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationUnsignedShiftRight( AnnotationUnsignedShiftRight shiftRight ) {
++        Object left = shiftRight.getLeft().accept( this );
++        Object right = shiftRight.getRight().accept( this );
++        Class type = numericResultType( left, right );
++        Object result;
++
++        if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() >>> ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() >>> ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + shiftRight + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationEquals( AnnotationEquals annotationEquals ) {
++        Object left = annotationEquals.getLeft().accept( this );
++        Object right = annotationEquals.getRight().accept( this );
++        Class type = resultType( left, right );
++        boolean result;
++
++        if( type == Double.class ) {
++            result = ((Number) left).doubleValue() == ((Number) right).doubleValue();
++        }
++        else if( type == Float.class ) {
++            result = ((Number) left).floatValue() == ((Number) right).floatValue();
++        }
++        else if( type == Long.class ) {
++            result = ((Number) left).longValue() == ((Number) right).longValue();
++        }
++        else if( type == Integer.class ) {
++            result = ((Number) left).intValue() == ((Number) right).intValue();
++        }
++        else {
++            result = (left == right);
++        }
++
++        return result ? Boolean.TRUE : Boolean.FALSE;
++    }
++
++    public Object visitAnnotationExclusiveOr( AnnotationExclusiveOr annotationExclusiveOr ) {
++        Object left = annotationExclusiveOr.getLeft().accept( this );
++        Object right = annotationExclusiveOr.getRight().accept( this );
++        Class type = numericResultType( left, right );
++        Object result;
++
++        if( type == Long.class ) {
++            result = new Long( ((Number) left).longValue() ^ ((Number) right).longValue() );
++        }
++        else if( type == Integer.class ) {
++            result = new Integer( ((Number) left).intValue() ^ ((Number) right).intValue() );
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + annotationExclusiveOr + "'." );
++        }
++
++        return result;
++    }
++
++    public Object visitAnnotationNotEquals( AnnotationNotEquals annotationNotEquals ) {
++        Object left = annotationNotEquals.getLeft().accept( this );
++        Object right = annotationNotEquals.getRight().accept( this );
++        Class type = resultType( left, right );
++        boolean result;
++
++        if( type == Double.class ) {
++            result = ((Number) left).doubleValue() != ((Number) right).doubleValue();
++        }
++        else if( type == Float.class ) {
++            result = ((Number) left).floatValue() != ((Number) right).floatValue();
++        }
++        else if( type == Long.class ) {
++            result = ((Number) left).longValue() != ((Number) right).longValue();
++        }
++        else if( type == Integer.class ) {
++            result = ((Number) left).intValue() != ((Number) right).intValue();
++        }
++        else {
++            result = (left == right);
++        }
++
++        return result ? Boolean.TRUE : Boolean.FALSE;
++    }
++
++    public Object visitAnnotationQuery( AnnotationQuery annotationQuery ) {
++        Object value = annotationQuery.getCondition().accept( this );
++
++        if( value == null || !(value instanceof Boolean) ) {
++            throw new IllegalArgumentException( "Cannot evaluate '" + annotationQuery + "'." );
++        }
++
++        AnnotationValue expression = ((Boolean) value).booleanValue() ? annotationQuery.getTrueExpression()
++            : annotationQuery.getFalseExpression();
++
++        return expression.accept( this );
++    }
++
++    public Object visitAnnotationCast( AnnotationCast annotationCast ) {
++        Object value = annotationCast.getValue().accept( this );
++        String type = annotationCast.getType().getJavaClass().getFullyQualifiedName();
++        Object result;
++
++        if( value instanceof Number ) {
++            Number n = (Number) value;
++
++            if( type.equals( "byte" ) ) {
++                result = new Byte( n.byteValue() );
++            }
++            else if( type.equals( "char" ) ) {
++                result = new Character( (char) n.intValue() );
++            }
++            else if( type.equals( "short" ) ) {
++                result = new Short( n.shortValue() );
++            }
++            else if( type.equals( "int" ) ) {
++                result = new Integer( n.intValue() );
++            }
++            else if( type.equals( "long" ) ) {
++                result = new Long( n.longValue() );
++            }
++            else if( type.equals( "float" ) ) {
++                result = new Float( n.floatValue() );
++            }
++            else if( type.equals( "double" ) ) {
++                result = new Double( n.doubleValue() );
++            }
++            else {
++                throw new IllegalArgumentException( "Cannot evaluate '" + annotationCast + "'." );
++            }
++        }
++        else if( value instanceof String ) {
++            if( type.equals( "java.lang.String" ) ) {
++                result = value;
++            }
++            else {
++                throw new IllegalArgumentException( "Cannot evaluate '" + annotationCast + "'." );
++            }
++        }
++        else {
++            throw new IllegalArgumentException( "Cannot evaluate '" + annotationCast + "'." );
++        }
++
++        return result;
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationParenExpression.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationParenExpression.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationParenExpression.java	(revision 0)
+@@ -0,0 +1,27 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationParenExpression implements AnnotationValue {
++
++    private AnnotationValue value;
++
++    public AnnotationParenExpression( AnnotationValue value ) {
++        this.value = value;
++    }
++
++    public AnnotationValue getValue() {
++        return value;
++    }
++
++    public String toString() {
++        return "(" + value.toString() + ")";
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationParenExpression( this );
++    }
++
++    public Object getParameterValue() {
++        return "(" + value.getParameterValue() + ")";
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationSubtract.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationSubtract.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationSubtract.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationSubtract extends AnnotationBinaryOperator {
++
++    public AnnotationSubtract( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " - " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationSubtract( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " - " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/RecursiveAnnotationVisitor.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/RecursiveAnnotationVisitor.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/RecursiveAnnotationVisitor.java	(revision 0)
+@@ -0,0 +1,217 @@
++package com.thoughtworks.qdox.model.annotation;
++
++import java.util.Iterator;
++import java.util.ListIterator;
++
++import com.thoughtworks.qdox.model.Annotation;
++
++public class RecursiveAnnotationVisitor implements AnnotationVisitor {
++
++    public Object visitAnnotation( Annotation annotation ) {
++        for( Iterator i = annotation.getPropertyMap().values().iterator(); i.hasNext(); ) {
++            AnnotationValue value = (AnnotationValue) i.next();
++            value.accept( this );
++        }
++
++        return null;
++    }
++
++    public Object visitAnnotationAdd( AnnotationAdd op ) {
++        op.getLeft().accept( this );
++        op.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationConstant( AnnotationConstant constant ) {
++        return null;
++    }
++
++    public Object visitAnnotationDivide( AnnotationDivide op ) {
++        op.getLeft().accept( this );
++        op.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationFieldRef( AnnotationFieldRef fieldRef ) {
++        return null;
++    }
++
++    public Object visitAnnotationGreaterThan( AnnotationGreaterThan op ) {
++        op.getLeft().accept( this );
++        op.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationLessThan( AnnotationLessThan op ) {
++        op.getLeft().accept( this );
++        op.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationMultiply( AnnotationMultiply op ) {
++        op.getLeft().accept( this );
++        op.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationParenExpression( AnnotationParenExpression parenExpression ) {
++        parenExpression.getValue().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationSubtract( AnnotationSubtract op ) {
++        op.getLeft().accept( this );
++        op.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationTypeRef( AnnotationTypeRef typeRef ) {
++        return null;
++    }
++
++    public Object visitAnnotationValueList( AnnotationValueList valueList ) {
++        for( ListIterator i = valueList.getValueList().listIterator(); i.hasNext(); ) {
++            AnnotationValue value = (AnnotationValue) i.next();
++            value.accept( this );
++        }
++
++        return null;
++    }
++
++    public Object visitAnnotationAnd( AnnotationAnd and ) {
++        and.getLeft().accept( this );
++        and.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationGreaterEquals( AnnotationGreaterEquals greaterEquals ) {
++        greaterEquals.getLeft().accept( this );
++        greaterEquals.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationLessEquals( AnnotationLessEquals lessEquals ) {
++        lessEquals.getLeft().accept( this );
++        lessEquals.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationLogicalAnd( AnnotationLogicalAnd and ) {
++        and.getLeft().accept( this );
++        and.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationLogicalNot( AnnotationLogicalNot not ) {
++        not.getValue().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationLogicalOr( AnnotationLogicalOr or ) {
++        or.getLeft().accept( this );
++        or.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationMinusSign( AnnotationMinusSign sign ) {
++        sign.getValue().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationNot( AnnotationNot not ) {
++        not.getValue().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationOr( AnnotationOr or ) {
++        or.getLeft().accept( this );
++        or.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationPlusSign( AnnotationPlusSign sign ) {
++        sign.getValue().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationRemainder( AnnotationRemainder remainder ) {
++        remainder.getLeft().accept( this );
++        remainder.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationShiftLeft( AnnotationShiftLeft left ) {
++        left.getLeft().accept( this );
++        left.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationShiftRight( AnnotationShiftRight right ) {
++        right.getLeft().accept( this );
++        right.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationUnsignedShiftRight( AnnotationUnsignedShiftRight right ) {
++        right.getLeft().accept( this );
++        right.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationEquals( AnnotationEquals annotationEquals ) {
++        annotationEquals.getLeft().accept( this );
++        annotationEquals.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationExclusiveOr( AnnotationExclusiveOr annotationExclusiveOr ) {
++        annotationExclusiveOr.getLeft().accept( this );
++        annotationExclusiveOr.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationNotEquals( AnnotationNotEquals annotationNotEquals ) {
++        annotationNotEquals.getLeft().accept( this );
++        annotationNotEquals.getRight().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationQuery( AnnotationQuery annotationQuery ) {
++        annotationQuery.getCondition().accept( this );
++        annotationQuery.getTrueExpression().accept( this );
++        annotationQuery.getFalseExpression().accept( this );
++
++        return null;
++    }
++
++    public Object visitAnnotationCast( AnnotationCast annotationCast ) {
++        annotationCast.getValue().accept( this );
++
++        return null;
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationShiftLeft.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationShiftLeft.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationShiftLeft.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationShiftLeft extends AnnotationBinaryOperator {
++
++    public AnnotationShiftLeft( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " << " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationShiftLeft( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " << " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationAdd.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationAdd.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationAdd.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationAdd extends AnnotationBinaryOperator {
++
++    public AnnotationAdd( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " + " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationAdd( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " + " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationEquals.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationEquals.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationEquals.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationEquals extends AnnotationBinaryOperator {
++
++    public AnnotationEquals( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " == " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationEquals( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " == " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationLogicalNot.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationLogicalNot.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationLogicalNot.java	(revision 0)
+@@ -0,0 +1,20 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationLogicalNot extends AnnotationUnaryOperator {
++
++    public AnnotationLogicalNot( AnnotationValue value ) {
++        super( value );
++    }
++
++    public String toString() {
++        return "!" + getValue().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationLogicalNot( this );
++    }
++
++    public Object getParameterValue() {
++        return "!" + getValue().toString();
++    }
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationLogicalAnd.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationLogicalAnd.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationLogicalAnd.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationLogicalAnd extends AnnotationBinaryOperator {
++
++    public AnnotationLogicalAnd( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " && " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationLogicalAnd( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " && " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationBinaryOperator.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationBinaryOperator.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationBinaryOperator.java	(revision 0)
+@@ -0,0 +1,22 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public abstract class AnnotationBinaryOperator implements AnnotationValue {
++
++    private AnnotationValue left;
++
++    private AnnotationValue right;
++
++    public AnnotationBinaryOperator( AnnotationValue left, AnnotationValue right ) {
++        this.left = left;
++        this.right = right;
++    }
++
++    public AnnotationValue getLeft() {
++        return left;
++    }
++
++    public AnnotationValue getRight() {
++        return right;
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationNot.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationNot.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationNot.java	(revision 0)
+@@ -0,0 +1,20 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationNot extends AnnotationUnaryOperator {
++
++    public AnnotationNot( AnnotationValue value ) {
++        super( value );
++    }
++
++    public String toString() {
++        return "~" + getValue().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationNot( this );
++    }
++
++    public Object getParameterValue() {
++        return "~" + getValue().toString();
++    }
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationAnd.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationAnd.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationAnd.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationAnd extends AnnotationBinaryOperator {
++
++    public AnnotationAnd( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " & " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationAnd( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " & " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationQuery.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationQuery.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationQuery.java	(revision 0)
+@@ -0,0 +1,41 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationQuery implements AnnotationValue {
++
++    private final AnnotationValue condition;
++
++    private final AnnotationValue trueExpression;
++
++    private final AnnotationValue falseExpression;
++
++    public AnnotationQuery( AnnotationValue condition, AnnotationValue trueExpression, AnnotationValue falseExpression ) {
++        this.condition = condition;
++        this.trueExpression = trueExpression;
++        this.falseExpression = falseExpression;
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationQuery( this );
++    }
++
++    public AnnotationValue getCondition() {
++        return this.condition;
++    }
++
++    public AnnotationValue getTrueExpression() {
++        return this.trueExpression;
++    }
++
++    public AnnotationValue getFalseExpression() {
++        return this.falseExpression;
++    }
++
++    public Object getParameterValue() {
++        return condition.getParameterValue().toString() + " ? " + trueExpression.getParameterValue() + " : "
++            + falseExpression.getParameterValue();
++    }
++
++    public String toString() {
++        return condition.toString() + " ? " + trueExpression.toString() + " : " + falseExpression.toString();
++    }
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationUnaryOperator.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationUnaryOperator.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationUnaryOperator.java	(revision 0)
+@@ -0,0 +1,15 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public abstract class AnnotationUnaryOperator implements AnnotationValue {
++
++    private AnnotationValue value;
++
++    public AnnotationUnaryOperator( AnnotationValue value ) {
++        this.value = value;
++    }
++
++    public AnnotationValue getValue() {
++        return value;
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationLogicalOr.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationLogicalOr.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationLogicalOr.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationLogicalOr extends AnnotationBinaryOperator {
++
++    public AnnotationLogicalOr( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " || " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationLogicalOr( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " || " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationShiftRight.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationShiftRight.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationShiftRight.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationShiftRight extends AnnotationBinaryOperator {
++
++    public AnnotationShiftRight( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " >> " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationShiftRight( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " >> " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationNotEquals.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationNotEquals.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationNotEquals.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationNotEquals extends AnnotationBinaryOperator {
++
++    public AnnotationNotEquals( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " != " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationNotEquals( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " != " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationMinusSign.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationMinusSign.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationMinusSign.java	(revision 0)
+@@ -0,0 +1,20 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationMinusSign extends AnnotationUnaryOperator {
++
++    public AnnotationMinusSign( AnnotationValue value ) {
++        super( value );
++    }
++
++    public String toString() {
++        return "-" + getValue().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationMinusSign( this );
++    }
++
++    public Object getParameterValue() {
++        return "-" + getValue().toString();
++    }
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationTypeRef.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationTypeRef.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationTypeRef.java	(revision 0)
+@@ -0,0 +1,28 @@
++package com.thoughtworks.qdox.model.annotation;
++
++import com.thoughtworks.qdox.model.Type;
++
++public class AnnotationTypeRef implements AnnotationValue {
++
++    private Type type;
++
++    public AnnotationTypeRef( Type type ) {
++        this.type = type;
++    }
++
++    public Type getType() {
++        return type;
++    }
++
++    public String toString() {
++        return type.getValue() + ".class";
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationTypeRef( this );
++    }
++
++    public Object getParameterValue() {
++        return type.getValue() + ".class";
++    }
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationMultiply.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationMultiply.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationMultiply.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationMultiply extends AnnotationBinaryOperator {
++
++    public AnnotationMultiply( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " * " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationMultiply( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " * " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationFieldRef.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationFieldRef.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationFieldRef.java	(revision 0)
+@@ -0,0 +1,137 @@
++package com.thoughtworks.qdox.model.annotation;
++
++import java.util.StringTokenizer;
++
++import com.thoughtworks.qdox.model.AbstractJavaEntity;
++import com.thoughtworks.qdox.model.JavaClass;
++import com.thoughtworks.qdox.model.JavaField;
++import com.thoughtworks.qdox.model.Type;
++
++public class AnnotationFieldRef implements AnnotationValue {
++
++    private final int[] parts;
++
++    private final String name;
++
++    private AbstractJavaEntity context;
++
++    private JavaField field;
++
++    private int fieldIndex = -1;
++
++    public AnnotationFieldRef( String name ) {
++        this.name = name;
++
++        int length = new StringTokenizer( name, "." ).countTokens();
++        this.parts = new int[length + 1];
++        this.parts[0] = -1;
++
++        for( int i = 1; i < length; ++i ) {
++            this.parts[i] = name.indexOf( '.', this.parts[i - 1] + 1 );
++        }
++
++        this.parts[length] = name.length();
++    }
++
++    public String getName() {
++        return name;
++    }
++
++    public String getNamePrefix( int end ) {
++        return name.substring( 0, parts[end + 1] );
++    }
++
++    public String getNamePart( int index ) {
++        return name.substring( parts[index] + 1, parts[index + 1] );
++    }
++
++    public int getPartCount() {
++        return parts.length - 1;
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationFieldRef( this );
++    }
++
++    public Object getParameterValue() {
++        return getName();
++    }
++
++    public String toString() {
++        return getName();
++    }
++
++    public AbstractJavaEntity getContext() {
++        return this.context;
++    }
++
++    public void setContext( AbstractJavaEntity context ) {
++        this.context = context;
++    }
++
++    public String getClassPart() {
++        String result = null;
++
++        if( getField() != null ) {
++            result = name.substring( 0, parts[fieldIndex] );
++        }
++
++        return result;
++    }
++
++    public String getFieldPart() {
++        String result = null;
++
++        if( getField() != null ) {
++            result = name.substring( parts[fieldIndex] + 1 );
++        }
++
++        return result;
++    }
++
++    protected JavaField resolveField( JavaClass javaClass, int start, int end ) {
++        JavaField field = null;
++
++        for( int i = start; i < end; ++i ) {
++            field = javaClass.getFieldByName( getNamePart( i ) );
++
++            if( field == null ) {
++                break;
++            }
++
++            javaClass = field.getType().getJavaClass();
++        }
++
++        return field;
++    }
++
++    public JavaField getField() {
++        if( fieldIndex < 0 ) {
++            if( context.getParent() instanceof JavaClass ) {
++                JavaClass javaClass = (JavaClass) context.getParent();
++                field = resolveField( javaClass, 0, parts.length );
++                fieldIndex = 0;
++            }
++
++            if( field == null ) {
++                for( int i = 0; i < parts.length - 1; ++i ) {
++                    String className = getNamePrefix( i );
++                    String typeName = context.getParent().resolveType( className );
++
++                    if( typeName != null ) {
++                        Type type = Type.createUnresolved( typeName, 0, context.getParent() );
++                        JavaClass javaClass = type.getJavaClass();
++
++                        if( javaClass != null ) {
++                            fieldIndex = i + 1;
++                            field = resolveField( javaClass, i + 1, parts.length - 1 );
++                            break;
++                        }
++                    }
++                }
++            }
++        }
++
++        return field;
++    }
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationLessThan.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationLessThan.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationLessThan.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationLessThan extends AnnotationBinaryOperator {
++
++    public AnnotationLessThan( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " < " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationLessThan( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " < " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationLessEquals.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationLessEquals.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationLessEquals.java	(revision 0)
+@@ -0,0 +1,21 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationLessEquals extends AnnotationBinaryOperator {
++
++    public AnnotationLessEquals( AnnotationValue left, AnnotationValue right ) {
++        super( left, right );
++    }
++
++    public String toString() {
++        return getLeft().toString() + " <= " + getRight().toString();
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationLessEquals( this );
++    }
++
++    public Object getParameterValue() {
++        return getLeft().getParameterValue() + " <= " + getRight().getParameterValue();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationConstant.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationConstant.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationConstant.java	(revision 0)
+@@ -0,0 +1,34 @@
++package com.thoughtworks.qdox.model.annotation;
++
++public class AnnotationConstant implements AnnotationValue {
++
++    private final Object value;
++
++    private final String image;
++
++    public AnnotationConstant( Object value, String image ) {
++        this.value = value;
++        this.image = image;
++    }
++
++    public Object getValue() {
++        return value;
++    }
++
++    public String getImage() {
++        return image;
++    }
++
++    public String toString() {
++        return image;
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationConstant( this );
++    }
++
++    public Object getParameterValue() {
++        return image;
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationCast.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationCast.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationCast.java	(revision 0)
+@@ -0,0 +1,36 @@
++package com.thoughtworks.qdox.model.annotation;
++
++import com.thoughtworks.qdox.model.Type;
++
++public class AnnotationCast implements AnnotationValue {
++
++    private final Type type;
++
++    private final AnnotationValue value;
++
++    public AnnotationCast( Type type, AnnotationValue value ) {
++        this.type = type;
++        this.value = value;
++    }
++
++    public Type getType() {
++        return this.type;
++    }
++
++    public AnnotationValue getValue() {
++        return this.value;
++    }
++
++    public Object accept( AnnotationVisitor visitor ) {
++        return visitor.visitAnnotationCast( this );
++    }
++
++    public Object getParameterValue() {
++        return "(" + type.getValue() + ") " + value.getParameterValue();
++    }
++
++    public String toString() {
++        return "(" + type.getValue() + ") " + value.toString();
++    }
++
++}
+Index: src/java/com/thoughtworks/qdox/model/annotation/AnnotationVisitor.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/model/annotation/AnnotationVisitor.java	(revision 0)
++++ src/java/com/thoughtworks/qdox/model/annotation/AnnotationVisitor.java	(revision 0)
+@@ -0,0 +1,74 @@
++package com.thoughtworks.qdox.model.annotation;
++
++import com.thoughtworks.qdox.model.Annotation;
++
++/**
++ * Visitor class for the annotation model elements
++ * 
++ * @author Jochen Kuhnle
++ */
++public interface AnnotationVisitor {
++
++    public Object visitAnnotationAdd( AnnotationAdd add );
++
++    public Object visitAnnotationSubtract( AnnotationSubtract subtract );
++
++    public Object visitAnnotationMultiply( AnnotationMultiply multiply );
++
++    public Object visitAnnotationDivide( AnnotationDivide divide );
++
++    public Object visitAnnotationGreaterThan( AnnotationGreaterThan greaterThan );
++
++    public Object visitAnnotationLessThan( AnnotationLessThan lessThan );
++
++    public Object visitAnnotation( Annotation annotation );
++
++    public Object visitAnnotationConstant( AnnotationConstant constant );
++
++    public Object visitAnnotationParenExpression( AnnotationParenExpression expression );
++
++    public Object visitAnnotationValueList( AnnotationValueList valueList );
++
++    public Object visitAnnotationTypeRef( AnnotationTypeRef typeRef );
++
++    public Object visitAnnotationFieldRef( AnnotationFieldRef fieldRef );
++
++    public Object visitAnnotationLessEquals( AnnotationLessEquals lessEquals );
++
++    public Object visitAnnotationGreaterEquals( AnnotationGreaterEquals greaterEquals );
++
++    public Object visitAnnotationRemainder( AnnotationRemainder remainder );
++
++    public Object visitAnnotationOr( AnnotationOr or );
++
++    public Object visitAnnotationAnd( AnnotationAnd and );
++
++    public Object visitAnnotationShiftLeft( AnnotationShiftLeft left );
++
++    public Object visitAnnotationShiftRight( AnnotationShiftRight right );
++
++    public Object visitAnnotationNot( AnnotationNot not );
++
++    public Object visitAnnotationLogicalOr( AnnotationLogicalOr or );
++
++    public Object visitAnnotationLogicalAnd( AnnotationLogicalAnd and );
++
++    public Object visitAnnotationLogicalNot( AnnotationLogicalNot not );
++
++    public Object visitAnnotationMinusSign( AnnotationMinusSign sign );
++
++    public Object visitAnnotationPlusSign( AnnotationPlusSign sign );
++
++    public Object visitAnnotationUnsignedShiftRight( AnnotationUnsignedShiftRight right );
++
++    public Object visitAnnotationEquals( AnnotationEquals annotationEquals );
++
++    public Object visitAnnotationNotEquals( AnnotationNotEquals annotationNotEquals );
++
++    public Object visitAnnotationExclusiveOr( AnnotationExclusiveOr annotationExclusiveOr );
++
++    public Object visitAnnotationQuery( AnnotationQuery annotationQuery );
++
++    public Object visitAnnotationCast( AnnotationCast annotationCast );
++
++}
+Index: src/java/com/thoughtworks/qdox/parser/Builder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/parser/Builder.java	(revision 483)
++++ src/java/com/thoughtworks/qdox/parser/Builder.java	(working copy)
+@@ -1,6 +1,7 @@
+ package com.thoughtworks.qdox.parser;
+ 
+-import com.thoughtworks.qdox.parser.structs.AnnoDef;
++import com.thoughtworks.qdox.model.Annotation;
++import com.thoughtworks.qdox.model.Type;
+ import com.thoughtworks.qdox.parser.structs.ClassDef;
+ import com.thoughtworks.qdox.parser.structs.FieldDef;
+ import com.thoughtworks.qdox.parser.structs.MethodDef;
+@@ -24,5 +25,7 @@
+ 
+     void addField(FieldDef def);
+ 
+-    void addAnnotation(AnnoDef def);
++    void addAnnotation(Annotation annotation);
++    
++    Type createType(String name, int dimensions);
+ }
+Index: src/grammar/parser.y
+===================================================================
+--- src/grammar/parser.y	(revision 483)
++++ src/grammar/parser.y	(working copy)
+@@ -1,23 +1,47 @@
+ %{
+ import com.thoughtworks.qdox.parser.*;
+ import com.thoughtworks.qdox.parser.structs.*;
++import com.thoughtworks.qdox.model.*;
++import com.thoughtworks.qdox.model.annotation.*;
+ import java.io.IOException;
+ import java.util.LinkedList;
++import java.util.ArrayList;
++import java.util.List;
+ %}
+ 
+-%token SEMI DOT DOTDOTDOT COMMA STAR EQUALS ANNOSTRING ANNOCHAR SLASH PLUS MINUS
++%token SEMI DOT DOTDOTDOT COMMA STAR PERCENT EQUALS ANNOSTRING ANNOCHAR SLASH PLUS MINUS
+ %token PACKAGE IMPORT PUBLIC PROTECTED PRIVATE STATIC FINAL ABSTRACT NATIVE STRICTFP SYNCHRONIZED TRANSIENT VOLATILE
+ %token CLASS INTERFACE ENUM ANNOINTERFACE THROWS EXTENDS IMPLEMENTS SUPER DEFAULT
+-%token BRACEOPEN BRACECLOSE SQUAREOPEN SQUARECLOSE PARENOPEN PARENCLOSE LESSTHAN GREATERTHAN AMPERSAND QUERY AT
++%token BRACEOPEN BRACECLOSE SQUAREOPEN SQUARECLOSE PARENOPEN PARENCLOSE
++%token LESSTHAN GREATERTHAN LESSEQUALS GREATEREQUALS
++%token LESSTHAN2 GREATERTHAN2 GREATERTHAN3
++%token EXCLAMATION AMPERSAND2 VERTLINE2 EQUALS2 NOTEQUALS
++%token TILDE AMPERSAND VERTLINE CIRCUMFLEX
++%token VOID
++%token QUERY COLON AT
+ %token JAVADOCSTART JAVADOCEND JAVADOCEOL
+ %token CODEBLOCK PARENBLOCK
++%token BYTE SHORT INT LONG CHAR FLOAT DOUBLE BOOLEAN
+ 
+ // strongly typed tokens/types
+-%token <sval> IDENTIFIER JAVADOCTAG JAVADOCTOKEN ANNOTATION
+-%token <sval> BOOLEAN_LITERAL INTEGER_LITERAL FLOAT_LITERAL
++%token <sval> IDENTIFIER JAVADOCTAG JAVADOCTOKEN
++%token <sval> BOOLEAN_LITERAL
++%token <sval> INTEGER_LITERAL
++%token <sval> LONG_LITERAL
++%token <sval> FLOAT_LITERAL
++%token <sval> DOUBLE_LITERAL
++%token <sval> CHAR_LITERAL
++%token <sval> STRING_LITERAL
++%token <ival> VERTLINE2 AMPERSAND2 VERTLINE CIRCUMFLEX AMPERSAND EQUALS2 NOTEQUALS
++%token <ival> LESSTHAN GREATERTHAN LESSEQUALS GREATEREQUALS LESSTHAN2 GREATERTHAN2 GREATERTHAN3
++%token <ival> PLUS MINUS STAR SLASH PERCENT TILDE EXCLAMATION
++%type <sval> name primitiveType
++%type <annoval> value expression literal annotation arrayInitializer
++%type <annoval> conditionalExpression conditionalOrExpression conditionalAndExpression inclusiveOrExpression exclusiveOrExpression andExpression
++%type <annoval> equalityExpression relationalExpression shiftExpression additiveExpression multiplicativeExpression
++%type <annoval> unaryExpression unaryExpressionNotPlusMinus primary
++%type <ival> dims
+ %type <sval> fullidentifier modifier classtype typedeclspecifier typename memberend
+-%type <sval> annotationValueConstant annotationSymConstant
+-%type <oval> annoElementValue
+ %type <ival> dimensions
+ %type <bval> varargs
+ %type <type> type arrayidentifier
+@@ -104,85 +128,169 @@
+ 
+ modifiers:
+     modifiers modifier { modifiers.add($2); } |
+-    modifiers annotation |
++    modifiers annotation { builder.addAnnotation((Annotation) $2); } |
+     ;
+ 
+ 
+-// ----- ANNOTATIONS
++//--------------------------------------------------------------------------------
++// ANNOTATIONS
++//--------------------------------------------------------------------------------
+ 
+-annotationValueConstant:
+-	FLOAT_LITERAL		{ $$ = $1; } |
+-	INTEGER_LITERAL		{ $$ = $1; } |
+-	BOOLEAN_LITERAL		{ $$ = $1; } |
+-	fullidentifier		{ $$ = $1; } |
+-	fullidentifier DOT CLASS { $$ = $1 + ".class"; } |
+-	ANNOSTRING			{
+-		// would prefer to set this as a returned token in flex... how?
+-		String str = lexer.getCodeBody();
+-		str = str.substring( 1, str.length() - 1 );
+-		$$ = str;
+-	} |
+-	ANNOCHAR			{
+-		String str = lexer.getCodeBody();
+-		str = str.substring( 1, str.length() - 1 );
+-		$$ = str;
+-	};
++annotation:
++    AT name 
++    { 
++    	annotationStack.add(annotation);
++    	annotation = new Annotation(builder.createType($2, 0), lexer.getLine()); 
++    }
++    annotationParensOpt
++    {
++    	$$ = annotation;
++    	annotation = (Annotation)annotationStack.remove(annotationStack.size() - 1);
++    };
++    
++annotationParensOpt:
++	|
++	PARENOPEN value PARENCLOSE { annotation.setProperty("value", $2); } |
++	PARENOPEN valuePairs PARENCLOSE |
++	PARENOPEN PARENCLOSE;
++    
++valuePairs:
++    valuePair |
++    valuePairs COMMA valuePair;
++    
++valuePair:
++    IDENTIFIER EQUALS value { annotation.setProperty($1, $3); };
++    
++arrayInitializer:
++    {
++    	annoValueListStack.add(annoValueList);
++    	annoValueList = new ArrayList(); 
++    }
++    BRACEOPEN valuesOpt BRACECLOSE
++    {
++    	$$ = new AnnotationValueList(annoValueList);
++    	annoValueList = (List)annoValueListStack.remove(annoValueListStack.size() - 1);
++    };
++    
++valuesOpt:
++    |
++    values;    
++    
++values:
++	value { annoValueList.add($1); } |
++	values COMMA value { annoValueList.add($3); };
++    
++value:
++    expression { $$ = $1; } |
++    annotation { $$ = $1; } |
++    arrayInitializer { $$ = $1; };
+ 
+-annotationSymConstant:
+-	LESSTHAN	{ $$ = "<"; } |
+-	GREATERTHAN	{ $$ = ">"; } |
+-	STAR		{ $$ = "*"; } |
+-	SLASH		{ $$ = "/"; } |
+-	PLUS		{ $$ = "+"; } |
+-	MINUS		{ $$ = "/"; };
++expression:
++	conditionalExpression { $$ = $1; };
++	
++conditionalExpression:
++	conditionalOrExpression { $$ = $1; } |
++	conditionalOrExpression QUERY expression COLON expression { $$ = new AnnotationQuery($1, $3, $5); };
+ 
+-annotationValueConstants:
+-	annotationValueConstant {
+-		annoConstants.add( $1 );
+-	} | annotationValueConstants annotationSymConstant annotationValueConstant {
+-		annoConstants.add( $2 );
+-		annoConstants.add( $3 );
+-	};
++conditionalOrExpression:
++    conditionalAndExpression { $$ = $1; } |
++	conditionalOrExpression VERTLINE2 conditionalAndExpression { $$ = new AnnotationLogicalOr($1, $3); };
+ 
+-annotation:
+-	{ ano = new AnnoDef(); } annotationWork { builder.addAnnotation(ano); };
++conditionalAndExpression:
++    inclusiveOrExpression { $$ = $1; } |
++	conditionalAndExpression AMPERSAND2 inclusiveOrExpression { $$ = new AnnotationLogicalAnd($1, $3); };
+ 
+-annotationWork:
+-	ANNOTATION {
+-        ano.lineNumber = line;
+-		ano.name = $1.substring(1).trim();
+-	} annoParens;
++inclusiveOrExpression:
++    exclusiveOrExpression { $$ = $1; } |
++    inclusiveOrExpression VERTLINE exclusiveOrExpression { $$ = new AnnotationOr($1, $3); };
+ 
+-annoParens:
+-	|
+-	PARENOPEN annoParenContents PARENCLOSE;
++exclusiveOrExpression:
++	andExpression { $$ = $1; } |
++	exclusiveOrExpression CIRCUMFLEX andExpression { $$ = new AnnotationExclusiveOr($1, $3); };
+ 
+-annoParenContents:
+-	annoElementValue { ano.args.put( "value", $1 ); } |
+-	annoElementValuePairs;
++andExpression:
++    equalityExpression { $$ = $1; } |
++    andExpression AMPERSAND equalityExpression { $$ = new AnnotationAnd($1, $3); };
+ 
+-annoElementValuePairs:
+-	annoElementValuePair |
+-	annoElementValuePairs COMMA annoElementValuePair;
++equalityExpression:
++    relationalExpression { $$ = $1; } |
++    equalityExpression EQUALS2 relationalExpression { $$ = new AnnotationEquals($1, $3); } |
++    equalityExpression NOTEQUALS relationalExpression { $$ = new AnnotationNotEquals($1, $3); };
+ 
+-annoElementValuePair:
+-	IDENTIFIER EQUALS annoElementValue { ano.args.put( $1, $3 ); };
++relationalExpression:
++	shiftExpression { $$ = $1; } |
++	relationalExpression LESSEQUALS shiftExpression { $$ = new AnnotationLessEquals($1, $3); } |
++	relationalExpression GREATEREQUALS shiftExpression { $$ = new AnnotationGreaterEquals($1, $3); } |
++	relationalExpression LESSTHAN shiftExpression { $$ = new AnnotationLessThan($1, $3); } |
++	relationalExpression GREATERTHAN shiftExpression { $$ = new AnnotationGreaterThan($1, $3); };
++	
++shiftExpression:
++	additiveExpression { $$ = $1; } |
++	shiftExpression LESSTHAN2 additiveExpression { $$ = new AnnotationShiftLeft($1, $3); } |
++	shiftExpression GREATERTHAN3 additiveExpression { $$ = new AnnotationUnsignedShiftRight($1, $3); } |
++	shiftExpression GREATERTHAN2 additiveExpression { $$ = new AnnotationShiftRight($1, $3); };
+ 
+-annoElementValue:
+-	PARENOPEN annoElementValue PARENCLOSE { $$ = $2; } |
+-	annotationValueConstants { $$ = annoConstants; annoConstants = new LinkedList(); } |
+-	{	AnnoDef tmpAno = new AnnoDef();
+-		tmpAno.tempAnno = ano;
+-		ano = tmpAno;
+-	} annotationWork { $$ = ano; ano = ano.tempAnno; } |
+-	annoElementValueArrayInitializer { $$ = annoValues; annoValues = new LinkedList(); };
++additiveExpression:
++	multiplicativeExpression { $$ = $1; } |
++	additiveExpression PLUS multiplicativeExpression { $$ = new AnnotationAdd($1, $3); } |
++	additiveExpression MINUS multiplicativeExpression { $$ = new AnnotationSubtract($1, $3); };
+ 
+-annoElementValueArrayInitializer:
+-    BRACEOPEN annoElementValues BRACECLOSE;
++multiplicativeExpression:
++    unaryExpression { $$ = $1; } |
++	multiplicativeExpression STAR unaryExpression { $$ = new AnnotationMultiply($1, $3); } |
++	multiplicativeExpression SLASH unaryExpression { $$ = new AnnotationDivide($1, $3); } |
++	multiplicativeExpression PERCENT unaryExpression { $$ = new AnnotationRemainder($1, $3); };
++	
++unaryExpression:
++    PLUS unaryExpression { $$ = new AnnotationPlusSign($2); } |
++    MINUS unaryExpression { $$ = new AnnotationMinusSign($2); } |
++	unaryExpressionNotPlusMinus { $$ = $1; };
+ 
+-annoElementValues:
+-	annoElementValue { annoValues.add( $1 ); } |
+-	annoElementValues COMMA annoElementValue { annoValues.add( $3 ); };
++unaryExpressionNotPlusMinus:
++	TILDE unaryExpression { $$ = new AnnotationNot($2); } |
++	EXCLAMATION unaryExpression { $$ = new AnnotationLogicalNot($2); } |
++	primary;
++    	
++primary:
++    PARENOPEN primitiveType PARENCLOSE unaryExpression { $$ = new AnnotationCast(builder.createType($2, 0), $4); } |
++	PARENOPEN primitiveType dims PARENCLOSE unaryExpression { $$ = new AnnotationCast(builder.createType($2, $3), $5); } |
++    PARENOPEN name dims PARENCLOSE unaryExpressionNotPlusMinus { $$ = new AnnotationCast(builder.createType($2, $3), $5); } |
++	PARENOPEN name PARENCLOSE unaryExpressionNotPlusMinus { $$ = new AnnotationCast(builder.createType($2, 0), $4); } |
++    PARENOPEN expression PARENCLOSE { $$ = new AnnotationParenExpression($2); } |
++    literal { $$ = $1; } |
++    primitiveType dims DOT CLASS { $$ = new AnnotationTypeRef(builder.createType($1, 0)); } |
++    primitiveType DOT CLASS { $$ = new AnnotationTypeRef(builder.createType($1, 0)); } |
++    name DOT CLASS { $$ = new AnnotationTypeRef(builder.createType($1, 0)); } |
++    name dims DOT CLASS { $$ = new AnnotationTypeRef(builder.createType($1, 0)); } |
++    name { $$ = new AnnotationFieldRef($1); };
++	
++dims:
++    SQUAREOPEN SQUARECLOSE { $$ = 1; } |
++    dims SQUAREOPEN SQUARECLOSE { $$ = $1 + 1; };
++	
++name:
++    IDENTIFIER { $$ = $1; } |
++    name DOT IDENTIFIER { $$ = $1 + "." + $3; };    
++    
++literal:
++    DOUBLE_LITERAL { $$ = new AnnotationConstant(toDouble($1), $1); } |
++    FLOAT_LITERAL { $$ = new AnnotationConstant(toFloat($1), $1); } |
++    LONG_LITERAL { $$ = new AnnotationConstant(toLong($1), $1); } |
++    INTEGER_LITERAL { $$ = new AnnotationConstant(toInteger($1), $1); } |
++    BOOLEAN_LITERAL { $$ = new AnnotationConstant(toBoolean($1), $1); } |
++    CHAR_LITERAL { String s = lexer.getCodeBody(); $$ = new AnnotationConstant(toChar(s), s); } |
++    STRING_LITERAL { String s = lexer.getCodeBody(); $$ = new AnnotationConstant(toString(s), s); };
++        
++primitiveType:
++    BOOLEAN { $$ = "boolean"; } |
++    BYTE { $$ = "byte"; } |
++    SHORT { $$ = "short"; } |
++    INT { $$ = "int"; } |
++    LONG { $$ = "long"; } |
++    CHAR { $$ = "char"; } |
++    FLOAT { $$ = "float"; } |
++    DOUBLE { $$ = "double"; };
++        
+ 
+ // ----- TYPES
+ 
+@@ -409,7 +517,10 @@
+ private StringBuffer textBuffer = new StringBuffer();
+ private ClassDef cls = new ClassDef();
+ private MethodDef mth = new MethodDef();
+-private AnnoDef ano = new AnnoDef();
++private List annotationStack = new ArrayList(); // Use ArrayList intead of Stack because it is unsynchronized 
++private Annotation annotation = null;
++private List annoValueListStack = new ArrayList(); // Use ArrayList intead of Stack because it is unsynchronized
++private List annoValueList = null;
+ private FieldDef param = new FieldDef();
+ private java.util.Set modifiers = new java.util.HashSet();
+ private TypeDef fieldType;
+@@ -417,9 +528,6 @@
+ private int column;
+ private boolean debugLexer;
+ 
+-private LinkedList annoConstants = new LinkedList();
+-private LinkedList annoValues = new LinkedList();
+-
+ private void appendToBuffer(String word) {
+     if (textBuffer.length() > 0) {
+         char lastChar = textBuffer.charAt(textBuffer.length() - 1);
+@@ -481,8 +589,10 @@
+     int ival;
+ 	boolean bval;
+     TypeDef type;
++    AnnotationValue annoval;
+ }
+ 
++
+ private void makeField(TypeDef field, String body) {
+     FieldDef fd = new FieldDef();
+     fd.lineNumber = line;
+@@ -494,3 +604,197 @@
+     builder.addField(fd);
+ }
+ 
++private String convertString(String str) {
++	StringBuffer buf = new StringBuffer();
++	boolean escaped = false;
++	int unicode = 0;
++	int value = 0;
++	int octal = 0;
++	boolean consumed = false;
++	
++	for(int i = 0; i < str.length(); ++ i) {
++		char ch = str.charAt( i );
++		
++		if(octal > 0) {
++			if( value >= '0' && value <= '7' ) {
++				value = ( value << 3 ) | Character.digit( ch, 8 );
++				-- octal;
++				consumed = true;
++			}
++			else {
++				octal = 0;
++			}
++			
++			if( octal == 0 ) {
++				buf.append( (char) value );		
++				value = 0;
++			}
++		}
++		
++		if(!consumed) {
++			if(unicode > 0) {
++				value = ( value << 4 ) | Character.digit( ch, 16 );
++				
++				-- unicode;
++		
++				if(unicode == 0) {
++					buf.append( (char)value );
++					value = 0;
++				}
++			}
++			else if(ch == '\\') {
++				escaped = true;
++			}
++			else if(escaped) {
++				if(ch == 'u' || ch == 'U') {
++					unicode = 4;
++				}
++				else if(ch >= '0' && ch <= '7') {
++					octal = (ch > '3') ? 1 : 2;
++					value = Character.digit( ch, 8 );
++				}
++				else {
++					switch( ch ) {
++						case 'b':
++							buf.append('\b');
++							break;
++							
++						case 'f':
++							buf.append('\f');
++							break;
++							
++						case 'n':
++							buf.append('\n');
++							break;
++							
++						case 'r':
++							buf.append('\r');
++							break;
++							
++						case 't':
++							buf.append('\t');
++							break;
++							
++						case '\'':
++							buf.append('\'');
++							break;
++	
++						case '\"':
++							buf.append('\"');
++							break;
++	
++						case '\\':
++							buf.append('\\');
++							break;
++							
++						default:
++							yyerror( "Illegal escape character '" + ch + "'" );
++					}
++				}
++				
++				escaped = false;
++			}
++			else {
++				buf.append( ch );
++			}
++		}
++	}
++
++	return buf.toString();
++}
++
++private Boolean toBoolean(String str) {
++	str = str.trim();
++
++	return new Boolean( str );
++}
++
++private Integer toInteger(String str) {
++	str = str.trim();
++	
++	Integer result;
++	
++	if(str.startsWith("0x") || str.startsWith( "0X" ) ) {
++		result = new Integer( Integer.parseInt( str.substring( 2 ), 16 ) );
++	}
++	else if(str.length() > 1 && str.startsWith("0") ) {
++		result = new Integer( Integer.parseInt( str.substring( 1 ), 8 ) );
++	}
++	else {
++		result = new Integer( str );
++	}
++	
++	return result;
++}
++
++private Long toLong(String str) {
++	str = str.trim();
++
++	Long result;
++	
++	if( !str.endsWith("l") && !str.endsWith("L") ) {
++		yyerror( "Long literal must end with 'l' or 'L'." );
++	}
++	
++	int len = str.length() - 1;
++	
++	if(str.startsWith("0x") || str.startsWith( "0X" ) ) {
++		result = new Long( Long.parseLong( str.substring( 2, len ), 16 ) );
++	}
++	else if(str.startsWith("0") ) {
++		result = new Long( Long.parseLong( str.substring( 1, len ), 8 ) );
++	}
++	else {
++		result = new Long( str.substring( 0, len ) );
++	}
++
++	return result;
++}
++
++private Float toFloat(String str) {
++	str = str.trim();
++	return new Float( str );
++}
++
++private Double toDouble(String str) {
++	str = str.trim();
++
++	if( !str.endsWith("d") && !str.endsWith("D") ) {
++		yyerror( "Double literal must end with 'd' or 'D'." );
++	}
++	
++	return new Double( str.substring( 0, str.length() - 1 ) );
++}
++
++/**
++ * Convert a character literal into a character.
++ */
++private Character toChar(String str) {
++	str = str.trim();
++
++	if( !str.startsWith("'") && !str.endsWith("'") ) {
++		yyerror("Character must be single quoted.");
++	}
++
++	String str2 = convertString( str.substring( 1, str.length() - 1 ) );
++	
++	if( str2.length() != 1) {
++		yyerror("Only one character allowed in character constants.");
++	}
++	
++	return new Character( str2.charAt( 0 ) );
++}
++
++/**
++ * Convert a string literal into a string.
++ */
++private String toString(String str) {
++	str = str.trim();
++
++	if( str.length() < 2 && !str.startsWith("\"") && !str.endsWith("\"") ) {
++		yyerror("String must be double quoted.");
++	}
++
++	String str2 = convertString( str.substring( 1, str.length() - 1 ) );
++	return str2;
++}
+\ No newline at end of file
+Index: src/grammar/lexer.flex
+===================================================================
+--- src/grammar/lexer.flex	(revision 483)
++++ src/grammar/lexer.flex	(working copy)
+@@ -22,7 +22,8 @@
+     private boolean javaDocNewLine;
+     private boolean javaDocStartedContent;
+     private StringBuffer codeBody = new StringBuffer(8192);
+-	private boolean annoExpected;
++	private boolean at;
++	private boolean annotation;
+     private boolean newMode;
+     private boolean anonymousMode;
+     private boolean enumMode;
+@@ -69,12 +70,17 @@
+ Eol                     = \r|\n|\r\n
+ WhiteSpace              = {Eol} | [ \t\f]
+ CommentChar             = ( [^ \t\r\n*] | "*"+ [^ \t\r\n/*] )
+-IntegerLiteral			= (( [1-9] ([0-9])* ) | ( "0" [xX] ([0-9]|[a-f]|[A-F])+ ) | ( "0" ([0-7])* )) ([lL])?
++IntegerLiteral			= (( [1-9] ([0-9])* ) | ( "0" [xX] ([0-9]|[a-f]|[A-F])+ ) | ( "0" ([0-7])* ))
++LongLiteral				= (( [1-9] ([0-9])* ) | ( "0" [xX] ([0-9]|[a-f]|[A-F])+ ) | ( "0" ([0-7])* )) [lL]
+ Exponent				= [eE] [+-]? ([0-9])+
+-FloatLiteral			= ( [0-9]+ ("." [0-9]+)? ({Exponent})? ([fFdD])? ) |
+-						  ( "." [0-9]+ ({Exponent})? ([fFdD])? ) |
+-						  ( ([0-9])+ {Exponent} ([fFdD])? ) |
+-						  ( ([0-9])+ ({Exponent})? [fFdD] )
++FloatLiteral			= ( [0-9]+ ("." [0-9]+)? ({Exponent})? ([fF])? ) |
++						  ( "." [0-9]+ ({Exponent})? ([fF])? ) |
++						  ( ([0-9])+ {Exponent} ([fF])? ) |
++						  ( ([0-9])+ ({Exponent})? [fF] )
++DoubleLiteral			= ( [0-9]+ ("." [0-9]+)? ({Exponent})? [dD] ) |
++						  ( "." [0-9]+ ({Exponent})? [dD] ) |
++						  ( ([0-9])+ {Exponent} [dD] ) |
++						  ( ([0-9])+ ({Exponent})? [dD] )
+ Id						= [:jletter:] [:jletterdigit:]*
+ 
+ %state JAVADOC CODEBLOCK PARENBLOCK ASSIGNMENT STRING CHAR SINGLELINECOMMENT MULTILINECOMMENT ANNOTATION ANNOSTRING ANNOCHAR
+@@ -110,42 +116,52 @@
+     "]"                 { nestingDepth--; return Parser.SQUARECLOSE; }
+     "("                 {
+         nestingDepth++;
+-		if( annoExpected ) { pushState(ANNOTATION); }
++		
++        if( annotation ) {
++            pushState(ANNOTATION);
++        }
++
++        annotation = false;
++
+         if (enumMode) {
+           pushState(PARENBLOCK);
+         } else {
+           return Parser.PARENOPEN;
+         }
+     }
+-
++    
+     ")"                 { nestingDepth--; return Parser.PARENCLOSE; }
+     "<"                 { return Parser.LESSTHAN; }
+     ">"                 { return Parser.GREATERTHAN; }
+     "&"                 { return Parser.AMPERSAND; }
+     "?"                 { return Parser.QUERY; }
+ 
+-    "@"                 {
+-		return Parser.AT;
++    "@" {WhiteSpace}* "interface" {
++    	classDepth++;
++        return Parser.ANNOINTERFACE;
+ 	}
+ 
+     "class"             {
+         classDepth++;
+         return Parser.CLASS; 
+     }
++    
+     "interface"         { 
+         classDepth++;
+         return Parser.INTERFACE;
+     }
++    
+     "enum"              {
+         classDepth++;
+         enumMode = true;
+         return Parser.ENUM;
+     }
+-	"@" {WhiteSpace}* "interface"		{
+-        classDepth++;
+-        return Parser.ANNOINTERFACE;
+-	}
+ 
++    "@"                 {
++        at = true;                
++        return Parser.AT;
++    }
++
+     "{"                 {
+         nestingDepth++;
+         if (nestingDepth == classDepth + 1) {
+@@ -156,6 +172,7 @@
+             return Parser.BRACEOPEN;
+         }
+     }
++    
+     "}"                 { 
+         nestingDepth--;
+         if (nestingDepth == classDepth - 1) {
+@@ -183,14 +200,11 @@
+     }
+ 
+     [:jletter:] [:jletterdigit:]* {
+-		annoExpected = false;
++        annotation = at;
++        at = false;
++        
+         return Parser.IDENTIFIER;
+     }
+-
+-	"@" {WhiteSpace}* {Id} ( {WhiteSpace}* "." {WhiteSpace}* {Id} )* {
+-		annoExpected = true;
+-		return Parser.ANNOTATION;
+-	}
+ }
+ 
+ <JAVADOC> {
+@@ -225,7 +239,7 @@
+ }
+ 
+ <ANNOTATION> {
+-	"("                 { nestingDepth++; return Parser.PARENOPEN; }
++	"("                 { ++ nestingDepth; return Parser.PARENOPEN; }
+     ")"                 { if( --nestingDepth == classDepth) { popState(); } return Parser.PARENCLOSE; }
+ 
+ 	","                 { return Parser.COMMA; }
+@@ -235,40 +249,69 @@
+     "}"                 { nestingDepth--; return Parser.BRACECLOSE; }
+ 
+ 	"\""                { appendingToCodeBody=true; codeBody.append("\""); pushState(ANNOSTRING); }
+-    \'                  { appendingToCodeBody=true; codeBody.append("\'"); pushState(ANNOCHAR); }
++    "\'"                { appendingToCodeBody=true; codeBody.append("\'"); pushState(ANNOCHAR); }
+ 
+ 	"."                 { return Parser.DOT; }
+ 
++    "?"                 { return Parser.QUERY; }
++    ":"                 { return Parser.COLON; }
++    "<<"                { return Parser.LESSTHAN2; }
++    ">>>"               { return Parser.GREATERTHAN3; }
++    ">>"                { return Parser.GREATERTHAN2; }
++    "=="                { return Parser.EQUALS2; }
++    "!="                { return Parser.NOTEQUALS; }
+     "<"                 { return Parser.LESSTHAN; }
+     ">"                 { return Parser.GREATERTHAN; }
++    "<="                { return Parser.LESSEQUALS; }
++    ">="                { return Parser.GREATEREQUALS; }
+     "*"                 { return Parser.STAR; }
+     "/"                 { return Parser.SLASH; }
++    "%"                 { return Parser.PERCENT; }
+     "+"                 { return Parser.PLUS; }
+     "-"                 { return Parser.MINUS; }
++    
++    "byte"              { return Parser.BYTE; }
++    "char"              { return Parser.CHAR; }
++    "short"             { return Parser.SHORT; }
++    "int"               { return Parser.INT; }
++    "long"              { return Parser.LONG; }
++    "float"             { return Parser.FLOAT; }
++    "double"            { return Parser.DOUBLE; }
+ 
++    "&&"                { return Parser.AMPERSAND2; }
++    "||"                { return Parser.VERTLINE2; }
++    "!"                	{ return Parser.EXCLAMATION; }
++
++    "&"                 { return Parser.AMPERSAND; }
++    "|"                 { return Parser.VERTLINE; }
++    "^"                	{ return Parser.CIRCUMFLEX; }
++    "~"                 { return Parser.TILDE; }
++
+ 	{IntegerLiteral}	{ return Parser.INTEGER_LITERAL; }
++	{LongLiteral}		{ return Parser.LONG_LITERAL; }
+ 	{FloatLiteral}		{ return Parser.FLOAT_LITERAL; }
++	{DoubleLiteral}		{ return Parser.DOUBLE_LITERAL; }
+ 	"true" | "false"	{ return Parser.BOOLEAN_LITERAL; }
++	
++	"class"				{ return Parser.CLASS; }
+ 
+ 	[:jletter:] [:jletterdigit:]* {
+         return Parser.IDENTIFIER;
+     }
+ 
+-	"@" {WhiteSpace}* [:jletter:] [:jletterdigit:]* {
+-		return Parser.ANNOTATION;
+-	}
++	"@" 				{ return Parser.AT; }
++}
+ 
+-	<ANNOSTRING> {
+-		"\""            { codeBody.append("\""); popState(); appendingToCodeBody=false; return Parser.ANNOSTRING; }
+-		"\\\""          { codeBody.append("\\\""); }
+-		"\\\\"          { codeBody.append("\\\\"); }
+-	}
++<ANNOSTRING> {
++	"\""            { codeBody.append("\""); popState(); appendingToCodeBody=false; return Parser.STRING_LITERAL; }
++	"\\\""          { codeBody.append("\\\""); }
++	"\\\\"          { codeBody.append("\\\\"); }
++}
+ 
+-	<ANNOCHAR> {
+-		\'              { codeBody.append("\'"); popState(); appendingToCodeBody=false; return Parser.ANNOCHAR; }
+-		"\\'"           { codeBody.append("\\'"); }
+-		"\\\\"          { codeBody.append("\\\\"); }
+-	}
++<ANNOCHAR> {
++	\'              { codeBody.append("\'"); popState(); appendingToCodeBody=false; return Parser.CHAR_LITERAL; }
++	"\\'"           { codeBody.append("\\'"); }
++	"\\\\"          { codeBody.append("\\\\"); }
+ }
+ 
+ <PARENBLOCK> {

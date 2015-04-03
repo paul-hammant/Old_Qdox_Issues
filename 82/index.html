@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html class="mozilla"><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    
+
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<title>[QDOX-82] multiline'd tag attribute values not working anymore - jira.codehaus.org</title>
+<script type="text/javascript"><!--
+/* Script removed by snapshot save */
+--></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+<link rel="shortcut icon" href="index_files/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="https://jira.codehaus.org/osd.jsp" title="[QDOX-82] multiline'd tag attribute values not working anymore - jira.codehaus.org">
+
+    
+
+
+<!--[if IE]><![endif]-->
+<script type="text/javascript"><!--
+/* Script removed by snapshot save */
+--></script>
+<link type="text/css" rel="stylesheet" href="index_files/batch.css" media="all">
+<!--[if lte IE 8]>
+<link type="text/css" rel="stylesheet" href="/s/d41d8cd98f00b204e9800998ecf8427e/en_UK-huda6k-1988229788/6162/7/6/_/download/superbatch/css/batch.css?conditionalComment=lte+IE+8" media="all">
+<![endif]-->
+<!--[if lte IE 9]>
+<link type="text/css" rel="stylesheet" href="/s/d41d8cd98f00b204e9800998ecf8427e/en_UK-huda6k-1988229788/6162/7/6/_/download/superbatch/css/batch.css?conditionalComment=lte+IE+9" media="all">
+<![endif]-->
+<link type="text/css" rel="stylesheet" href="index_files/batch-1.css" media="all">
+<script type="text/javascript" src="index_files/batch.js"></script><style type="text/css"></style>
+<!--[if lte IE 8]>
+<script type="text/javascript" src="/s/d41d8cd98f00b204e9800998ecf8427e/en_UK-huda6k-1988229788/6162/7/6/_/download/superbatch/js/batch.js?conditionalComment=lte+IE+8" ></script>
+<![endif]-->
+<script type="text/javascript" src="index_files/batch-1.js"></script>
+<script type="text/javascript" src="index_files/jira.webresources_calendar-en.js"></script>
+<script type="text/javascript" src="index_files/com.atlassian.administraticksearch-webresources.js"></script>
+
+<script type="text/javascript" src="index_files/shortcuts.js"></script>
+
+
+    
+    
+    
+    <meta name="decorator" content="atl.general">
+    <meta id="isNavigator" name="isNavigator" content="true">
+    <meta name="ajs-user.search.mode" content="basic">
+    <meta name="ajs-issue-search-help-title" content="Searching for Issues">
+    <meta name="ajs-issue-search-help-url" content="https://docs.atlassian.com/jira/docs-061/Searching+for+Issues">
+    <meta name="ajs-advanced-search-help-title" content="Performing Advanced Searches">
+    <meta name="ajs-advanced-search-help-url" content="https://docs.atlassian.com/jira/docs-061/Advanced+Searching">
+    
+</head>
+<body data-aui-version="5.1.8" id="jira" class="aui-layout aui-theme-default ka ajax-issue-search-and-view page-type-navigator navigator-issue-only" data-version="6.1.6">
+<div id="page">
+    <header id="header" style="display:none" role="banner">
+        
+
+
+
+    
+        
+            
+        
+    
+
+
+
+
+
+
+
+        
+
+
+
+
+        
+
+
+
+
+
+<fieldset class="parameters hidden dont-default-focus">
+    <input title="tzdetect.pref.tzid" value="America/Chicago" type="hidden">
+    <input title="tzdetect.pref.tzname" value="(GMT-06:00) Chicago" type="hidden">
+    <input title="tzdetect.pref.tzoffset" value="(GMT-06:00)" type="hidden">
+    <input title="tzdetect.pref.tzdst" value="true" type="hidden">
+    <input title="tzdetect.pref.nothanks" value="" type="hidden">
+</fieldset>
+<nav data-aui-responsive="true" class="aui-header aui-dropdown2-trigger-group" role="navigation"><div class="aui-header-inner"><div class="aui-header-before"><a class="aui-dropdown2-trigger app-switcher-trigger" aria-owns="app-switcher" aria-haspopup="true" tabindex="0"><span class="aui-icon aui-icon-small aui-iconfont-appswitcher">Linked Applications</span></a><div id="app-switcher" class="aui-dropdown2 aui-style-default"><div class="aui-dropdown2-section"><ul class="nav-links"><li class="nav-link nav-link-local"><a href="https://jira.codehaus.org/" class="aui-dropdown2-radio interactive checked" title="https://jira.codehaus.org/"><span class="nav-link-label">jira.codehaus.org</span></a></li><li class="nav-link"><a href="http://jira.sonarsource.com/" class="aui-dropdown2-radio interactive" title="http://jira.sonarsource.com/"><span class="nav-link-label">SonarSource</span></a></li><li class="nav-link"><a href="http://docs.codehaus.org/" class="aui-dropdown2-radio interactive" title="http://docs.codehaus.org/"><span class="nav-link-label">Codehaus</span></a></li><li class="nav-link"><a href="http://xircles.codehaus.org/" class="aui-dropdown2-radio interactive" title="http://xircles.codehaus.org"><span class="nav-link-label">Xircles</span></a></li></ul></div></div><script><!--
+/* Script removed by snapshot save */
+--></script></div><div class="aui-header-primary"><h1 id="logo" class="aui-header-logo aui-header-logo-custom"><a href="https://jira.codehaus.org/secure/MyJiraHome.jspa"><img data-aui-responsive-header-index="0" src="urn:download-error:http://www.codehaus.org/codehaus-small.gif" alt="jira.codehaus.org"></a></h1><ul style="width: auto;" class="aui-nav">
+
+
+
+
+<li><a class="aui-nav-link aui-dropdown2-ajax jira-ajax-menu aui-dropdown2-trigger " href="https://jira.codehaus.org/secure/Dashboard.jspa" id="home_link" accesskey="d" title="View and manage your dashboards" aria-haspopup="true" aria-owns="home_link-content">Dashboards</a><div id="home_link-content" class="aui-dropdown2 aui-style-default" data-aui-dropdown2-ajax-key="home_link"></div></li><li><a class="aui-nav-link aui-dropdown2-ajax jira-ajax-menu aui-dropdown2-trigger " href="/Old_Qdox_Issues/index.html" id="browse_link" accesskey="p" title="View recent projects and browse a list of projects" aria-haspopup="true" aria-owns="browse_link-content">Projects</a><div id="browse_link-content" class="aui-dropdown2 aui-style-default" data-aui-dropdown2-ajax-key="browse_link"></div></li><li><a class="aui-nav-link aui-dropdown2-ajax jira-ajax-menu aui-dropdown2-trigger " href="https://jira.codehaus.org/secure/IssueNavigator.jspa" id="find_link" accesskey="i" title="Search for issues and view recent issues" aria-haspopup="true" aria-owns="find_link-content">Issues</a><div id="find_link-content" class="aui-dropdown2 aui-style-default" data-aui-dropdown2-ajax-key="find_link"></div></li>
+<li style="display: none;"><a id="aui-responsive-header-dropdown-trigger-0" class="aui-dropdown2-trigger" aria-owns="aui-responsive-header-dropdown-content-0" aria-haspopup="true" href="#">More<span class="icon aui-icon-dropdown"></span></a><div id="aui-responsive-header-dropdown-content-0" class="aui-dropdown2 aui-style-default"><div class="aui-dropdown2-section"><ul id="aui-responsive-header-dropdown-list-0"></ul></div></div></li></ul></div><div class="aui-header-secondary"><ul class="aui-nav"><li>
+    <form action="https://jira.codehaus.org/secure/QuickSearch.jspa" method="post" id="quicksearch" class="aui-quicksearch dont-default-focus ajs-dirty-warning-exempt">
+        <input id="quickSearchInput" class="search" title="Quick Search ( Type '/' )" placeholder="Quick Search" name="searchString" accesskey="q" type="text">
+        <input class="hidden" value="Search" type="submit">
+    </form>
+</li>
+
+
+
+    <li id="system-help-menu">
+        <a class="aui-nav-link aui-dropdown2-trigger" aria-haspopup="true" aria-owns="system-help-menu-content" href="https://docs.atlassian.com/jira/docs-061/JIRA+Documentation" target="_blank" title="Help"><span class="aui-icon aui-icon-small aui-iconfont-help">Help</span></a>
+        <div id="system-help-menu-content" class="aui-dropdown2 aui-style-default">
+                            <div class="aui-dropdown2-section">
+                                                                <ul id="jira-help" class="aui-list-truncate">
+                                                            <li>
+                                    <a id="view_help" class="interactive" title="Goto the online documentation for JIRA" href="https://docs.atlassian.com/jira/docs-061/JIRA+Documentation" target="_blank">Online Help</a>
+                                </li>
+                                                            <li>
+                                    <a id="keyshortscuthelp" class="interactive" title="Get more information about JIRA's Keyboard Shortcuts ( Type '?' )" href="https://jira.codehaus.org/secure/ViewKeyboardShortcuts%21default.jspa" target="_blank">Keyboard Shortcuts</a>
+                                </li>
+                                                            <li>
+                                    <a id="view_about" class="interactive" title="Get more information about JIRA" href="https://jira.codehaus.org/secure/AboutPage.jspa">About JIRA</a>
+                                </li>
+                                                            <li>
+                                    <a id="view_credits" class="interactive" title="See who did what" href="https://jira.codehaus.org/secure/JiraCreditsPage%21default.jspa" target="_blank">JIRA Credits</a>
+                                </li>
+                                                            <li>
+                                    <a id="whats-new-menu-link" class="interactive" href="https://docs.atlassian.com/jira/docs-061/whatsnew/iframe">What?s New</a>
+                                </li>
+                                                    </ul>
+                                    </div>
+                    </div>
+    </li>
+
+
+
+
+
+
+
+
+
+<li id="user-options">
+            <a class="aui-nav-link login-link" href="https://jira.codehaus.org/login.jsp?os_destination=%2Fbrowse%2FQDOX-82">Log In</a>
+                <div id="user-options-content" class="aui-dropdown2 aui-style-default">
+                            <div class="aui-dropdown2-section">
+                                                        </div>
+                    </div>
+    </li>
+</ul></div></div><!-- .aui-header-inner--></nav><!-- .aui-header -->
+    </header>
+    
+
+
+<div id="announcement-banner" class="alertHeader">
+    <div style="position: absolute; right: 20em; top: -2em">
+  <a href="https://xircles.codehaus.org/signup">Signup</a>
+</div>
+</div>
+
+
+    <section id="content" role="main">
+        
+    
+
+    <div class="issue-container ">
+                                    <div id="issue-content" class="issue-edit-form">
+                    <header id="stalker" class="issue-header js-stalker">
+                        <div class="issue-header-content"><header class="aui-page-header"><div class="aui-page-header-inner"><div class="aui-page-header-image"><span id="10103" class="aui-avatar aui-avatar-large aui-avatar-project jira-system-avatar"><span class="aui-avatar-inner"><img id="project-avatar" alt="QDox" src="index_files/projectavatar.png"></span></span></div><!-- .aui-page-header-image --><div class="aui-page-header-main"><ol class="aui-nav aui-nav-breadcrumbs"><li><a id="project-name-val" href="/Old_Qdox_Issues/index.html">QDox</a></li><li><a class="issue-link" data-issue-key="QDOX-82" href="#" id="key-val" rel="20643">QDOX-82</a></li></ol><h1 id="summary-val">multiline'd tag attribute values not working anymore</h1></div><!-- .aui-page-header-main --><div class="aui-page-header-actions"><div id="issue-header-pager"></div></div><!-- .aui-page-header-actions --></div><!-- .aui-page-header-inner --></header><!-- .aui-page-header --><div class="command-bar"><div class="ops-cont"><div class="ops-menus aui-toolbar"><div class="toolbar-split toolbar-split-left"><ul id="opsbar-ops-login-lnk_container" class="toolbar-group pluggable-ops"><li class="toolbar-item"><a id="ops-login-lnk" style="display:none" title="Log In" class="toolbar-trigger" href="https://jira.codehaus.org/login.jsp?os_destination=%2Fbrowse%2FQDOX-82"><span class="trigger-label">Log In</span></a></li></ul><ul id="opsbar-opsbar-operations" class="toolbar-group pluggable-ops"></ul><ul id="opsbar-opsbar-transitions" class="toolbar-group pluggable-ops"></ul><ul id="opsbar-opsbar-admin" class="toolbar-group pluggable-ops"></ul></div><div class="toolbar-split toolbar-split-right"><ul id="opsbar-jira.issue.tools" style="display:none" class="toolbar-group pluggable-ops"><li class="toolbar-item toolbar-dropdown"><div><a href="#" id="viewissue-export" title="Export this issue in another format" data-hide-on-scroll=".split-view .issue-container" data-contain-to-window="true" class="toolbar-trigger  js-default-dropdown"><span class="icon icon-export viewissue-export"></span> <span class="dropdown-text">Export</span><span class="icon drop-menu"></span></a><div class="aui-list hidden"><ul class="aui-list-section aui-first aui-last"><li class="aui-list-item"><a href="https://jira.codehaus.org/si/jira.issueviews:issue-xml/QDOX-82/QDOX-82.xml" class="aui-list-item-link" id="jira.issueviews:issue-xml"><span class="trigger-label">XML</span></a></li><li class="aui-list-item"><a href="https://jira.codehaus.org/si/jira.issueviews:issue-word/QDOX-82/QDOX-82.doc" class="aui-list-item-link" id="jira.issueviews:issue-word"><span class="trigger-label">Word</span></a></li><li class="aui-list-item"><a href="https://jira.codehaus.org/si/jira.issueviews:issue-html/QDOX-82/QDOX-82.html" class="aui-list-item-link" id="jira.issueviews:issue-html"><span class="trigger-label">Printable</span></a></li></ul></div></div></li></ul></div></div></div></div></div>
+                    </header>
+                    <div class="issue-body-content">
+                        <div class="aui-group issue-body"><div class="aui-item issue-main-column"><div id="details-module" class="module toggle-wrap"><div id="details-module_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Details</h2></div><div class="mod-content">
+
+
+
+
+<ul id="issuedetails" class="property-list two-cols">
+    <li class="item">
+        <div class="wrap">
+            <strong class="name">Type:</strong>
+            <span id="type-val" class="value">
+                                <img alt="Bug" src="index_files/bug.png" title="Bug - A problem which impairs or prevents the functions of the product." height="16" width="16"> Bug
+            </span>
+        </div>
+    </li>
+    <li class="item item-right">
+        <div class="wrap">
+            <strong class="name">Status:</strong>
+            <span id="status-val" class="value">
+                                
+
+<img src="index_files/resolved.png" alt="Resolved" title="Resolved - A resolution has been taken, and it is awaiting verification by reporter. From here issues are either reopened, or are closed." height="16" width="16"> Resolved
+            </span>
+                    </div>
+    </li>
+            <li class="item">
+            <div class="wrap">
+                <strong class="name">Priority:</strong>
+                <span id="priority-val" class="value">
+                                        <img alt="Major" src="index_files/major.png" title="Major - Major loss of function." height="16" width="16"> Major
+                </span>
+            </div>
+        </li>
+                                <li class="item item-right">
+            <div class="wrap">
+                <strong class="name">Resolution:</strong>
+                <span id="resolution-val" class="value resolved">
+                                     Fixed
+                                </span>
+            </div>
+        </li>
+                <li class="item">
+            <div class="wrap">
+                <strong class="name">Affects Version/s:</strong>
+                <span id="versions-val" class="value">
+                                            None
+                                    </span>
+            </div>
+        </li>
+                <li class="item item-right">
+            <div class="wrap">
+                <strong class="name">Fix Version/s:</strong>
+                <span id="fixfor-val" class="value">
+                                            <span style="height: auto;" class="shorten" id="fixVersions-field">
+                                                            <a href="/Old_Qdox_Issues/index.html/fixforversion/15020" title="1.10 ">1.10</a>                                                    </span>
+                                    </span>
+            </div>
+        </li>
+                <li class="item">
+            <div class="wrap">
+                <strong class="name">Component/s:</strong>
+                <span id="components-val" class="value">
+                                            <span style="height: auto;" class="shorten" id="components-field">
+                                                            <a href="/Old_Qdox_Issues/index.html/component/10124" title="Parser ">Parser</a>                                                    </span>
+                                    </span>
+            </div>
+        </li>
+                    <li class="item full-width">
+            <div class="wrap" id="wrap-labels">
+                <strong class="name">Labels:</strong>
+                    <div class="labels-wrap value">
+            <span class="labels" id="labels-20643-value">None</span>
+                </div>
+            </div>
+        </li>
+        </ul>
+
+<div id="customfieldmodule">
+    <div class="aui-tabs horizontal-tabs" id="customfield-tabs">
+                    <div id="customfield-panel-1" class="tabs-pane active-pane">
+                        <ul class="property-list">
+                                                <li id="rowForcustomfield_10210" class="item">
+                        <div class="wrap">
+                            <strong title="Number of attachments " class="name">Number of attachments :</strong>
+                            <div id="customfield_10210-val" class="value type-attachments" data-fieldtype="attachments" data-fieldtypecompletekey="com.atlassian.jira.toolkit:attachments">
+                                    2
+
+                            </div>
+                        </div>
+                    </li>
+                                        </ul>
+        </div>
+        </div></div>
+</div></div><div id="descriptionmodule" class="module toggle-wrap"><div id="descriptionmodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Description</h2></div><div class="mod-content"><div id="description-val" class="field-ignore-highlight">
+    <div class="user-content-block">
+                    <p>Some undefined time ago, it was possible to parse the following source<br>
+with qdox and retrieve a sensible value for the "foo" attribute of the<br>
+"bar.baz" tag -&gt; "this is multilined"</p>
+
+<p>/**</p>
+<ul>
+	<li>@bar.baz foo="this is</li>
+	<li>      multilined"<br>
+*/</li>
+</ul>
+
+
+<p>with the latest snapshot, this unfortunately doesn't work anymore.</p>
+
+<p>I haven't found an open related jira issue, but before creating one, I<br>
+wanted to make sure this wasn't on purpose ?</p>
+
+<p>I think allowing this makes sense, for instance for xdoclet because<br>
+some attributes might have longish values, like the "description"<br>
+elements for servlets and such.</p>
+            </div>
+</div>
+</div></div><div id="attachmentmodule" class="module toggle-wrap"><div id="attachmentmodule_heading" class="mod-header"><ul class="ops"><li class="drop"><div class="aui-dd-parent"><a href="#" class="icon drop-menu js-default-dropdown" title="Options"><span>Options</span></a><div class="aui-dropdown-content aui-list"><ul id="attachment-sorting-options" class="aui-list-section aui-first"><li class="aui-list-item"><a id="attachment-sort-key-name" href="/Old_Qdox_Issues/82?attachmentSortBy=fileName#attachmentmodule" class="aui-list-checked aui-checked aui-list-item-link" title="viewissue.subtasks.tab.show.all.name"><span>Sort By Name</span></a></li><li class="aui-list-item"><a id="attachment-sort-key-date" href="/Old_Qdox_Issues/82?attachmentSortBy=dateTime#attachmentmodule" class="aui-list-checked aui-list-item-link" title="Sort By Date"><span>Sort By Date</span></a></li></ul><ul id="attachment-sorting-order-options" class="aui-list-section"><li class="aui-list-item"><a id="attachment-sort-direction-asc" href="/Old_Qdox_Issues/82?attachmentOrder=asc#attachmentmodule" class="aui-list-checked aui-checked aui-list-item-link" title="Ascending"><span>Ascending</span></a></li><li class="aui-list-item"><a id="attachment-sort-direction-desc" href="/Old_Qdox_Issues/82?attachmentOrder=desc#attachmentmodule" class="aui-list-checked aui-list-item-link" title="Descending"><span>Descending</span></a></li></ul><ul id="attachment-manage-options" class="aui-list-section aui-last"><li class="aui-list-item"><a id="aszip" href="/Old_Qdox_Issues/attachmentzip/20643.zip" class="aui-list-checked aui-list-item-link" title="Download all attachments as a ZIP file"><span>Download All</span></a></li></ul></div></div></li></ul><h2 class="toggle-title">Attachments</h2></div><div class="mod-content">
+            <ol id="file_attachments" class="item-attachments">
+                            <li class="attachment-content">
+                                            <div class="attachment-thumb">
+                            <a href="/Old_Qdox_Issues/attachment/13932/MultineLineAttributeValuesWithQDoxTestCase.java" draggable="true" data-downloadurl="text/plain:MultineLineAttributeValuesWithQDoxTestCase.java:/Old_Qdox_Issues/attachment/13932/MultineLineAttributeValuesWithQDoxTestCase.java">
+                                    <img src="index_files/java.gif" alt="Java Source File" height="16" border="0" width="16">
+                            </a>
+                        </div>
+                        <dl>
+                                <dt class="attachment-title">
+        <a href="/Old_Qdox_Issues/attachment/13932/MultineLineAttributeValuesWithQDoxTestCase.java" title="Latest  07/Feb/05 5:08 PM - Grégory Joseph (old account)" draggable="true" data-downloadurl="text/plain:MultineLineAttributeValuesWithQDoxTestCase.java:/Old_Qdox_Issues/attachment/13932/MultineLineAttributeValuesWithQDoxTestCase.java">MultineLineAttributeValuesWithQDoxTestCase.java
+        </a>
+    </dt>
+    <dd class="attachment-delete">
+                    <span class="icon"></span>
+            </dd>
+    <dd class="attachment-date"><time class="livestamp" datetime="2005-02-07T17:08-0600">07/Feb/05 5:08 PM</time></dd>
+    <dd class="attachment-size">1 kB</dd>
+    <dd class="attachment-author">Grégory Joseph (old account)</dd>
+                        </dl>
+                                    </li>
+                            <li class="attachment-content">
+                                            <div class="attachment-thumb">
+                            <a href="/Old_Qdox_Issues/attachment/13933/qdox82-test.patch" draggable="true" data-downloadurl="${fileAttachment.mimetype}:qdox82-test.patch:/Old_Qdox_Issues/attachment/13933/qdox82-test.patch">
+                                    <img src="index_files/text.gif" alt="Text File" height="16" border="0" width="16">
+                            </a>
+                        </div>
+                        <dl>
+                                <dt class="attachment-title">
+        <a href="/Old_Qdox_Issues/attachment/13933/qdox82-test.patch" title="Latest  07/Feb/05 5:31 PM - Grégory Joseph (old account)" draggable="true" data-downloadurl="${attachment.mimetype}:qdox82-test.patch:/Old_Qdox_Issues/attachment/13933/qdox82-test.patch">qdox82-test.patch
+        </a>
+    </dt>
+    <dd class="attachment-delete">
+                    <span class="icon"></span>
+            </dd>
+    <dd class="attachment-date"><time class="livestamp" datetime="2005-02-07T17:31-0600">07/Feb/05 5:31 PM</time></dd>
+    <dd class="attachment-size">2 kB</dd>
+    <dd class="attachment-author">Grégory Joseph (old account)</dd>
+                        </dl>
+                                    </li>
+                    </ol>
+        </div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+
+
+
+
+
+
+
+
+
+
+    <div class="tabwrap tabs2" style="display:none">
+                    <div class="sortwrap">
+                                    <a class="icon icon-sort-down ajax-activity-content" rel="nofollow" href="/Old_Qdox_Issues/82?actionOrder=desc" title="Ascending order - Click to sort in descending order"><span>Ascending order - Click to sort in descending order</span></a>
+                            </div>
+                <ul id="issue-tabs" class="tabs horizontal">
+                                
+            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-82">
+                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/82"><strong>All</strong></a>
+                        </li>
+                                
+            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-82">
+                            <strong>Comments</strong>
+                        </li>
+                                
+            <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-82">
+                            <a class="ajax-activity-content" id="worklog-tabpanel" href="/Old_Qdox_Issues/82"><strong>Work Log</strong></a>
+                        </li>
+                                
+            <li data-id="changehistory-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:changehistory-tabpanel" data-label="History" data-href="/browse/QDOX-82">
+                            <a class="ajax-activity-content" id="changehistory-tabpanel" href="/Old_Qdox_Issues/82"><strong>History</strong></a>
+                        </li>
+                                
+            <li data-id="activity-stream-issue-tab" data-key="com.atlassian.streams.streams-jira-plugin:activity-stream-issue-tab" data-label="Activity" data-href="/browse/QDOX-82">
+                            <a class="ajax-activity-content" id="activity-stream-issue-tab" href="/Old_Qdox_Issues/82"><strong>Activity</strong></a>
+                        </li>
+                </ul>
+    </div>
+    <div class="issuePanelWrapper">
+        <div class="issuePanelProgress"></div>
+        <div class="issuePanelContainer" id="issue_actions_container">
+                                    
+
+
+<div id="comment-29565" class="issue-data-block activity-comment twixi-block  collapsed">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/82?focusedCommentId=29565&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-29565" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="jwalnes1" id="commentauthor_29565_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=jwalnes1"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Joe Walnes</a>
+ added a comment  - <span class="commentdate_29565_verbose subText"><span class="date user-tz" title="04/Feb/05 8:55 AM"><time class="livestamp" datetime="2005-02-04T08:55-0600">04/Feb/05 8:55 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Assigned to 1.6 release as this is a critical regression that has recently been introduced. Whoever fixes this, please add a unit-test to ensure the problem doesn't return unnoticed.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="jwalnes1" id="commentauthor_29565_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=jwalnes1"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Joe Walnes</a>
+ added a comment  - <span class="commentdate_29565_concise subText"><span class="date user-tz" title="04/Feb/05 8:55 AM"><time class="livestamp" datetime="2005-02-04T08:55-0600">04/Feb/05 8:55 AM</time></span></span>                    Assigned to 1.6 release as this is a critical regression that has recently been introduced. Whoever fixes this, please add a unit-test to ensure the problem doesn't return unnoticed.              </div>
+        </div>
+    </div>
+</div>
+                             <div class="message-container">
+    <a class="collapsed-comments" href="/Old_Qdox_Issues/82&amp;showAll=true"><span class="collapsed-comments-line"></span><span class="collapsed-comments-line"></span><span class="show-more-comments" data-collapsed-count="16">16 older comments</span></a>
+</div>                             
+
+
+<div id="comment-97198" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/82?focusedCommentId=97198&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-97198" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="maurotalevi" id="commentauthor_97198_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=maurotalevi"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mauro Talevi</a>
+ added a comment  - <span class="commentdate_97198_verbose subText"><span class="date user-tz" title="27/May/07 10:48 AM"><time class="livestamp" datetime="2007-05-27T10:48-0500">27/May/07 10:48 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Changed fix version to 1.7</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="maurotalevi" id="commentauthor_97198_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=maurotalevi"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mauro Talevi</a>
+ added a comment  - <span class="commentdate_97198_concise subText"><span class="date user-tz" title="27/May/07 10:48 AM"><time class="livestamp" datetime="2007-05-27T10:48-0500">27/May/07 10:48 AM</time></span></span>                    Changed fix version to 1.7              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-119575" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/82?focusedCommentId=119575&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-119575" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="dbaeli" id="commentauthor_119575_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=dbaeli"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Dimitri BAELI</a>
+ added a comment  - <span class="commentdate_119575_verbose subText"><span class="date user-tz" title="11/Jan/08 8:31 AM"><time class="livestamp" datetime="2008-01-11T08:31-0600">11/Jan/08 8:31 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>A short study on that point shown that the StreamTokenizer used in TagParser does not work as expected.<br>
+It handles newline as token separator, according to Java &lt;a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4501629"&gt;Bug 4501629&lt;/a&gt; it won't be fixed.<br>
+Suggestion, the TagParser should be reimplemented.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="dbaeli" id="commentauthor_119575_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=dbaeli"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Dimitri BAELI</a>
+ added a comment  - <span class="commentdate_119575_concise subText"><span class="date user-tz" title="11/Jan/08 8:31 AM"><time class="livestamp" datetime="2008-01-11T08:31-0600">11/Jan/08 8:31 AM</time></span></span>                    A short study on that point shown that the StreamTokenizer used in TagParser does not work as expected. 
+It handles newline as token separator, according to Java &lt;a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4501629"&gt;Bug 4501629&lt;/a&gt; it won't be fixed. 
+Suggestion, the TagParser should be reimplemented.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-124564" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/82?focusedCommentId=124564&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-124564" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="paul" id="commentauthor_124564_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=paul"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Paul Hammant</a>
+ added a comment  - <span class="commentdate_124564_verbose subText"><span class="date user-tz" title="21/Feb/08 1:46 AM"><time class="livestamp" datetime="2008-02-21T01:46-0600">21/Feb/08 1:46 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Dimitri, are you interested in try some regex or extended/alternate StreamTokenizer hacking to overcome this ?</p>
+
+<p>it might be OK to substitute newlines for some other char, might it not ?</p>
+
+<ul class="alternate" type="square">
+	<li>Paul</li>
+</ul>
+ </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="paul" id="commentauthor_124564_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=paul"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Paul Hammant</a>
+ added a comment  - <span class="commentdate_124564_concise subText"><span class="date user-tz" title="21/Feb/08 1:46 AM"><time class="livestamp" datetime="2008-02-21T01:46-0600">21/Feb/08 1:46 AM</time></span></span>                    Dimitri, are you interested in try some regex or extended/alternate StreamTokenizer hacking to overcome this ? 
+
+ it might be OK to substitute newlines for some other char, might it not ? 
+
+ 
+	 Paul 
+ 
+             </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-178873" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/82?focusedCommentId=178873&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-178873" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="markjenner" id="commentauthor_178873_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=markjenner"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mark Jenner</a>
+ added a comment  - <span class="commentdate_178873_verbose subText"><span class="date user-tz" title="01/Jun/09 8:58 AM"><time class="livestamp" datetime="2009-06-01T08:58-0500">01/Jun/09 8:58 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Hi,</p>
+
+<p>I had the same issue parsing something else with StreamTokenizer and I found your issue when I was searching for solutions.  I could not find one so I cooked up my own and thought you might be interested in applying it to your problem as well.  Basically I needed to parse strings contained in double quotes, StreamTokenizer does this for you but fails if there is a newline in the string.  So instead of letting StreamTokenizer do the string parsing, I tell it that double quote is not special and when I get to a one, I reconfigure the tokenizer into my own "string mode" where the only special chars are double quote and backslash.  When I get to the end of the string I switch back to my normal tokenizer config (for a format call fvar).  Here are the methods:</p>
+
+<p>	private void setUpTokenizerForFvar(StreamTokenizer tokenizer) </p>
+{
+		// Setup the tokenizer just like a new one as per the StreamTokenizer constructor comment 
+		tokenizer.resetSyntax();
+		tokenizer.wordChars((int)'a', (int)'z');
+		tokenizer.wordChars((int)'A', (int)'Z');
+		tokenizer.wordChars(128 + 32, 255);
+		tokenizer.whitespaceChars(0, (int)' ');
+		tokenizer.commentChar((int)'/');
+		tokenizer.parseNumbers();
+
+		// Attribute names in fvar can include underscores, and spaces!
+		tokenizer.wordChars(UNDER_SCORE, UNDER_SCORE);
+		tokenizer.wordChars(SPACE, SPACE);
+		tokenizer.ordinaryChar(DOUBLE_QUOTE);
+	}
+
+<p>	private void setUpTokenizerForQuotedValue(StreamTokenizer tokenizer) </p>
+{
+		// Reset the tokenizer to treat everything as a word except the double quote char and the escape char
+		tokenizer.resetSyntax();
+		tokenizer.wordChars(0, 127);
+		tokenizer.ordinaryChar(ESCAPE);
+		tokenizer.ordinaryChar(DOUBLE_QUOTE);
+	}
+
+<p>	// Because StreamTokenizer does not parse quoted strings that contain newlines properly<br>
+	// we have to do it ourselves. Reads everything up until a matching closing quote<br>
+	// ignoring any that are preceded by an escape char '\'<br>
+	private String parseQuotedString(int openQuote, StreamTokenizer tokenizer) {<br>
+		StringBuilder value = new StringBuilder();<br>
+		setUpTokenizerForQuotedValue(tokenizer);<br>
+		def nextToken = tokenizer.nextToken();<br>
+		boolean escapedQuote = false;<br>
+		while (escapedQuote || nextToken != openQuote) {<br>
+			escapedQuote = false;<br>
+			if (nextToken == StreamTokenizer.TT_WORD) </p>
+{
+				value.append(tokenizer.sval);
+			}
+<p> else if (nextToken == ESCAPE) </p>
+{
+				escapedQuote = true;
+				value.append((char)nextToken);
+			}
+<p> else if (nextToken == openQuote) </p>
+{
+				value.append((char)nextToken);
+			}
+<p>			nextToken = tokenizer.nextToken();<br>
+		}<br>
+		setUpTokenizerForFvar(tokenizer);<br>
+		return value.toString();<br>
+	}</p>
+
+<p>used in some code like this:<br>
+<span class="error">[...]</span><br>
+				nextToken = tokenizer.nextToken();<br>
+				if (nextToken == DOUBLE_QUOTE) {<br>
+					String value = parseQuotedString(nextToken, tokenizer);<br>
+<span class="error">[...]</span></p>
+
+<p>Hope that is some value to you.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="markjenner" id="commentauthor_178873_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=markjenner"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mark Jenner</a>
+ added a comment  - <span class="commentdate_178873_concise subText"><span class="date user-tz" title="01/Jun/09 8:58 AM"><time class="livestamp" datetime="2009-06-01T08:58-0500">01/Jun/09 8:58 AM</time></span></span>                    Hi, 
+
+ I had the same issue parsing something else with StreamTokenizer and I found your issue when I was searching for solutions.  I could not find one so I cooked up my own and thought you might be interested in applying it to your problem as well.  Basically I needed to parse strings contained in double quotes, StreamTokenizer does this for you but fails if there is a newline in the string.  So instead of letting StreamTokenizer do the string parsing, I tell it that double quote is not special and when I get to a one, I reconfigure the tokenizer into my own "string mode" where the only special chars are double quote and backslash.  When I get to the end of the string I switch back to my normal tokenizer config (for a format call fvar).  Here are the methods: 
+
+ 	private void setUpTokenizerForFvar(StreamTokenizer tokenizer)  
+{
+		// Setup the tokenizer just like a new one as per the StreamTokenizer constructor comment 
+		tokenizer.resetSyntax();
+		tokenizer.wordChars((int)'a', (int)'z');
+		tokenizer.wordChars((int)'A', (int)'Z');
+		tokenizer.wordChars(128 + 32, 255);
+		tokenizer.whitespaceChars(0, (int)' ');
+		tokenizer.commentChar((int)'/');
+		tokenizer.parseNumbers();
+
+		// Attribute names in fvar can include underscores, and spaces!
+		tokenizer.wordChars(UNDER_SCORE, UNDER_SCORE);
+		tokenizer.wordChars(SPACE, SPACE);
+		tokenizer.ordinaryChar(DOUBLE_QUOTE);
+	}
+
+ 	private void setUpTokenizerForQuotedValue(StreamTokenizer tokenizer)  
+{
+		// Reset the tokenizer to treat everything as a word except the double quote char and the escape char
+		tokenizer.resetSyntax();
+		tokenizer.wordChars(0, 127);
+		tokenizer.ordinaryChar(ESCAPE);
+		tokenizer.ordinaryChar(DOUBLE_QUOTE);
+	}
+
+ 	// Because StreamTokenizer does not parse quoted strings that contain newlines properly 
+	// we have to do it ourselves. Reads everything up until a matching closing quote 
+	// ignoring any that are preceded by an escape char '\' 
+	private String parseQuotedString(int openQuote, StreamTokenizer tokenizer) { 
+		StringBuilder value = new StringBuilder(); 
+		setUpTokenizerForQuotedValue(tokenizer); 
+		def nextToken = tokenizer.nextToken(); 
+		boolean escapedQuote = false; 
+		while (escapedQuote || nextToken != openQuote) { 
+			escapedQuote = false; 
+			if (nextToken == StreamTokenizer.TT_WORD)  
+{
+				value.append(tokenizer.sval);
+			}
+  else if (nextToken == ESCAPE)  
+{
+				escapedQuote = true;
+				value.append((char)nextToken);
+			}
+  else if (nextToken == openQuote)  
+{
+				value.append((char)nextToken);
+			}
+ 			nextToken = tokenizer.nextToken(); 
+		} 
+		setUpTokenizerForFvar(tokenizer); 
+		return value.toString(); 
+	} 
+
+ used in some code like this: 
+ [...]  
+				nextToken = tokenizer.nextToken(); 
+				if (nextToken == DOUBLE_QUOTE) { 
+					String value = parseQuotedString(nextToken, tokenizer); 
+ [...]  
+
+ Hope that is some value to you.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-189754" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/82?focusedCommentId=189754&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-189754" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_189754_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_189754_verbose subText"><span class="date user-tz" title="03/Sep/09 3:46 PM"><time class="livestamp" datetime="2009-09-03T15:46-0500">03/Sep/09 3:46 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>This one should be resolved by implementing <a href="/Old_Qdox_Issues/168" title="Parsing JavadocComment (please validate)" class="issue-link" data-issue-key="QDOX-168"><del>QDOX-168</del></a></p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_189754_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_189754_concise subText"><span class="date user-tz" title="03/Sep/09 3:46 PM"><time class="livestamp" datetime="2009-09-03T15:46-0500">03/Sep/09 3:46 PM</time></span></span>                    This one should be resolved by implementing   QDOX-168                </div>
+        </div>
+    </div>
+</div>
+                             </div>
+    </div>
+</div></div></div><div id="viewissuesidebar" class="aui-item issue-side-column"><div id="peoplemodule" class="module toggle-wrap"><div id="peoplemodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">People</h2></div><div class="mod-content"><ul class="item-details" id="peopledetails">
+    <li class="people-details">
+                <dl>
+            <dt>Assignee:</dt>
+            <dd>
+                <span id="assignee-val" class="view-issue-field">
+
+            <span class="user-hover" id="issue_summary_assignee_rfscholte" rel="rfscholte">
+            <span class="aui-avatar aui-avatar-small"><span class="aui-avatar-inner"><img src="index_files/useravatar-1.png"></span></span>
+            Robert Scholte
+        </span>
+    </span>
+                            </dd>
+        </dl>
+                        <dl>
+            <dt>Reporter:</dt>
+            <dd>
+                <span id="reporter-val" class="view-issue-field">
+
+            <span class="user-hover" id="issue_summary_reporter_greg_greg" rel="greg_greg">
+            <span class="aui-avatar aui-avatar-small"><span class="aui-avatar-inner"><img src="index_files/useravatar-1.png"></span></span>
+            Grégory Joseph (old account)
+        </span>
+    </span>
+            </dd>
+        </dl>
+                    </li>
+</ul>
+    <ul class="item-details">
+        <li>
+                            <dl>
+                    <dt>Votes:</dt>
+                    <dd>
+                                                                            <span id="vote-data" class="aui-badge vote-state-off">1</span>
+                        
+                                                                                                        <span id="vote-label" title="You have to be logged in to vote for an issue.">Vote for this issue</span>
+                                            </dd>
+                </dl>
+                                        <dl>
+                    <dt>Watchers:</dt>
+                    <dd>
+                                                                        
+                                                                            <span id="watcher-data" class="aui-badge watch-state-off">1</span>
+                        
+                                                                                <span id="watch-label" title="You have to be logged in to watch an issue.">Start watching this issue</span>
+                                            </dd>
+                </dl>
+                    </li>
+    </ul>
+</div></div><div id="datesmodule" class="module toggle-wrap"><div id="datesmodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Dates</h2></div><div class="mod-content"><ul class="item-details">
+    <li>
+            <dl class="dates">
+            <dt>Created:</dt>
+            <dd class="date user-tz" title="03/Feb/05 12:53 PM">
+
+                <span data-name="Created" id="create-date" data-fieldtype="datetime">
+                                                                        <time class="livestamp" datetime="2005-02-03T12:53-0600">03/Feb/05 12:53 PM</time>                                                             </span>
+            </dd>
+        </dl>
+            <dl class="dates">
+            <dt>Updated:</dt>
+            <dd class="date user-tz" title="03/Sep/09 3:46 PM">
+
+                <span data-name="Updated" id="updated-date" data-fieldtype="datetime">
+                                                                        <time class="livestamp" datetime="2009-09-03T15:46-0500">03/Sep/09 3:46 PM</time>                                                             </span>
+            </dd>
+        </dl>
+            <dl class="dates">
+            <dt>Resolved:</dt>
+            <dd class="date user-tz" title="03/Sep/09 3:46 PM">
+
+                <span data-name="Resolved" id="resolved-date" data-fieldtype="datetime">
+                                                                        <time class="livestamp" datetime="2009-09-03T15:46-0500">03/Sep/09 3:46 PM</time>                                                             </span>
+            </dd>
+        </dl>
+        </li>
+</ul>
+</div></div></div></div>
+                    </div>
+                </div>
+                        </div>
+
+    <fieldset class="hidden parameters">
+        <input title="autocompleteEnabled" value="true" type="hidden">
+    </fieldset>
+    
+    </section>
+    <footer id="footer" role="contentinfo">
+        
+        
+
+
+
+<div class="footer-body">
+    <ul>
+        <li>
+                        <a href="http://www.atlassian.com/software/jira">Atlassian JIRA</a>
+
+                                                    
+                        
+            <span id="footer-build-information">(v6.1.6#6162-<span title="7af547ce7c84dbb7c1e345a65437ed7b85efffa2" data-commit-id="7af547ce7c84dbb7c1e345a65437ed7b85efffa2}">sha1:7af547c</span>)</span>
+        </li>
+        <li>
+            <a id="about-link" href="https://jira.codehaus.org/secure/AboutPage.jspa">About JIRA</a>
+        </li>
+        <li>
+                                    <a id="footer-report-problem-link" href="https://jira.codehaus.org/secure/CreateIssue%21default.jspa">Report a problem</a>
+        </li>
+    </ul>
+            <ul>
+            <li class="licensemessage">
+                                    Powered by a free Atlassian <a href="http://www.atlassian.com/software/jira">JIRA</a> open source license for Codehaus. Try JIRA - <a href="http://www.atlassian.com/software/jira">bug tracking software</a> for <i>your</i> team.
+
+                            </li>
+        </ul>
+    </div>
+
+<form id="jira_request_timing_info" class="dont-default-focus">
+	<fieldset class="parameters hidden">
+
+
+
+
+		<input title="jira.session.expiry.in.mins" value="299" type="hidden">
+
+	</fieldset>
+</form>
+<!--
+	                 
+	          
+	               
+	                 
+	        CONCURRENT REQUESTS : 5
+
+
+
+-->
+
+
+
+
+
+
+
+
+
+
+<fieldset class="hidden parameters">
+    <input title="loggedInUser" value="" type="hidden">
+    <input title="ajaxTimeout" value="The call to the JIRA server did not complete within the timeout period.  We are unsure of the result of this operation." type="hidden">
+    <input title="JiraVersion" value="6.1.6" type="hidden">
+    <input title="ajaxUnauthorised" value="You are not authorised to perform this operation.  Please log in." type="hidden">
+    <input title="baseURL" value="https://jira.codehaus.org:443" type="hidden">
+    <input title="ajaxCommsError" value="The JIRA server could not be contacted.  This may be a temporary glitch or the server may be down." type="hidden">
+    <input title="ajaxServerError" value="The JIRA server was contacted but has returned an error response. We are unsure of the result of this operation." type="hidden">
+    <input title="ajaxErrorCloseDialog" value="Close this dialog and press refresh in your browser" type="hidden">
+    <input title="ajaxErrorDialogHeading" value="Communications Breakdown" type="hidden">
+
+    <input title="dirtyMessage" value="You have entered new data on this page. If you navigate away from this page without first saving your data, the changes will be lost." type="hidden">
+    <input title="dirtyDialogMessage" value="You have entered new data in this dialog. If you navigate away from this dialog without first saving your data, the changes will be lost. Click cancel to return to the dialog." type="hidden">
+    <input title="keyType" value="Type" type="hidden">
+    <input title="keyThen" value="then" type="hidden">
+    <input title="dblClickToExpand" value="Double click to expand" type="hidden">
+    <input title="actions" value="Actions" type="hidden">
+    <input title="removeItem" value="Remove" type="hidden">
+    <input title="workflow" value="Workflow" type="hidden">
+    <input title="labelNew" value="New Label" type="hidden">
+    <input title="issueActionsHint" value="Begin typing for available operations or press down to see all" type="hidden">
+    <input title="closelink" value="Close" type="hidden">
+    <input title="dotOperations" value="Operations" type="hidden">
+    <input title="dotLoading" value="Loading..." type="hidden">
+    <input title="frotherSuggestions" value="Suggestions" type="hidden">
+    <input title="frotherNomatches" value="No Matches" type="hidden">
+    <input title="multiselectVersionsError" value="{0} is not a valid version." type="hidden">
+    <input title="multiselectComponentsError" value="{0} is not a valid component." type="hidden">
+    <input title="multiselectGenericError" value="The value {0} is invalid." type="hidden">
+</fieldset>
+
+    </footer>
+</div>
+
+
+<div id="fancybox-tmp"></div><div id="fancybox-loading"><div></div></div><div id="fancybox-overlay"></div><div id="fancybox-wrap"><div id="fancybox-outer"><div class="fancybox-bg" id="fancybox-bg-n"></div><div class="fancybox-bg" id="fancybox-bg-ne"></div><div class="fancybox-bg" id="fancybox-bg-e"></div><div class="fancybox-bg" id="fancybox-bg-se"></div><div class="fancybox-bg" id="fancybox-bg-s"></div><div class="fancybox-bg" id="fancybox-bg-sw"></div><div class="fancybox-bg" id="fancybox-bg-w"></div><div class="fancybox-bg" id="fancybox-bg-nw"></div><div id="fancybox-content"></div><a id="fancybox-close"></a><div id="fancybox-title"></div><a href="javascript:void(0);" id="fancybox-left"><span class="fancy-ico" id="fancybox-left-ico"></span></a><a href="javascript:void(0);" id="fancybox-right"><span class="fancy-ico" id="fancybox-right-ico"></span></a></div></div><div class="navigator-sidebar collapsed ui-popout ui-popout-detached ui-popout-collapsed" id="navigator-sidebar"><a class="toggle-filter-panel" href="#" title="Dock the filters panel ([)"></a></div><div style="display: none;" class="jira-dialog box-shadow" id="edit-issue-dialog"><div class="jira-dialog-content"></div></div><div style="display: none;" class="jira-dialog box-shadow" id="create-subtask-dialog"><div class="jira-dialog-content"></div></div></body></html>

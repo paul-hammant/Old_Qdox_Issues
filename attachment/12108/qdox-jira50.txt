@@ -1,0 +1,30 @@
+Index: JavaDocBuilderTest.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java,v
+retrieving revision 1.51
+diff -u -r1.51 JavaDocBuilderTest.java
+--- JavaDocBuilderTest.java	26 Apr 2004 18:50:45 -0000	1.51
++++ JavaDocBuilderTest.java	13 May 2004 15:31:50 -0000
+@@ -659,4 +659,22 @@
+         assertEquals("Bar", clazz.getSuperJavaClass().getFullyQualifiedName());
+     }
+ 
++	public void testJiraQdox50() {
++		String PARAM = " hello world";
++	    String sourceCode = ""
++	            + "package foo.bar;"
++				+ "/** " 
++				+ "@foo bar=\""+PARAM+"\" " 
++				+ " 	*/"
++	            + "public class Outer {"
++	            + "}";
++	    JavaDocBuilder builder = new JavaDocBuilder();
++	    builder.addSource(new StringReader(sourceCode));
++	    JavaClass clazz = builder.getClassByName("foo.bar.Outer");
++	
++	    DocletTag foo = clazz.getTagByName("foo");
++	    String bar = foo.getNamedParameter("bar");
++	    assertEquals(PARAM, bar);
++	}
++
+ }

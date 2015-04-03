@@ -1,0 +1,176 @@
+Index: src/test/com/thoughtworks/qdox/testdata/PropertyClass.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/testdata/PropertyClass.java	(revision 485)
++++ src/test/com/thoughtworks/qdox/testdata/PropertyClass.java	(working copy)
+@@ -13,9 +13,17 @@
+         aField = true;
+     }
+ 
++    protected int protectedField;
++
++    private int privateField;
++
+     public PropertyClass() {
+     }
+ 
++    protected PropertyClass(PropertyClass other) {
++        privateField = other.privateField;
++    }
++
+     // not a bean property, sice it's static
+     public static String getFoo() {
+         return "foo";
+@@ -33,6 +41,15 @@
+     public final String get() {
+         return null;
+     }
++
++    protected void protectedMethod() {
++        privateField = 2;
++        protectedField = privateMethod();
++    }
++
++    private int privateMethod() {
++        return privateField;
++    }
+ }
+ 
+ class Superclass {
+Index: src/test/com/thoughtworks/qdox/testdata/DefaultCtor.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/testdata/DefaultCtor.java	(revision 0)
++++ src/test/com/thoughtworks/qdox/testdata/DefaultCtor.java	(revision 0)
+@@ -0,0 +1,9 @@
++/* ----------------------------------------------------------------------------
++ * (c) Volantis Systems Ltd 2007. All Rights Reserved.
++ * ----------------------------------------------------------------------------
++ */
++
++package com.thoughtworks.qdox.testdata;
++
++public class DefaultCtor {
++}
+Index: src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java
+===================================================================
+--- src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	(revision 485)
++++ src/test/com/thoughtworks/qdox/JavaDocBuilderTest.java	(working copy)
+@@ -407,32 +407,77 @@
+ 
+         // test ctor, methods and fields
+         JavaMethod[] methods = propertyClass.getMethods();
+-        assertEquals(5, methods.length);
++        assertEquals(8, methods.length);
+ 
+         JavaMethod ctor = propertyClass.getMethodBySignature("PropertyClass", null);
++        JavaMethod ctor2 = propertyClass.getMethodBySignature("PropertyClass", new Type[] {propertyClass.asType()});
+         JavaMethod getFoo = propertyClass.getMethodBySignature("getFoo", null);
+         JavaMethod isBar = propertyClass.getMethodBySignature("isBar", null);
+         JavaMethod get = propertyClass.getMethodBySignature("get", null);
+         JavaMethod set = propertyClass.getMethodBySignature("set", new Type[]{new Type("int")});
+ 
++        JavaMethod protectedMethod = propertyClass.getMethodBySignature("protectedMethod", null);
++        JavaMethod privateMethod = propertyClass.getMethodBySignature("privateMethod", null);
++        JavaMethod shouldntBeInherited = propertyClass.getMethodBySignature("getShouldntBeInherited", null);
++
++        assertNotNull(ctor);
++        assertNotNull(ctor2);
++        assertNotNull(getFoo);
++        assertNotNull(isBar);
++        assertNotNull(get);
++        assertNotNull(set);
++        assertNotNull(protectedMethod);
++        assertNotNull(privateMethod);
++        assertNull(shouldntBeInherited);
++
+         assertTrue(ctor.isConstructor());
++        assertTrue(ctor2.isConstructor());
+         assertFalse(getFoo.isConstructor());
+         assertFalse(isBar.isConstructor());
+         assertFalse(get.isConstructor());
+         assertFalse(set.isConstructor());
++        assertFalse(protectedMethod.isConstructor());
++        assertFalse(privateMethod.isConstructor());
+ 
+         assertTrue(getFoo.isStatic());
+         assertFalse(isBar.isStatic());
+         assertFalse(get.isStatic());
+         assertFalse(set.isStatic());
++        assertFalse(protectedMethod.isStatic());
++        assertFalse(privateMethod.isStatic());
+ 
+         assertTrue(get.isFinal());
+-        assertFalse(set.isStatic());
++        assertFalse(set.isFinal());
+ 
++        assertTrue(ctor2.isProtected());
++        assertTrue(protectedMethod.isProtected());
++        assertTrue(privateMethod.isPrivate());
++
+         JavaField[] fields = propertyClass.getFields();
+-        assertEquals(1, fields.length);
++        assertEquals(3, fields.length);
+     }
+ 
++    public void testSourceDefaultCtor() throws Exception {
++        builder.addSource(new File("src/test/com/thoughtworks/qdox/testdata/DefaultCtor.java"));
++        JavaClass javaClass = builder.getClassByName("com.thoughtworks.qdox.testdata.DefaultCtor");
++
++        JavaMethod ctor = javaClass.getMethodBySignature("DefaultCtor", null);
++
++        // Differs from binary as currently no way to identify default
++        // constructor in binary class.
++        assertNull(ctor);
++    }
++
++    public void testBinaryDefaultCtor() {
++        JavaClass javaClass = builder.getClassByName("com.thoughtworks.qdox.testdata.DefaultCtor");
++
++        JavaMethod ctor = javaClass.getMethodBySignature("DefaultCtor", null);
++
++        // Differs from source as currently no way to identify default 
++        // constructor in binary class.
++        assertNotNull(ctor);
++    }
++
+     public void testSerializable() throws Exception {
+         builder.addSource(new StringReader("package test; public class X{}"));
+         assertEquals("X", builder.getSources()[0].getClasses()[0].getName());
+Index: src/java/com/thoughtworks/qdox/JavaDocBuilder.java
+===================================================================
+--- src/java/com/thoughtworks/qdox/JavaDocBuilder.java	(revision 485)
++++ src/java/com/thoughtworks/qdox/JavaDocBuilder.java	(working copy)
+@@ -185,25 +185,24 @@
+             binaryBuilder.beginClass(classDef);
+ 
+             // add the constructors
+-            Constructor[] constructors = clazz.getConstructors();
++            //
++            // This also adds the default constructor if any which is different
++            // to the source code as that does not create a default constructor
++            // if no constructor exists.
++            Constructor[] constructors = clazz.getDeclaredConstructors();
+             for (int i = 0; i < constructors.length; i++) {
+                 addMethodOrConstructor(constructors[i], binaryBuilder);
+             }
+ 
+             // add the methods
+-            Method[] methods = clazz.getMethods();
++            Method[] methods = clazz.getDeclaredMethods();
+             for (int i = 0; i < methods.length; i++) {
+-                // Ignore methods defined in superclasses
+-                if (methods[i].getDeclaringClass() == clazz) {
+-                    addMethodOrConstructor(methods[i], binaryBuilder);
+-                }
++                addMethodOrConstructor(methods[i], binaryBuilder);
+             }
+ 
+-            Field[] fields = clazz.getFields();
++            Field[] fields = clazz.getDeclaredFields();
+             for (int i = 0; i < fields.length; i++) {
+-                if (fields[i].getDeclaringClass() == clazz) {
+-                    addField(fields[i], binaryBuilder);
+-                }
++                addField(fields[i], binaryBuilder);
+             }
+ 
+             binaryBuilder.endClass();

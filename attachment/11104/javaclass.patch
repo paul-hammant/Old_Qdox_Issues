@@ -1,0 +1,701 @@
+Index: src/java/com/thoughtworks/qdox/model/JavaClass.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/JavaClass.java,v
+retrieving revision 1.32
+diff -r1.32 JavaClass.java
+5c5,16
+< import java.util.*;
+---
+> import org.apache.commons.logging.Log;
+> import org.apache.commons.logging.LogFactory;
+> 
+> import java.util.ArrayList;
+> import java.util.Collection;
+> import java.util.HashMap;
+> import java.util.HashSet;
+> import java.util.Iterator;
+> import java.util.LinkedList;
+> import java.util.List;
+> import java.util.Map;
+> import java.util.Set;
+11,12c22,25
+< public class JavaClass extends AbstractInheritableJavaEntity implements JavaClassParent {
+< 
+---
+> public class JavaClass extends AbstractInheritableJavaEntity
+>     implements JavaClassParent
+> {
+>     private static Log log = LogFactory.getLog(JavaClass.class);
+14d26
+< 
+21a34
+> 
+27d39
+< 
+30c42,43
+<     public JavaClass(JavaClassParent parent) {
+---
+>     public JavaClass(JavaClassParent parent)
+>     {
+34c47,48
+<     public void setJavaClassCache(JavaClassCache javaClassCache) {
+---
+>     public void setJavaClassCache(JavaClassCache javaClassCache)
+>     {
+35a50
+> 
+45c60,61
+<     public boolean isInterface() {
+---
+>     public boolean isInterface()
+>     {
+49c65,66
+<     public Type getSuperClass() {
+---
+>     public Type getSuperClass()
+>     {
+51c68,70
+<         if (!interfce && superClass == null && !iAmJavaLangObject) {
+---
+> 
+>         if (!interfce && (superClass == null) && !iAmJavaLangObject)
+>         {
+53a73
+> 
+60,61c80,83
+<     public JavaClass getSuperJavaClass() {
+<         if (getSuperClass() != null) {
+---
+>     public JavaClass getSuperJavaClass()
+>     {
+>         if (getSuperClass() != null)
+>         {
+63c85,87
+<         } else {
+---
+>         }
+>         else
+>         {
+68c92,93
+<     public Type[] getImplements() {
+---
+>     public Type[] getImplements()
+>     {
+75c100,101
+<     public JavaClass[] getImplementedInterfaces() {
+---
+>     public JavaClass[] getImplementedInterfaces()
+>     {
+78c104,106
+<         for (int i = 0; i < result.length; i++) {
+---
+> 
+>         for (int i = 0; i < result.length; i++)
+>         {
+80a109
+> 
+84,85c113,114
+<     protected void writeBody(IndentBuffer result) {
+< 
+---
+>     protected void writeBody(IndentBuffer result)
+>     {
+93c122,123
+<         if (superClass != null) {
+---
+>         if (superClass != null)
+>         {
+96a127
+> 
+98c129,130
+<         if (implementz.length > 0) {
+---
+>         if (implementz.length > 0)
+>         {
+100,101c132,139
+<             for (int i = 0; i < implementz.length; i++) {
+<                 if (i > 0) result.write(", ");
+---
+> 
+>             for (int i = 0; i < implementz.length; i++)
+>             {
+>                 if (i > 0)
+>                 {
+>                     result.write(", ");
+>                 }
+> 
+104a143
+> 
+110c149,150
+<         for (Iterator iterator = fields.iterator(); iterator.hasNext();) {
+---
+>         for (Iterator iterator = fields.iterator(); iterator.hasNext();)
+>         {
+111a152
+> 
+117c158,159
+<         for (Iterator iterator = methods.iterator(); iterator.hasNext();) {
+---
+>         for (Iterator iterator = methods.iterator(); iterator.hasNext();)
+>         {
+118a161
+> 
+124c167,168
+<         for (Iterator iterator = classes.iterator(); iterator.hasNext();) {
+---
+>         for (Iterator iterator = classes.iterator(); iterator.hasNext();)
+>         {
+125a170
+> 
+136c181,182
+<     public void setInterface(boolean interfce) {
+---
+>     public void setInterface(boolean interfce)
+>     {
+140c186,187
+<     public void addMethod(JavaMethod meth) {
+---
+>     public void addMethod(JavaMethod meth)
+>     {
+146c193,199
+<     public void setSuperClass(Type type) {
+---
+>     public void setSuperClass(Type type)
+>     {
+>         if (log.isDebugEnabled())
+>         {
+>             log.debug(getName() + " setting up superclass: " + type);
+>         }
+> 
+150c203,214
+<     public void setImplementz(Type[] implementz) {
+---
+>     public void setImplementz(Type[] implementz)
+>     {
+>         if (log.isDebugEnabled())
+>         {
+>             log.debug(getName() + " setting up interfaces: ");
+> 
+>             for (int i = 0; i < implementz.length; i++)
+>             {
+>                 log.debug("type: " + implementz[i]);
+>             }
+>         }
+> 
+154c218,219
+<     public void addField(JavaField javaField) {
+---
+>     public void addField(JavaField javaField)
+>     {
+160c225,226
+<     public JavaClassParent getParent() {
+---
+>     public JavaClassParent getParent()
+>     {
+164c230,231
+<     public JavaSource getParentSource() {
+---
+>     public JavaSource getParentSource()
+>     {
+166c233,234
+<         return (parent == null ? null : parent.getParentSource());
+---
+> 
+>         return ((parent == null) ? null : parent.getParentSource());
+169c237,238
+<     public String getPackage() {
+---
+>     public String getPackage()
+>     {
+173c242,243
+<     public String getFullyQualifiedName() {
+---
+>     public String getFullyQualifiedName()
+>     {
+176c246,247
+<         return pakkage == null ? getName() : pakkage + separator + getName();
+---
+> 
+>         return (pakkage == null) ? getName() : (pakkage + separator + getName());
+182c253,254
+<     public boolean isInner() {
+---
+>     public boolean isInner()
+>     {
+186c258,259
+<     public String resolveType(String typeName) {
+---
+>     public String resolveType(String typeName)
+>     {
+189c262,264
+<         for (int i = 0; i < innerClasses.length; i++) {
+---
+> 
+>         for (int i = 0; i < innerClasses.length; i++)
+>         {
+192c267,269
+<             if (innerName.endsWith(typeName)) {
+---
+> 
+>             if (innerName.endsWith(typeName))
+>             {
+195a273
+> 
+199c277,278
+<     public ClassLibrary getClassLibrary() {
+---
+>     public ClassLibrary getClassLibrary()
+>     {
+203c282,283
+<     public String asClassNamespace() {
+---
+>     public String asClassNamespace()
+>     {
+207,208c287,290
+<     public Type asType() {
+<         if (type == null) {
+---
+>     public Type asType()
+>     {
+>         if (type == null)
+>         {
+210a293
+> 
+214,215c297,300
+<     public JavaMethod[] getMethods() {
+<         if (methodsArray == null) {
+---
+>     public JavaMethod[] getMethods()
+>     {
+>         if (methodsArray == null)
+>         {
+218a304
+> 
+225,226c311,319
+<     public JavaMethod[] getMethods(boolean superclasses) {
+<         if(superclasses) {
+---
+>     public JavaMethod[] getMethods(boolean superclasses)
+>     {
+>         if (log.isDebugEnabled())
+>         {
+>             log.debug("retrive methods for: " + getName());
+>         }
+> 
+>         if (superclasses)
+>         {
+229c322,324
+<             addMethodsFromSuperclassAndInterfaces(signatures, methods,  this);
+---
+> 
+>             addMethodsFromSuperclassAndInterfaces(signatures, methods, this);
+> 
+231c326,328
+<         } else {
+---
+>         }
+>         else
+>         {
+236c333,335
+<     private void addMethodsFromSuperclassAndInterfaces(Set signatures, List methodList, JavaClass clazz) {
+---
+>     private void addMethodsFromSuperclassAndInterfaces(Set signatures,
+>         List methodList, JavaClass clazz)
+>     {
+237a337
+> 
+240a341
+> 
+242,243c343,346
+<         if (superclass != null && superclass != clazz) {
+<             addMethodsFromSuperclassAndInterfaces(signatures, methodList, superclass);
+---
+>         if ((superclass != null) && (superclass != clazz))
+>         {
+>             addMethodsFromSuperclassAndInterfaces(signatures, methodList,
+>                 superclass);
+247,248c350,363
+<         for (int i = 0; i < implementz.length; i++) {
+<             addMethodsFromSuperclassAndInterfaces(signatures, methodList, implementz[i]);
+---
+> 
+>         for (int i = 0; i < implementz.length; i++)
+>         {
+>             if (implementz[i] != null)
+>             {
+>                 if (log.isDebugEnabled())
+>                 {
+>                     log.debug(getName() + " processing interface: "
+>                         + implementz[i].getName());
+>                 }
+> 
+>                 addMethodsFromSuperclassAndInterfaces(signatures, methodList,
+>                     implementz[i]);
+>             }
+252,253c367,371
+<     private void addNewMethods(Set signatures, List methodList, JavaMethod[] methods) {
+<         for (int i = 0; i < methods.length; i++) {
+---
+>     private void addNewMethods(Set signatures, List methodList,
+>         JavaMethod[] methods)
+>     {
+>         for (int i = 0; i < methods.length; i++)
+>         {
+255c373,375
+<             if (!method.isPrivate()) {
+---
+> 
+>             if (!method.isPrivate())
+>             {
+257c377,379
+<                 if(!signatures.contains(signature)) {
+---
+> 
+>                 if (!signatures.contains(signature))
+>                 {
+270,271c392,393
+<     public JavaMethod getMethodBySignature(String name,
+<                                            Type[] parameterTypes) {
+---
+>     public JavaMethod getMethodBySignature(String name, Type[] parameterTypes)
+>     {
+273,274c395,399
+<         for (int i = 0; i < methods.length; i++) {
+<             if (methods[i].signatureMatches(name, parameterTypes)) {
+---
+> 
+>         for (int i = 0; i < methods.length; i++)
+>         {
+>             if (methods[i].signatureMatches(name, parameterTypes))
+>             {
+277a403
+> 
+281,285c407,413
+<     public JavaMethod getMethodBySignature(String name,
+<                                            Type[] parameterTypes,
+<                                            boolean superclasses) {
+<         JavaMethod[] result = getMethodsBySignature(name, parameterTypes, superclasses);
+<         return result.length > 0 ? result[0] : null;
+---
+>     public JavaMethod getMethodBySignature(String name, Type[] parameterTypes,
+>         boolean superclasses)
+>     {
+>         JavaMethod[] result = getMethodsBySignature(name, parameterTypes,
+>                 superclasses);
+> 
+>         return (result.length > 0) ? result[0] : null;
+289,290c417,418
+<                                               Type[] parameterTypes,
+<                                               boolean superclasses) {
+---
+>         Type[] parameterTypes, boolean superclasses)
+>     {
+294c422,424
+<         if (methodInThisClass != null) {
+---
+> 
+>         if (methodInThisClass != null)
+>         {
+297c427,429
+<         if (superclasses) {
+---
+> 
+>         if (superclasses)
+>         {
+299,300c431,436
+<             if (superclass != null) {
+<                 JavaMethod method = superclass.getMethodBySignature(name, parameterTypes, true);
+---
+> 
+>             if (superclass != null)
+>             {
+>                 JavaMethod method = superclass.getMethodBySignature(name,
+>                         parameterTypes, true);
+> 
+302c438,439
+<                 if (method != null && !method.isPrivate()) {
+---
+>                 if ((method != null) && !method.isPrivate())
+>                 {
+308,310c445,452
+<             for (int i = 0; i < implementz.length; i++) {
+<                 JavaMethod method = implementz[i].getMethodBySignature(name, parameterTypes, true);
+<                 if (method != null) {
+---
+> 
+>             for (int i = 0; i < implementz.length; i++)
+>             {
+>                 JavaMethod method = implementz[i].getMethodBySignature(name,
+>                         parameterTypes, true);
+> 
+>                 if (method != null)
+>                 {
+314a457
+> 
+318,319c461,464
+<     public JavaField[] getFields() {
+<         if (fieldsArray == null) {
+---
+>     public JavaField[] getFields()
+>     {
+>         if (fieldsArray == null)
+>         {
+322a468
+> 
+326c472,473
+<     public JavaField getFieldByName(String name) {
+---
+>     public JavaField getFieldByName(String name)
+>     {
+328,329c475,479
+<         for (int i = 0; i < fields.length; i++) {
+<             if (fields[i].getName().equals(name)) {
+---
+> 
+>         for (int i = 0; i < fields.length; i++)
+>         {
+>             if (fields[i].getName().equals(name))
+>             {
+332a483
+> 
+336c487,488
+<     public void addClass(JavaClass cls) {
+---
+>     public void addClass(JavaClass cls)
+>     {
+344c496,497
+<     public JavaClass[] getClasses() {
+---
+>     public JavaClass[] getClasses()
+>     {
+351,352c504,507
+<     public JavaClass[] getInnerClasses() {
+<         if (classesArray == null) {
+---
+>     public JavaClass[] getInnerClasses()
+>     {
+>         if (classesArray == null)
+>         {
+355a511
+> 
+359c515,516
+<     public JavaClass getInnerClassByName(String name) {
+---
+>     public JavaClass getInnerClassByName(String name)
+>     {
+361,362c518,522
+<         for (int i = 0; i < classes.length; i++) {
+<             if (classes[i].getName().equals(name)) {
+---
+> 
+>         for (int i = 0; i < classes.length; i++)
+>         {
+>             if (classes[i].getName().equals(name))
+>             {
+365a526
+> 
+372c533,534
+<     public boolean isA(String fullClassName) {
+---
+>     public boolean isA(String fullClassName)
+>     {
+373a536
+> 
+380c543,544
+<     public boolean isA(JavaClass javaClass) {
+---
+>     public boolean isA(JavaClass javaClass)
+>     {
+388c552,553
+<     public BeanProperty[] getBeanProperties() {
+---
+>     public BeanProperty[] getBeanProperties()
+>     {
+395c560,561
+<     public BeanProperty[] getBeanProperties(boolean superclasses) {
+---
+>     public BeanProperty[] getBeanProperties(boolean superclasses)
+>     {
+398c564,566
+<         return (BeanProperty[]) beanPropertyCollection.toArray(new BeanProperty[beanPropertyCollection.size()]);
+---
+> 
+>         return (BeanProperty[]) beanPropertyCollection.toArray(new BeanProperty[beanPropertyCollection
+>             .size()]);
+401c569,570
+<     private Map getBeanPropertyMap(boolean superclasses) {
+---
+>     private Map getBeanPropertyMap(boolean superclasses)
+>     {
+403a573
+> 
+405c575,576
+<         for (int i = 0; i < methods.length; i++) {
+---
+>         for (int i = 0; i < methods.length; i++)
+>         {
+407c578,580
+<             if (method.isPropertyAccessor()) {
+---
+> 
+>             if (method.isPropertyAccessor())
+>             {
+409c582,584
+<                 BeanProperty beanProperty = getOrCreateProperty(beanPropertyMap, propertyName);
+---
+>                 BeanProperty beanProperty = getOrCreateProperty(beanPropertyMap,
+>                         propertyName);
+> 
+412c587,589
+<             } else if (method.isPropertyMutator()) {
+---
+>             }
+>             else if (method.isPropertyMutator())
+>             {
+414c591,593
+<                 BeanProperty beanProperty = getOrCreateProperty(beanPropertyMap, propertyName);
+---
+>                 BeanProperty beanProperty = getOrCreateProperty(beanPropertyMap,
+>                         propertyName);
+> 
+418a598
+> 
+422c602,604
+<     private BeanProperty getOrCreateProperty(Map beanPropertyMap, String propertyName) {
+---
+>     private BeanProperty getOrCreateProperty(Map beanPropertyMap,
+>         String propertyName)
+>     {
+424c606,608
+<         if (result == null) {
+---
+> 
+>         if (result == null)
+>         {
+427a612
+> 
+435c620,621
+<     public BeanProperty getBeanProperty(String propertyName) {
+---
+>     public BeanProperty getBeanProperty(String propertyName)
+>     {
+442c628,630
+<     public BeanProperty getBeanProperty(String propertyName, boolean superclasses) {
+---
+>     public BeanProperty getBeanProperty(String propertyName,
+>         boolean superclasses)
+>     {
+448,449c636,637
+< 
+<     public JavaClass[] getDerivedClasses() {
+---
+>     public JavaClass[] getDerivedClasses()
+>     {
+453c641,643
+<         for (int i = 0; i < classes.length; i++) {
+---
+> 
+>         for (int i = 0; i < classes.length; i++)
+>         {
+455c645,647
+<             if (clazz.isA(this) && !(clazz == this)) {
+---
+> 
+>             if (clazz.isA(this) && !(clazz == this))
+>             {
+458a651
+> 
+462c655,656
+<     public DocletTag[] getTagsByName(String name, boolean superclasses) {
+---
+>     public DocletTag[] getTagsByName(String name, boolean superclasses)
+>     {
+463a658,664
+> 
+>         if (log.isDebugEnabled())
+>         {
+>             log.debug(getName() + " retrieving tags with name: " + name
+>                 + " in superclasses: " + superclasses);
+>         }
+> 
+464a666
+> 
+468c670,672
+<     private void addTagsRecursive(List result, JavaClass javaClass, String name, boolean superclasses) {
+---
+>     private void addTagsRecursive(List result, JavaClass javaClass,
+>         String name, boolean superclasses)
+>     {
+469a674
+> 
+471,472c676,688
+<         if (superclasses) {
+<             JavaClass superclass = getSuperJavaClass();
+---
+> 
+>         if (superclasses)
+>         {
+>             JavaClass superclass = javaClass.getSuperJavaClass();
+> 
+>             if (log.isDebugEnabled())
+>             {
+>                 log.debug(javaClass.getName() + " processing superclass:"
+>                     + superclass);
+>                 log.debug(javaClass.getName() + " is a: "
+>                     + javaClass.getClass().getName());
+>             }
+> 
+475,476c691,699
+<             if (superclass != null && superclass != javaClass) {
+<                 addTagsRecursive(result,superclass,name,superclasses);
+---
+>             if ((superclass != null) && (superclass != javaClass))
+>             {
+>                 if (log.isDebugEnabled())
+>                 {
+>                     log.debug(javaClass.getName()
+>                         + " add tags recursive for superclass");
+>                 }
+> 
+>                 addTagsRecursive(result, superclass, name, superclasses);
+479,481c702,723
+<             JavaClass[] implementz = getImplementedInterfaces();
+<             for (int h = 0; h < implementz.length; h++) {
+<                 addTagsRecursive(result,superclass,name,superclasses);
+---
+>             JavaClass[] implementz = javaClass.getImplementedInterfaces();
+> 
+>             if (log.isDebugEnabled())
+>             {
+>                 log.debug(javaClass.getName() + " processing "
+>                     + implementz.length + " superinterfaces");
+>             }
+> 
+>             for (int h = 0; h < implementz.length; h++)
+>             {
+>                 if (implementz[h] != null)
+>                 {
+>                     if (log.isDebugEnabled())
+>                     {
+>                         log.debug(javaClass.getName()
+>                             + " processing superinterface: "
+>                             + ((implementz[h] != null)
+>                             ? implementz[h].getName() : null));
+>                     }
+> 
+>                     addTagsRecursive(result, implementz[h], name, superclasses);
+>                 }
+486,487c728,731
+<     private void addNewTags(List list, DocletTag[] tags) {
+<         for (int i = 0; i < tags.length; i++) {
+---
+>     private void addNewTags(List list, DocletTag[] tags)
+>     {
+>         for (int i = 0; i < tags.length; i++)
+>         {
+489c733,735
+<             if (!list.contains(superTag)) {
+---
+> 
+>             if (!list.contains(superTag))
+>             {

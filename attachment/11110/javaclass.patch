@@ -1,0 +1,19 @@
+Index: src/java/com/thoughtworks/qdox/model/JavaClass.java
+===================================================================
+RCS file: /cvsroot/qdox/qdox/src/java/com/thoughtworks/qdox/model/JavaClass.java,v
+retrieving revision 1.33
+diff -r1.33 JavaClass.java
+472c472
+<             JavaClass superclass = getSuperJavaClass();
+---
+>             JavaClass superclass = javaClass.getSuperJavaClass();
+479c479
+<             JavaClass[] implementz = getImplementedInterfaces();
+---
+>             JavaClass[] implementz = javaClass.getImplementedInterfaces();
+481c481,483
+<                 addTagsRecursive(result,implementz[i],name,superclasses);
+---
+> 				if(implementz[i] != null) {
+> 					addTagsRecursive(result,implementz[i],name,superclasses);
+> 				}

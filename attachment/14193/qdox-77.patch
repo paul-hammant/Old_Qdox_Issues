@@ -1,0 +1,616 @@
+diff -urN qdox-orig/src/grammar/lexer.flex qdox/src/grammar/lexer.flex
+--- qdox-orig/src/grammar/lexer.flex	2005-01-03 19:16:06.000000000 +0100
++++ qdox/src/grammar/lexer.flex	2005-03-31 19:25:19.823044800 +0200
+@@ -17,6 +17,7 @@
+     private int classDepth = 0;
+     private int nestingDepth = 0;
+     private int assignmentDepth = 0;
++    private int objectAssignmentDepth = 0;
+     private int stateDepth = 0;
+     private int[] stateStack = new int[10];
+     private boolean javaDocNewLine;
+@@ -29,7 +30,7 @@
+     public int lex() throws java.io.IOException {
+         return yylex();
+     }
+-    
++
+     public int getLine() {
+         return yyline + 1;
+     }
+@@ -53,7 +54,7 @@
+ WhiteSpace              = {Eol} | [ \t\f]
+ CommentChar             = ( [^ \t\r\n*] | "*"+ [^ \t\r\n/*] )
+ 
+-%state JAVADOC CODEBLOCK ASSIGNMENT STRING CHAR SINGLELINECOMMENT MULTILINECOMMENT
++%state JAVADOC CODEBLOCK ASSIGNMENT OBJECT_ASSIGNMENT STRING CHAR SINGLELINECOMMENT MULTILINECOMMENT
+ 
+ %%
+ 
+@@ -94,11 +95,11 @@
+ 
+     "class"             {
+         classDepth++;
+-        return Parser.CLASS; 
++        return Parser.CLASS;
+     }
+-    "interface"         { 
++    "interface"         {
+         classDepth++;
+-        return Parser.INTERFACE; 
++        return Parser.INTERFACE;
+     }
+     "enum"              {
+         classDepth++;
+@@ -114,32 +115,32 @@
+             return Parser.BRACEOPEN;
+         }
+     }
+-    "}"                 { 
++    "}"                 {
+         nestingDepth--;
+         if (nestingDepth == classDepth - 1) {
+             classDepth--;
+         }
+-        return Parser.BRACECLOSE; 
++        return Parser.BRACECLOSE;
+     }
+ 
+-    "/*" "*"+           { 
+-        pushState(JAVADOC); 
+-        javaDocNewLine = true; 
++    "/*" "*"+           {
++        pushState(JAVADOC);
++        javaDocNewLine = true;
+         return Parser.JAVADOCSTART;
+     }
+ 
+-    "="                 { 
+-        assignmentDepth = nestingDepth; 
++    "="                 {
++        assignmentDepth = nestingDepth;
+         pushState(ASSIGNMENT);
+     }
+ 
+-    "default"           { 
+-        assignmentDepth = nestingDepth; 
++    "default"           {
++        assignmentDepth = nestingDepth;
+         pushState(ASSIGNMENT);
+     }
+ 
+-    [:jletter:] [:jletterdigit:]* { 
+-        return Parser.IDENTIFIER; 
++    [:jletter:] [:jletterdigit:]* {
++        return Parser.IDENTIFIER;
+     }
+ 
+ }
+@@ -151,7 +152,7 @@
+     {CommentChar}* "*"+ / [ \t\r\n] {
+         return Parser.JAVADOCTOKEN;
+     }
+-    {CommentChar}+ { 
++    {CommentChar}+ {
+         int token = Parser.JAVADOCTOKEN;
+         if (javaDocNewLine && yycharat(0) == '@') {
+                 token = Parser.JAVADOCTAG;
+@@ -173,33 +174,54 @@
+ }
+ 
+ <ASSIGNMENT> {
+-    ";"                 { 
+-        if (nestingDepth == assignmentDepth) { 
+-            popState(); 
+-            return Parser.SEMI; 
+-        } 
++    ";"                 {
++        if (nestingDepth == assignmentDepth) {
++            popState();
++            return Parser.SEMI;
++        }
+     }
+     ","                 {
+-        if (nestingDepth == assignmentDepth) { 
+-            popState(); 
+-            return Parser.COMMA; 
+-        } 
++        if (nestingDepth == assignmentDepth) {
++            popState();
++            return Parser.COMMA;
++        }
+     }
+     "{"                 { nestingDepth++; }
+     "}"                 { nestingDepth--; }
+     "("                 { nestingDepth++; }
+-    ")"                 { 
+-        nestingDepth--; 
+-        if (nestingDepth < assignmentDepth) { 
+-            popState(); 
+-            return Parser.PARENCLOSE; 
++    ")"                 {
++        nestingDepth--;
++        if (nestingDepth < assignmentDepth) {
++            popState();
++            return Parser.PARENCLOSE;
+         }
+     }
+     "["                 { nestingDepth++; }
+     "]"                 { nestingDepth--; }
++    "new"               {
++        objectAssignmentDepth = nestingDepth;
++        pushState(OBJECT_ASSIGNMENT);
++    }
++}
++
++<OBJECT_ASSIGNMENT> {
++    "("                 { nestingDepth++; }
++    ")"                 {
++        nestingDepth--;
++        if (nestingDepth == objectAssignmentDepth) {
++            popState();
++        }
++    }
++    "["                 { nestingDepth++; }
++    "]"                 {
++        nestingDepth--;
++        if (nestingDepth == objectAssignmentDepth) {
++            popState();
++        }
++    }
+ }
+ 
+-<ASSIGNMENT, CODEBLOCK, YYINITIAL> {
++<ASSIGNMENT, OBJECT_ASSIGNMENT, CODEBLOCK, YYINITIAL> {
+     "\""                { pushState(STRING); }
+     \'                  { pushState(CHAR); }
+     "//"                { pushState(SINGLELINECOMMENT); }
+diff -urN qdox-orig/src/grammar/parser.y qdox/src/grammar/parser.y
+--- qdox-orig/src/grammar/parser.y	2005-02-12 10:55:26.000000000 +0100
++++ qdox/src/grammar/parser.y	2005-03-31 16:37:03.324993600 +0200
+@@ -9,7 +9,7 @@
+ %token CLASS INTERFACE ENUM THROWS EXTENDS IMPLEMENTS SUPER DEFAULT
+ %token BRACEOPEN BRACECLOSE SQUAREOPEN SQUARECLOSE PARENOPEN PARENCLOSE LESSTHAN GREATERTHAN AMPERSAND QUERY AT
+ %token JAVADOCSTART JAVADOCEND JAVADOCEOL
+-%token CODEBLOCK 
++%token CODEBLOCK
+ %token INTEGER_LITERAL FLOAT_LITERAL
+ 
+ // strongly typed tokens/types
+@@ -41,14 +41,14 @@
+ 
+ javadoc: JAVADOCSTART javadocdescription javadoctags JAVADOCEND;
+ 
+-javadocdescription: 
+-    javadoctokens { 
+-        builder.addJavaDoc(buffer()); 
++javadocdescription:
++    javadoctokens {
++        builder.addJavaDoc(buffer());
+     };
+ 
+ javadoctokens: | javadoctokens javadoctoken;
+ 
+-javadoctoken: 
++javadoctoken:
+     JAVADOCTOKEN {
+         appendToBuffer($1);
+     } |
+@@ -58,22 +58,22 @@
+ 
+ javadoctags: | javadoctags javadoctag;
+ 
+-javadoctag: 
+-    JAVADOCTAG { line = lexer.getLine(); } 
++javadoctag:
++    JAVADOCTAG { line = lexer.getLine(); }
+     javadoctokens {
+-        builder.addJavaDocTag(new TagDef($1.substring(1), buffer(), line)); 
++        builder.addJavaDocTag(new TagDef($1.substring(1), buffer(), line));
+     };
+ 
+ 
+ // ----- COMMON TOKENS
+ 
+ // A fullidentifier is "a", "a.b", "a.b.c", "a.b.*", etc...
+-fullidentifier: 
++fullidentifier:
+     IDENTIFIER { $$ = $1; } |
+     fullidentifier DOT IDENTIFIER { $$ = $1 + '.' + $3; } |
+     fullidentifier DOT STAR { $$ = $1 + ".*"; };
+ 
+-arrayidentifier: 
++arrayidentifier:
+     IDENTIFIER dimensions {
+         $$ = new TypeDef($1,$2);
+     };
+@@ -81,7 +81,7 @@
+ dimensions:
+     /* empty */ { $$ = 0; }
+ |   dimensions SQUAREOPEN SQUARECLOSE {
+-        $$ = $1 + 1; 
++        $$ = $1 + 1;
+     };
+ 
+ // Modifiers to methods, fields, classes, interfaces, parameters, etc...
+@@ -104,7 +104,7 @@
+     ;
+ 
+ 
+-// ----- ANNOTATIONS 
++// ----- ANNOTATIONS
+ 
+ annotation:
+     AT IDENTIFIER |
+@@ -126,7 +126,7 @@
+ 
+ classtype:
+     fullidentifier opt_typearguments {
+-        $$ = $1; 
++        $$ = $1;
+     };
+ 
+ opt_typearguments: | LESSTHAN typearglist GREATERTHAN;
+@@ -149,45 +149,47 @@
+     typeparam |
+     typeparamlist COMMA typeparam;
+ 
+-typeparam: 
++typeparam:
+     IDENTIFIER |
+     IDENTIFIER EXTENDS typeboundlist;
+ 
+ typeboundlist:
+-    type | 
++    type |
+     typeboundlist AMPERSAND type;
+ 
+ // ----- ENUM
+ 
+ enum:
+-    modifiers ENUM IDENTIFIER BRACEOPEN enum_values BRACECLOSE;
++    modifiers ENUM IDENTIFIER BRACEOPEN enum_values opt_semi BRACECLOSE;
+ 
+ enum_values:
+-    enum_value|
++    enum_value |
+     enum_values COMMA enum_value;
+ 
+ enum_value:
+     javadoc IDENTIFIER |
+     IDENTIFIER;
+ 
++opt_semi: | SEMI;
++
+ // ----- CLASS
+ 
+-class: 
++class:
+     classdefinition BRACEOPEN members BRACECLOSE {
+-        builder.endClass(); 
++        builder.endClass();
+     };
+ 
+-classdefinition: 
++classdefinition:
+     modifiers classorinterface IDENTIFIER opt_typeparams opt_extends opt_implements {
+         cls.lineNumber = line;
+-        cls.modifiers.addAll(modifiers); modifiers.clear(); 
++        cls.modifiers.addAll(modifiers); modifiers.clear();
+         cls.name = $3;
+-        builder.beginClass(cls); 
+-        cls = new ClassDef(); 
++        builder.beginClass(cls);
++        cls = new ClassDef();
+     };
+ 
+-classorinterface: 
+-    CLASS { cls.type = ClassDef.CLASS; } | 
++classorinterface:
++    CLASS { cls.type = ClassDef.CLASS; } |
+     INTERFACE { cls.type = ClassDef.INTERFACE; } |
+     AT INTERFACE { cls.type = ClassDef.ANNOTATION_TYPE; };
+ 
+@@ -199,20 +201,20 @@
+ 
+ opt_implements: | IMPLEMENTS implementslist;
+ 
+-implementslist: 
+-    classtype { cls.implementz.add($1); } | 
++implementslist:
++    classtype { cls.implementz.add($1); } |
+     implementslist COMMA classtype { cls.implementz.add($3); };
+ 
+ members: | members { line = lexer.getLine(); } member;
+ 
+ member:
+-    javadoc | 
+-    fields | 
++    javadoc |
++    fields |
+     method |
+     constructor |
+     static_block |
+     class |
+-	enum |
++    enum |
+     SEMI;
+ 
+ memberend: SEMI | CODEBLOCK;
+@@ -230,8 +232,8 @@
+     extrafields memberend {
+         modifiers.clear();
+     };
+-  
+-extrafields: | 
++
++extrafields: |
+     extrafields COMMA { line = lexer.getLine(); } arrayidentifier {
+         makeField($4);
+     };
+@@ -242,12 +244,12 @@
+ method:
+     modifiers typeparams type IDENTIFIER methoddef dimensions opt_exceptions memberend {
+         mth.lineNumber = line;
+-        mth.modifiers.addAll(modifiers); modifiers.clear(); 
++        mth.modifiers.addAll(modifiers); modifiers.clear();
+         mth.returns = $3.name;
+         mth.dimensions = $6 + $3.dimensions; // return dimensions can be specified after return type OR after params
+         mth.name = $4;
+         builder.addMethod(mth);
+-        mth = new MethodDef(); 
++        mth = new MethodDef();
+     } |
+     modifiers type IDENTIFIER methoddef dimensions opt_exceptions memberend {
+         mth.lineNumber = line;
+@@ -262,30 +264,30 @@
+ constructor:
+     modifiers IDENTIFIER methoddef opt_exceptions memberend {
+         mth.lineNumber = line;
+-        mth.modifiers.addAll(modifiers); modifiers.clear(); 
++        mth.modifiers.addAll(modifiers); modifiers.clear();
+         mth.constructor = true; mth.name = $2;
+         builder.addMethod(mth);
+-        mth = new MethodDef(); 
++        mth = new MethodDef();
+     };
+ 
+ methoddef: PARENOPEN opt_params PARENCLOSE;
+ 
+ opt_exceptions: | THROWS exceptionlist;
+ 
+-exceptionlist: 
+-    fullidentifier { mth.exceptions.add($1); } | 
++exceptionlist:
++    fullidentifier { mth.exceptions.add($1); } |
+     exceptionlist COMMA fullidentifier { mth.exceptions.add($3); };
+ 
+ opt_params: | paramlist;
+ 
+-paramlist: 
+-    param | 
++paramlist:
++    param |
+     paramlist COMMA param;
+ 
+-param: 
++param:
+     opt_parammodifiers type varargs arrayidentifier {
+         param.name = $4.name;
+-        param.type = $2.name; 
++        param.type = $2.name;
+         param.dimensions = $2.dimensions + $4.dimensions;
+         param.isVarArgs = $3;
+         mth.params.add(param);
+@@ -296,7 +298,7 @@
+     /* empty */ { $$ = false; } |
+     DOTDOTDOT   { $$ = true; } ;
+ 
+-opt_parammodifiers: | 
++opt_parammodifiers: |
+     opt_parammodifiers modifier { param.modifiers.add($2); };
+ 
+ 
+@@ -378,10 +380,10 @@
+ private void makeField(TypeDef field) {
+     FieldDef fd = new FieldDef();
+     fd.lineNumber = line;
+-    fd.modifiers.addAll(modifiers); 
+-    fd.type = fieldType.name; 
++    fd.modifiers.addAll(modifiers);
++    fd.type = fieldType.name;
+     fd.dimensions = fieldType.dimensions + field.dimensions;
+     fd.name = field.name;
+     builder.addField(fd);
+ }
+-            
++
+diff -urN qdox-orig/src/test/com/thoughtworks/qdox/GenericsTest.java qdox/src/test/com/thoughtworks/qdox/GenericsTest.java
+--- qdox-orig/src/test/com/thoughtworks/qdox/GenericsTest.java	2005-01-03 13:21:22.000000000 +0100
++++ qdox/src/test/com/thoughtworks/qdox/GenericsTest.java	2005-03-31 19:38:20.595740800 +0200
+@@ -12,7 +12,7 @@
+  * @author Mike Williams
+  */
+ public class GenericsTest extends TestCase {
+-    
++
+     private JavaDocBuilder builder = new JavaDocBuilder();
+ 
+     public void testShouldUnderstandSingleGenericClassDeclarations() {
+@@ -60,7 +60,7 @@
+         builder.addSource(new StringReader(source));
+         assertEquals("Bar", builder.getClassByName("Bar").getName());
+     }
+-    
++
+     public void testShouldUnderstandNestedGenerics() {
+         String source = "" +
+                 "public class Bar {" +
+@@ -70,7 +70,7 @@
+         builder.addSource(new StringReader(source));
+         assertEquals("Bar", builder.getClassByName("Bar").getName());
+     }
+-    
++
+     public void testShouldUnderstandFullyQualifiedTypeArguments() {
+         String source = "" +
+                 "public class Bar {" +
+@@ -96,14 +96,14 @@
+         builder.addSource(new StringReader(source));
+         assertEquals("Bar", builder.getClassByName("Bar").getName());
+     }
+-    
++
+     public void testShouldUnderstandWildcardTypeArguments() {
+         String source = "" +
+                 "public class Bar { private Class<? extends Date> klass; }";
+         builder.addSource(new StringReader(source));
+         assertEquals("Bar", builder.getClassByName("Bar").getName());
+     }
+-    
++
+     public void testShouldUnderstandBoundedWildcardTypeArguments() {
+         String source = "" +
+                 "public class Bar { Map<? super String, ? extends Date> klass; }";
+@@ -121,8 +121,8 @@
+         builder.addSource(new StringReader(source));
+         assertEquals("Bar", builder.getClassByName("Bar").getName());
+     }
+-    
+-    public void FIXME_testJiraQdox66() {
++
++    public void testJiraQdox66() {
+         // Also see QDOX-77
+         String source = "" +
+             "public class Foo {\n" +
+@@ -132,14 +132,14 @@
+             "    }\n" +
+             "}\n";
+         builder.addSource(new StringReader(source));
+-        
++
+         JavaClass fooClass = builder.getClassByName("Foo");
+         assertNotNull(fooClass);
+         assertEquals("Foo", fooClass.getName());
+-        
++
+         JavaField envField = fooClass.getFieldByName("m_env");
+         assertNotNull(envField);
+         assertEquals("Map", envField.getType().getValue());
+-    } 
++    }
+ 
+ }
+diff -urN qdox-orig/src/test/com/thoughtworks/qdox/parser/LexerTest.java qdox/src/test/com/thoughtworks/qdox/parser/LexerTest.java
+--- qdox-orig/src/test/com/thoughtworks/qdox/parser/LexerTest.java	2005-01-03 18:21:26.000000000 +0100
++++ qdox/src/test/com/thoughtworks/qdox/parser/LexerTest.java	2005-03-31 18:35:41.280110400 +0200
+@@ -86,9 +86,16 @@
+         checkAssignment("new Thingifier() { void doThings(int x) { a = \"aaa\"; } }");
+     }
+ 
+-    public void FIXME_testGenericTypeAssignment() throws Exception {
++    public void testGenericTypeAssignment() throws Exception {
+         // QDOX-77
+-        checkAssignment("new HashMap<String,Integer>");
++        checkAssignment("new HashMap<String,Integer>()");
++        // makes not much sense but compiler accepts it.
++        checkAssignment("new HashMap<?,?>[0]");
++        // field declarations such as:
++        // HashMap<?,?>[] m = { new HashMap<String,String>() };
++        // are allowed by the language, although they don't make much sense.
++        checkAssignment("{ new HashMap<String,String>() }");
++        checkAssignment("{ new HashMap<String,String>(), new HashMap<Integer,String>() }");
+     }
+ 
+     public void testFieldsContainingLessThanOrGreaterThanInAssignment() throws Exception {
+@@ -136,7 +143,7 @@
+         assertLex(Parser.COMMA, lexer);
+         assertLex(Parser.IDENTIFIER, "y", lexer);
+         assertLex(Parser.SEMI, lexer);
+-        
++
+         assertLex(Parser.BRACECLOSE, lexer);
+         assertLex(0, lexer);
+     }
+@@ -151,7 +158,7 @@
+     }
+ 
+     public void testUnicodeInTest() throws Exception {
+-        checkAssignment("\"\u0000\""); 
++        checkAssignment("\"\u0000\"");
+     }
+ 
+     public void testUnicodeInFile() throws Exception {
+@@ -181,7 +188,7 @@
+         // \u0391 == uppercase Greek "Alpha"
+         assertSingleLex("\u0391", Parser.IDENTIFIER);
+         // \u00f6 == lowercase o + diaeresis
+-        assertSingleLex("f\u00f6rnamn", Parser.IDENTIFIER); 
++        assertSingleLex("f\u00f6rnamn", Parser.IDENTIFIER);
+     }
+ 
+     public void testInnerClass() throws Exception {
+@@ -350,10 +357,10 @@
+         String in = "/**@foo bar*/";
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+-        
++
+         assertLex(Parser.JAVADOCTAG, "@foo", lexer);
+         assertLex(Parser.JAVADOCTOKEN, "bar", lexer);
+-        
++
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+     }
+@@ -448,7 +455,7 @@
+             + " */";
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(Parser.JAVADOCSTART, lexer);
+-        
++
+         assertLex(Parser.JAVADOCEOL, lexer);
+         assertLex(Parser.JAVADOCTOKEN, "simple", lexer);
+         assertLex(Parser.JAVADOCEOL, lexer);
+@@ -459,7 +466,7 @@
+         assertLex(Parser.JAVADOCTOKEN, "multistar", lexer);
+         assertLex(Parser.JAVADOCEOL, lexer);
+         assertLex(Parser.JAVADOCEOL, lexer);
+-        
++
+         assertLex(Parser.JAVADOCEND, lexer);
+         assertLex(0, lexer);
+     }
+@@ -520,9 +527,9 @@
+     }
+ 
+     public void testAnnotationDeclarationTokens() throws Exception {
+-        String in = "" 
+-            + "public @interface Copyright {\n" 
+-            + "    int year();\n" 
++        String in = ""
++            + "public @interface Copyright {\n"
++            + "    int year();\n"
+             + "    String assignee() default \"The CodeHaus\";\n"
+             + "}\n";
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+@@ -548,8 +555,8 @@
+ 
+     public void testAnnotationTokens() throws Exception {
+         String in = ""
+-            + "@Copyright (year = 2004, month = \"Jan\")\n" 
+-            + "@Note(\"Just ignore me\")\n" 
++            + "@Copyright (year = 2004, month = \"Jan\")\n"
++            + "@Note(\"Just ignore me\")\n"
+             + "public class LexerTest extends TestCase {}\n";
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+ 
+@@ -573,7 +580,7 @@
+         assertLex(Parser.BRACECLOSE, lexer);
+         assertLex(0, lexer);
+     }
+-    
++
+     private void assertSingleLex(String in, short expectedLex) throws Exception {
+         Lexer lexer = new JFlexLexer(new StringReader(in));
+         assertLex(expectedLex, lexer);
