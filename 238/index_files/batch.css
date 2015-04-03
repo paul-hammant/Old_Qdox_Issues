@@ -216,6 +216,8 @@ input.aui-button.aui-dropdown2-trigger::after { display: none; }
 .icon-perma { background-position: 0px -950px; }
 .icon-perma:hover { background-position: -25px -950px; }
 .icon-export.viewissue-export { background-repeat: no-repeat; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAMFBMVEX///9wcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHAAAAAAAAAAAAAAAAAAAAAAAAAAAACyF7fRAAAACHRSTlMAETNViJm7zEufFCAAAABZSURBVHjaY2BAB4wcDWD6BxNMhIXhB0iIowIugo3xgYEtgeE/mMGkAGYwKIAVMDMJhByyEWdlY/77wFRCUnLzCSaG//MNmF99AMm++vB/PlAN0IjbSgcYGADoDhZe/cok5QAAAABJRU5ErkJggg=="); }
+.icon-sort-down { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAJCAYAAAALpr0TAAAANElEQVQY02P4//8/AwyXl5c3APF/KG5AlmMYQIVokrhwAzaTMBShWI1DcQNlnkFS3IAuDgDKSOiHYDSrdgAAAABJRU5ErkJggg=="); height: 10px; width: 12px; }
+.icon-sort-down:hover, .icon-sort-up:hover { opacity: 0.8; }
 .icon-previous::after, .icon-next::after, .icon-page-prev::after, .icon-page-next::after, .icon-page-prev-deactivated::after, .icon-page-next-deactivated::after { content: ""; border: 8px solid transparent; display: block; height: 0px; position: relative; width: 0px; }
 .icon-previous::after, .icon-next::after { border-width: 6px; }
 .icon-previous::after { border-right-color: rgb(112, 112, 112); }

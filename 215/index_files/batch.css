@@ -14,6 +14,7 @@ q::after { content: close-quote; }
 .aui-avatar { box-sizing: border-box; display: inline-block; vertical-align: text-bottom; }
 .aui-avatar-inner { display: table-cell; vertical-align: middle; }
 .aui-avatar img { border-radius: 3px; display: block; margin: 0px auto; height: 100%; width: 100%; }
+.aui-avatar-xsmall, .aui-avatar-xsmall .aui-avatar-inner { height: 16px; width: 16px; }
 .aui-avatar-small, .aui-avatar-small .aui-avatar-inner { height: 24px; width: 24px; }
 .aui-avatar-large, .aui-avatar-large .aui-avatar-inner { height: 48px; width: 48px; }
 .aui-avatar-project { background-color: rgb(255, 255, 255); box-shadow: 0px 0px 0px 1px rgb(204, 204, 204); position: relative; }
@@ -208,7 +209,10 @@ input.aui-button.aui-dropdown2-trigger::after { display: none; }
 .aui-header .aui-nav .aui-buttons .aui-button-primary.aui-dropdown2-trigger::after { border-top-color: rgb(255, 255, 255); }
 .aui-header .aui-button-primary.aui-button-split-main:hover + .aui-button.aui-dropdown2-trigger.aui-button-split-more::before, .aui-header .aui-button-primary.aui-dropdown2-trigger.aui-button-split-more.active:hover::before, .aui-header .aui-button-primary.aui-dropdown2-trigger.aui-button-split-more.active::before, .aui-header .aui-button-primary.aui-dropdown2-trigger.aui-button-split-more:hover::before, .aui-header .aui-button-primary.aui-dropdown2-trigger.aui-button-split-more::before { border-color: rgb(31, 78, 126); bottom: 0px; top: 0px; }
 .icon { background: url("urn:not-loaded:https://jira.codehaus.org/s/en_UK-huda6k-1988229788/6162/7/1.0/_/images/icons/sprites/icons_module.png") no-repeat scroll 0px 0px transparent; display: inline-block; height: 16px; margin: 0px; overflow: hidden; padding: 0px; text-align: left; text-indent: -999em; vertical-align: text-top; width: 16px; }
+.icon span { display: none; text-indent: -9000px; }
 .icon-export.viewissue-export { background-repeat: no-repeat; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAMFBMVEX///9wcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHAAAAAAAAAAAAAAAAAAAAAAAAAAAACyF7fRAAAACHRSTlMAETNViJm7zEufFCAAAABZSURBVHjaY2BAB4wcDWD6BxNMhIXhB0iIowIugo3xgYEtgeE/mMGkAGYwKIAVMDMJhByyEWdlY/77wFRCUnLzCSaG//MNmF99AMm++vB/PlAN0IjbSgcYGADoDhZe/cok5QAAAABJRU5ErkJggg=="); }
+.icon-sort-down { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAJCAYAAAALpr0TAAAANElEQVQY02P4//8/AwyXl5c3APF/KG5AlmMYQIVokrhwAzaTMBShWI1DcQNlnkFS3IAuDgDKSOiHYDSrdgAAAABJRU5ErkJggg=="); height: 10px; width: 12px; }
+.icon-sort-down:hover, .icon-sort-up:hover { opacity: 0.8; }
 .icon-previous::after, .icon-next::after, .icon-page-prev::after, .icon-page-next::after, .icon-page-prev-deactivated::after, .icon-page-next-deactivated::after { content: ""; border: 8px solid transparent; display: block; height: 0px; position: relative; width: 0px; }
 .icon-previous::after, .icon-next::after { border-width: 6px; }
 .icon-previous::after { border-right-color: rgb(112, 112, 112); }

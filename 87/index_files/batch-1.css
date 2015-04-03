@@ -196,6 +196,8 @@ ul.optionslist > li > ul > li::before { content: ", "; }
 ul.optionslist > li > ul > li:first-child::before { content: none; }
 .recipients li::before, .recipients li::after { content: " "; display: table; }
 .recipients li::after { clear: both; }
+.changehistory th, .changehistory td { vertical-align: top; padding: 0.166em 0.5em 0.166em 0px; }
+.action-body.changehistory { margin: 0px; }
 .tabwrap.tabs2 { font-size: 14px; line-height: 1.42857; }
 .tabwrap > ul.tabs > li a, .tabwrap > ul.tabs > li a:link, .tabwrap > ul.tabs > li a:visited { background: none repeat scroll 0% 0% rgb(238, 238, 238); color: rgb(51, 51, 51); }
 .tabwrap > ul.tabs > li a:focus, .tabwrap > ul.tabs > li a:hover { background: none repeat scroll 0% 0% rgb(230, 230, 230); color: rgb(51, 51, 51); }
@@ -247,6 +249,7 @@ ul.optionslist > li > ul > li:first-child::before { content: none; }
 .action-links { float: right; }
 .action-body { overflow-x: auto; overflow-y: hidden; margin: 10px 0px 0px; }
 #activitymodule .tabs2 { position: relative; }
+#activitymodule .tabs2 .sortwrap { bottom: 5px; left: auto; position: absolute; right: 0px; width: 1em; }
 #activitymodule .tabs2 #issue-tabs { padding-right: 20px; }
 #activitymodule .mod-content { min-height: 5em; }
 #activitymodule .issuePanelWrapper { position: relative; padding-top: 10px; }
@@ -276,6 +279,8 @@ ul.optionslist > li > ul > li:first-child::before { content: none; }
 dd.attachment-date { text-align: right; width: 180px; padding: 0px 5px; }
 .attachment-delete { visibility: hidden; }
 .attachment-content:hover .attachment-delete { visibility: visible; }
+.activity-name { color: rgb(102, 102, 102); min-width: 150px; }
+.activity-old-val, .activity-new-val { min-width: 250px; }
 .people-details > dl:first-child { line-height: 24px; }
 .people-details > dl:first-child + dl { line-height: 24px; }
 .people-details .aui-avatar { vertical-align: middle; }

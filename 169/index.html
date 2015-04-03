@@ -334,7 +334,7 @@
 <p>Would be nice if this was documented somewhere, maybe frontpage of qdox' Jira.</p>
             </div>
 </div>
-</div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+</div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -348,12 +348,12 @@
     <div class="tabwrap tabs2" style="display:none">
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-169">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/169"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-169">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-169">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-169">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/169"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-169">
@@ -372,9 +372,86 @@
     <div class="issuePanelWrapper">
         <div class="issuePanelProgress"></div>
         <div class="issuePanelContainer" id="issue_actions_container">
-                                    <div class="message-container">
-    There are no comments yet on this issue.
-</div>                             </div>
+                                    
+
+<div class="issue-data-block" id="changehistory-284065">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_284065">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_284065" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="26/Apr/10 3:23 AM"><time class="livestamp" datetime="2010-04-26T03:23-0500">26/Apr/10 3:23 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_284065" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Closed
+                                                                                               <span class="hist-value">[    6
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Assignee
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Paul Hammant
+                                                                                                <span class="hist-value">[    paul
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Robert Scholte
+                                                                                               <span class="hist-value">[    rfscholte
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Fix Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               1.12
+                                                                                               <span class="hist-value">[    16282
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Fixed
+                                                                                               <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             </div>
     </div>
 </div></div></div><div id="viewissuesidebar" class="aui-item issue-side-column"><div id="peoplemodule" class="module toggle-wrap"><div id="peoplemodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">People</h2></div><div class="mod-content"><ul class="item-details" id="peopledetails">
     <li class="people-details">
@@ -384,7 +461,7 @@
                 <span id="assignee-val" class="view-issue-field">
 
             <span class="user-hover" id="issue_summary_assignee_rfscholte" rel="rfscholte">
-            <span class="aui-avatar aui-avatar-small"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span>
+            <span class="aui-avatar aui-avatar-small"><span class="aui-avatar-inner"><img src="index_files/useravatar-1.png"></span></span>
             Robert Scholte
         </span>
     </span>
@@ -396,7 +473,7 @@
                 <span id="reporter-val" class="view-issue-field">
 
             <span class="user-hover" id="issue_summary_reporter_rfscholte" rel="rfscholte">
-            <span class="aui-avatar aui-avatar-small"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span>
+            <span class="aui-avatar aui-avatar-small"><span class="aui-avatar-inner"><img src="index_files/useravatar-1.png"></span></span>
             Robert Scholte
         </span>
     </span>

@@ -343,7 +343,7 @@ package org.oasis_open.docs.wsn.br_2;</p>
                         </dl>
                                     </li>
                     </ol>
-        </div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+        </div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -360,12 +360,12 @@ package org.oasis_open.docs.wsn.br_2;</p>
                             </div>
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-98">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/98"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-98">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-98">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-98">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/98"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-98">
@@ -387,7 +387,7 @@ package org.oasis_open.docs.wsn.br_2;</p>
                                     
 
 
-<div id="comment-73868" class="issue-data-block activity-comment twixi-block  collapsed">
+<div id="comment-73868" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
         <div class="action-head">
             <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
@@ -420,9 +420,231 @@ package org.oasis_open.docs.wsn.br_2;</p>
         </div>
     </div>
 </div>
-                             <div class="message-container">
-    <a class="collapsed-comments" href="/Old_Qdox_Issues/98&amp;showAll=true"><span class="collapsed-comments-line"></span><span class="collapsed-comments-line"></span><span class="show-more-comments" data-collapsed-count="4">4 older comments</span></a>
-</div>                             
+                             
+
+
+<div id="comment-106692" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/98?focusedCommentId=106692&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-106692" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="franz see" id="commentauthor_106692_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=franz+see"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Franz Allan Valencia See</a>
+ added a comment  - <span class="commentdate_106692_verbose subText"><span class="date user-tz" title="06/Sep/07 11:48 PM"><time class="livestamp" datetime="2007-09-06T23:48-0500">06/Sep/07 11:48 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>What is the status of this issue?</p>
+
+<p>I tried this with com.thoughtworks.qdox:qdox:1.6.3 but I'm still getting that error.</p>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre> 
+com.thoughtworks.qdox.parser.ParseException: syntax error @[2,1] in file:/home/franz/sources/com/mycompany/MyClass.java
+        at com.thoughtworks.qdox.parser.impl.Parser.yyerror(Parser.java:716)
+        at com.thoughtworks.qdox.parser.impl.Parser.yyparse(Parser.java:826)
+        at com.thoughtworks.qdox.parser.impl.Parser.parse(Parser.java:697)
+        at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:300)
+        at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:316)
+        at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:312)
+        at com.thoughtworks.qdox.JavaDocBuilder$1.visitFile(JavaDocBuilder.java:369)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:43)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.scan(DirectoryScanner.java:52)
+        at com.thoughtworks.qdox.JavaDocBuilder.addSourceTree(JavaDocBuilder.java:366)
+</pre>
+</div></div>  </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="franz see" id="commentauthor_106692_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=franz+see"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Franz Allan Valencia See</a>
+ added a comment  - <span class="commentdate_106692_concise subText"><span class="date user-tz" title="06/Sep/07 11:48 PM"><time class="livestamp" datetime="2007-09-06T23:48-0500">06/Sep/07 11:48 PM</time></span></span>                    What is the status of this issue? 
+
+ I tried this with com.thoughtworks.qdox:qdox:1.6.3 but I'm still getting that error. 
+
+  
+  
+com.thoughtworks.qdox.parser.ParseException: syntax error @[2,1] in file:/home/franz/sources/com/mycompany/MyClass.java
+        at com.thoughtworks.qdox.parser.impl.Parser.yyerror(Parser.java:716)
+        at com.thoughtworks.qdox.parser.impl.Parser.yyparse(Parser.java:826)
+        at com.thoughtworks.qdox.parser.impl.Parser.parse(Parser.java:697)
+        at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:300)
+        at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:316)
+        at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:312)
+        at com.thoughtworks.qdox.JavaDocBuilder$1.visitFile(JavaDocBuilder.java:369)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:43)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.scan(DirectoryScanner.java:52)
+        at com.thoughtworks.qdox.JavaDocBuilder.addSourceTree(JavaDocBuilder.java:366)
+ 
+                </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-141133" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/98?focusedCommentId=141133&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-141133" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="dennislundberg" id="commentauthor_141133_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=dennislundberg"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Dennis Lundberg</a>
+ added a comment  - <span class="commentdate_141133_verbose subText"><span class="date user-tz" title="08/Jul/08 3:37 PM"><time class="livestamp" datetime="2008-07-08T15:37-0500">08/Jul/08 3:37 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>This is still broken in the latest version built from svn.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="dennislundberg" id="commentauthor_141133_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=dennislundberg"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Dennis Lundberg</a>
+ added a comment  - <span class="commentdate_141133_concise subText"><span class="date user-tz" title="08/Jul/08 3:37 PM"><time class="livestamp" datetime="2008-07-08T15:37-0500">08/Jul/08 3:37 PM</time></span></span>                    This is still broken in the latest version built from svn.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-162221" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/98?focusedCommentId=162221&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-162221" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_162221_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_162221_verbose subText"><span class="date user-tz" title="23/Jan/09 11:22 AM"><time class="livestamp" datetime="2009-01-23T11:22-0600">23/Jan/09 11:22 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>I found a solution. This way the parser won't fail anymore. But the annotation is out of reach if we want to stay backwards compatible. The problem is clear: javaSource.getPackage returns a string. To support annotations for a package it has to return some object like JavaPackage.<br>
+So I'm not sure what to do... </p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_162221_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_162221_concise subText"><span class="date user-tz" title="23/Jan/09 11:22 AM"><time class="livestamp" datetime="2009-01-23T11:22-0600">23/Jan/09 11:22 AM</time></span></span>                    I found a solution. This way the parser won't fail anymore. But the annotation is out of reach if we want to stay backwards compatible. The problem is clear: javaSource.getPackage returns a string. To support annotations for a package it has to return some object like JavaPackage. 
+So I'm not sure what to do...               </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-163923" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/98?focusedCommentId=163923&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-163923" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="paul" id="commentauthor_163923_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=paul"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Paul Hammant</a>
+ added a comment  - <span class="commentdate_163923_verbose subText"><span class="date user-tz" title="04/Feb/09 9:21 AM"><time class="livestamp" datetime="2009-02-04T09:21-0600">04/Feb/09 9:21 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>MATHUS Baptiste wrote:</p>
+
+<p>&gt;   Hi all,<br>
+&gt;<br>
+&gt;   I just encountered that very problem: <a href="https://svn.cargo.codehaus.org/browse/QDOX-98" class="external-link" rel="nofollow">https://svn.cargo.codehaus.org/browse/QDOX-98</a> when running the paranamer-maven-plugin on a <br>
+&gt;   project that    dynamically generates a whole package using JAXB.<br>
+&gt;<br>
+&gt;   <span class="error">[...]</span><br>
+&gt;   </p>
+
+<p>If the answer is to change 'String javaSource.getPackage()' to 'JavaPackage javaSource.getPackage()', then that is what we have to do.  </p>
+
+<p>It would be a break of backwards compatibility, but not enough to warrant a jump to QDox 2.x perhaps.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="paul" id="commentauthor_163923_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=paul"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Paul Hammant</a>
+ added a comment  - <span class="commentdate_163923_concise subText"><span class="date user-tz" title="04/Feb/09 9:21 AM"><time class="livestamp" datetime="2009-02-04T09:21-0600">04/Feb/09 9:21 AM</time></span></span>                    MATHUS Baptiste wrote: 
+
+ &gt;   Hi all, 
+&gt; 
+&gt;   I just encountered that very problem:  https://svn.cargo.codehaus.org/browse/QDOX-98  when running the paranamer-maven-plugin on a  
+&gt;   project that    dynamically generates a whole package using JAXB. 
+&gt; 
+&gt;    [...]  
+&gt;    
+
+ If the answer is to change 'String javaSource.getPackage()' to 'JavaPackage javaSource.getPackage()', then that is what we have to do.   
+
+ It would be a break of backwards compatibility, but not enough to warrant a jump to QDox 2.x perhaps.              </div>
+        </div>
+    </div>
+</div>
+                             
 
 
 <div id="comment-163932" class="issue-data-block activity-comment twixi-block  expanded">
@@ -670,6 +892,43 @@ getPackage() has be to changed to getPackage().getName()
 </div>
                              
 
+<div class="issue-data-block" id="changehistory-210942">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_210942">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_210942" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="16/Feb/09 12:19 PM"><time class="livestamp" datetime="2009-02-16T12:19-0600">16/Feb/09 12:19 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_210942" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Attachment
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                                                        <a href="/Old_Qdox_Issues/attachment/40064/qdox-98.patch">qdox-98.patch</a>
+                                                                                                                       <span class="hist-value">[    40064
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
 
 <div id="comment-165834" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
@@ -743,6 +1002,75 @@ getPackage() has be to changed to getPackage().getName()
 
  fix/improvement for qdox-98 
 ----------------------------------------------------------------------------              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-210943">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_210943">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_210943" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="16/Feb/09 1:10 PM"><time class="livestamp" datetime="2009-02-16T13:10-0600">16/Feb/09 1:10 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_210943" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Fixed
+                                                                                               <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Assignee
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Robert Scholte
+                                                                                               <span class="hist-value">[    rfscholte
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Closed
+                                                                                               <span class="hist-value">[    6
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Fix Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               1.9
+                                                                                               <span class="hist-value">[    14956
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -880,7 +1208,7 @@ getPackage() has be to changed to getPackage().getName()
 	          
 	               
 	                 
-	        CONCURRENT REQUESTS : 6
+	        CONCURRENT REQUESTS : 4
 
 
 

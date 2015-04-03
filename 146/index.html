@@ -324,7 +324,7 @@
 <p>I've tried looking into the source to see where this was happening, but haven't been able to locate it precisely.</p>
             </div>
 </div>
-</div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+</div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -341,12 +341,12 @@
                             </div>
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-146">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/146"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-146">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-146">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-146">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/146"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-146">
@@ -491,6 +491,46 @@
  I think the stripping of spaces is baked into QDox at the parser stage. It would most likely need to be a change for QDox rather than a switch. 
 
  In AbstractJavaEntity.commentHeader(..) there is an attempt to format again in /** Javadoc Style */ but it does not add back the spaces.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-210968">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_210968">
+                                
+
+    <a class="user-hover user-avatar" rel="paul" id="changehistoryauthor_210968" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=paul"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Paul Hammant</a>
+ made changes  - <span class="date" title="16/Feb/09 5:23 PM"><time class="livestamp" datetime="2009-02-16T17:23-0600">16/Feb/09 5:23 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_210968" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Priority
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Major
+                                                                                                <span class="hist-value">[    3
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Minor
+                                                                                               <span class="hist-value">[    4
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -660,6 +700,75 @@ But then there´s another thing: in the chalala-example I think the last line sho
 
     <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_189753_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
  added a comment  - <span class="commentdate_189753_concise subText"><span class="date user-tz" title="03/Sep/09 3:45 PM"><time class="livestamp" datetime="2009-09-03T15:45-0500">03/Sep/09 3:45 PM</time></span></span>                    Issue resolved like mentioned: add those 4 extra spaces so the comment stays as it is.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-246752">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_246752">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_246752" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="03/Sep/09 3:45 PM"><time class="livestamp" datetime="2009-09-03T15:45-0500">03/Sep/09 3:45 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_246752" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Resolved
+                                                                                               <span class="hist-value">[    5
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Fix Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               1.10
+                                                                                               <span class="hist-value">[    15020
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Fixed
+                                                                                               <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Assignee
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Robert Scholte
+                                                                                               <span class="hist-value">[    rfscholte
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>

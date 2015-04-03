@@ -350,7 +350,7 @@ current HashMaps do not provide consistent ordering between different java vesrs
                         </dl>
                                     </li>
                     </ol>
-        </div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+        </div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -367,12 +367,12 @@ current HashMaps do not provide consistent ordering between different java vesrs
                             </div>
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-59">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/59"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-59">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-59">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-59">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/59"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-59">
@@ -394,7 +394,7 @@ current HashMaps do not provide consistent ordering between different java vesrs
                                     
 
 
-<div id="comment-21448" class="issue-data-block activity-comment twixi-block  collapsed">
+<div id="comment-21448" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
         <div class="action-head">
             <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
@@ -435,9 +435,353 @@ current HashMaps do not provide consistent ordering between different java vesrs
         </div>
     </div>
 </div>
-                             <div class="message-container">
-    <a class="collapsed-comments" href="/Old_Qdox_Issues/59&amp;showAll=true"><span class="collapsed-comments-line"></span><span class="collapsed-comments-line"></span><span class="show-more-comments" data-collapsed-count="5">5 older comments</span></a>
-</div>                             
+                             
+
+
+<div id="comment-21459" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/59?focusedCommentId=21459&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-21459" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="ko5tik" id="commentauthor_21459_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=ko5tik"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Konstantin Pribluda</a>
+ added a comment  - <span class="commentdate_21459_verbose subText"><span class="date user-tz" title="07/Jul/04 3:53 AM"><time class="livestamp" datetime="2004-07-07T03:53-0500">07/Jul/04 3:53 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>for example JavaClass.getBeanPropertyMap() <br>
+gathers them into HashMap, and then converts<br>
+values() to array - using threeMap instead helps</p>
+
+<p>I' attaching small patch for just one change.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="ko5tik" id="commentauthor_21459_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=ko5tik"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Konstantin Pribluda</a>
+ added a comment  - <span class="commentdate_21459_concise subText"><span class="date user-tz" title="07/Jul/04 3:53 AM"><time class="livestamp" datetime="2004-07-07T03:53-0500">07/Jul/04 3:53 AM</time></span></span>                    for example JavaClass.getBeanPropertyMap()  
+gathers them into HashMap, and then converts 
+values() to array - using threeMap instead helps 
+
+ I' attaching small patch for just one change.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-21460" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/59?focusedCommentId=21460&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-21460" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="ko5tik" id="commentauthor_21460_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=ko5tik"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Konstantin Pribluda</a>
+ added a comment  - <span class="commentdate_21460_verbose subText"><span class="date user-tz" title="07/Jul/04 3:53 AM"><time class="livestamp" datetime="2004-07-07T03:53-0500">07/Jul/04 3:53 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>just small patch for JavaClass </p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="ko5tik" id="commentauthor_21460_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=ko5tik"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Konstantin Pribluda</a>
+ added a comment  - <span class="commentdate_21460_concise subText"><span class="date user-tz" title="07/Jul/04 3:53 AM"><time class="livestamp" datetime="2004-07-07T03:53-0500">07/Jul/04 3:53 AM</time></span></span>                    just small patch for JavaClass               </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-22326">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_22326">
+                                
+
+    <a class="user-hover user-avatar" rel="ko5tik" id="changehistoryauthor_22326" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=ko5tik"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Konstantin Pribluda</a>
+ made changes  - <span class="date" title="07/Jul/04 3:53 AM"><time class="livestamp" datetime="2004-07-07T03:53-0500">07/Jul/04 3:53 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_22326" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Attachment
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                                                        <a href="/Old_Qdox_Issues/attachment/12433/qdox.patch">qdox.patch</a>
+                                                                                                                       <span class="hist-value">[    12433
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-22357">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_22357">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_22357" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="07/Jul/04 7:52 PM"><time class="livestamp" datetime="2004-07-07T19:52-0500">07/Jul/04 7:52 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_22357" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Assignee
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Mike Williams
+                                                                                               <span class="hist-value">[    mdub
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-21495" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/59?focusedCommentId=21495&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-21495" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="mdub" id="commentauthor_21495_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ added a comment  - <span class="commentdate_21495_verbose subText"><span class="date user-tz" title="07/Jul/04 8:18 PM"><time class="livestamp" datetime="2004-07-07T20:18-0500">07/Jul/04 8:18 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Thanks Konstantin; I've re-titled the issue. I'll apply your s/HashMap/TreeMap/ patch as a quick fix.  </p>
+
+<p>But the behaviour may change again, as longer-term, I'd prefer the ordering as declared in the source to be preserved.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="mdub" id="commentauthor_21495_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ added a comment  - <span class="commentdate_21495_concise subText"><span class="date user-tz" title="07/Jul/04 8:18 PM"><time class="livestamp" datetime="2004-07-07T20:18-0500">07/Jul/04 8:18 PM</time></span></span>                    Thanks Konstantin; I've re-titled the issue. I'll apply your s/HashMap/TreeMap/ patch as a quick fix.   
+
+ But the behaviour may change again, as longer-term, I'd prefer the ordering as declared in the source to be preserved.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-22359">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_22359">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_22359" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="07/Jul/04 8:18 PM"><time class="livestamp" datetime="2004-07-07T20:18-0500">07/Jul/04 8:18 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_22359" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Summary
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Provide consistent ordering on class propeties  , methods and members
+                                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Provide consistent ordering for JavaClass.getBeanProperties
+                                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Affects Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               1.5
+                                                                                               <span class="hist-value">[    10650
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Affects Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                1.6
+                                                                                                <span class="hist-value">[    10814
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Fix Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               1.6
+                                                                                               <span class="hist-value">[    10814
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-21507" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/59?focusedCommentId=21507&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-21507" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="ko5tik" id="commentauthor_21507_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=ko5tik"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Konstantin Pribluda</a>
+ added a comment  - <span class="commentdate_21507_verbose subText"><span class="date user-tz" title="08/Jul/04 4:45 AM"><time class="livestamp" datetime="2004-07-08T04:45-0500">08/Jul/04 4:45 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>well, this is not only JavaClass, but everywhere else...</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="ko5tik" id="commentauthor_21507_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=ko5tik"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Konstantin Pribluda</a>
+ added a comment  - <span class="commentdate_21507_concise subText"><span class="date user-tz" title="08/Jul/04 4:45 AM"><time class="livestamp" datetime="2004-07-08T04:45-0500">08/Jul/04 4:45 AM</time></span></span>                    well, this is not only JavaClass, but everywhere else...              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-21508" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/59?focusedCommentId=21508&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-21508" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="mdub" id="commentauthor_21508_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ added a comment  - <span class="commentdate_21508_verbose subText"><span class="date user-tz" title="08/Jul/04 6:04 AM"><time class="livestamp" datetime="2004-07-08T06:04-0500">08/Jul/04 6:04 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Sorry; there are plenty of Collections that <b>do</b> have consistent ordering, so "everywhere else" doesn't help me much.  Can you be more specific about where ordering is inconsistent?  </p>
+
+<ul class="alternate" type="square">
+	<li>Bean properties, we've already covered.</li>
+	<li>Looks like named-parameters of tags might have the same problem?</li>
+	<li>Anywhere else??</li>
+</ul>
+
+
+<p>Specific use-cases would be appreciated.  JUnit test-cases would be even better!</p>
+
+<p>By the way, why is consistent ordering important for Generama test-cases?  Can you provide an example of a test that fails?</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="mdub" id="commentauthor_21508_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ added a comment  - <span class="commentdate_21508_concise subText"><span class="date user-tz" title="08/Jul/04 6:04 AM"><time class="livestamp" datetime="2004-07-08T06:04-0500">08/Jul/04 6:04 AM</time></span></span>                    Sorry; there are plenty of Collections that  do  have consistent ordering, so "everywhere else" doesn't help me much.  Can you be more specific about where ordering is inconsistent?   
+
+ 
+	 Bean properties, we've already covered. 
+	 Looks like named-parameters of tags might have the same problem? 
+	 Anywhere else?? 
+ 
+
+
+ Specific use-cases would be appreciated.  JUnit test-cases would be even better! 
+
+ By the way, why is consistent ordering important for Generama test-cases?  Can you provide an example of a test that fails?              </div>
+        </div>
+    </div>
+</div>
+                             
 
 
 <div id="comment-21509" class="issue-data-block activity-comment twixi-block  expanded">
@@ -518,6 +862,39 @@ setFoo("blurge");
 
 
  I will raise dependency on xdoclet plugins  and look where similar problem may arise.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-22364">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_22364">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_22364" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="08/Jul/04 7:39 AM"><time class="livestamp" datetime="2004-07-08T07:39-0500">08/Jul/04 7:39 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_22364" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               In Progress
+                                                                                               <span class="hist-value">[    3
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -649,6 +1026,51 @@ unless some unlucky soul raises dependency on generama / xdoclet-2 / xdoclet plu
 </div>
                              
 
+<div class="issue-data-block" id="changehistory-23547">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_23547">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_23547" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="28/Jul/04 9:10 AM"><time class="livestamp" datetime="2004-07-28T09:10-0500">28/Jul/04 9:10 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_23547" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Fixed
+                                                                                               <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                In Progress
+                                                                                                <span class="hist-value">[    3
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Resolved
+                                                                                               <span class="hist-value">[    5
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
 
 <div id="comment-25590" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
@@ -680,6 +1102,39 @@ unless some unlucky soul raises dependency on generama / xdoclet-2 / xdoclet plu
 
     <a class="user-hover user-avatar" rel="mdub" id="commentauthor_25590_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
  added a comment  - <span class="commentdate_25590_concise subText"><span class="date user-tz" title="19/Oct/04 7:00 PM"><time class="livestamp" datetime="2004-10-19T19:00-0500">19/Oct/04 7:00 PM</time></span></span>                    No complaints.  Case closed.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-26970">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_26970">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_26970" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="19/Oct/04 7:00 PM"><time class="livestamp" datetime="2004-10-19T19:00-0500">19/Oct/04 7:00 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_26970" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Resolved
+                                                                                                <span class="hist-value">[    5
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Closed
+                                                                                               <span class="hist-value">[    6
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -817,7 +1272,7 @@ unless some unlucky soul raises dependency on generama / xdoclet-2 / xdoclet plu
 	          
 	               
 	                 
-	        CONCURRENT REQUESTS : 6
+	        CONCURRENT REQUESTS : 4
 
 
 

@@ -14,6 +14,7 @@ q::after { content: close-quote; }
 .aui-avatar { box-sizing: border-box; display: inline-block; vertical-align: text-bottom; }
 .aui-avatar-inner { display: table-cell; vertical-align: middle; }
 .aui-avatar img { border-radius: 3px; display: block; margin: 0px auto; height: 100%; width: 100%; }
+.aui-avatar-xsmall, .aui-avatar-xsmall .aui-avatar-inner { height: 16px; width: 16px; }
 .aui-avatar-small, .aui-avatar-small .aui-avatar-inner { height: 24px; width: 24px; }
 .aui-avatar-large, .aui-avatar-large .aui-avatar-inner { height: 48px; width: 48px; }
 .aui-avatar-project { background-color: rgb(255, 255, 255); box-shadow: 0px 0px 0px 1px rgb(204, 204, 204); position: relative; }

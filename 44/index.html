@@ -329,7 +329,7 @@
 <p>    Map getNamedParameterMap();</p>
             </div>
 </div>
-</div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+</div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -346,12 +346,12 @@
                             </div>
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-44">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/44"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-44">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-44">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-44">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/44"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-44">
@@ -412,6 +412,86 @@
 </div>
                              
 
+<div class="issue-data-block" id="changehistory-17682">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_17682">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_17682" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="21/Feb/04 12:44 AM"><time class="livestamp" datetime="2004-02-21T00:44-0600">21/Feb/04 12:44 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_17682" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Assignee
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Mike Williams
+                                                                                               <span class="hist-value">[    mdub
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Fix Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               1.4
+                                                                                               <span class="hist-value">[    10304
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Description
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                The DocletTag interface exposes the parameters for an entity, but not the namedParameter map:<br>
+<br>
+    String[] getParameters();<br>
+<br>
+The interface allows access to the parameters, as long as you know its name:<br>
+<br>
+    String getNamedParameter(String key);<br>
+<br>
+It would be useful to expose the namedParameter map in the interface as well so developers that want to abstract qdox don't have to recreate the map themselves:<br>
+<br>
+    Map getNamedParameterMap();
+                                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               The DocletTag interface exposes the parameters for an entity, but not the namedParameter map:<br>
+<br>
+    String[] getParameters();<br>
+<br>
+The interface allows access to the parameters, as long as you know its name:<br>
+<br>
+    String getNamedParameter(String key);<br>
+<br>
+It would be useful to expose the namedParameter map in the interface as well so developers that want to abstract qdox don't have to recreate the map themselves:<br>
+<br>
+    Map getNamedParameterMap();
+                                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
 
 <div id="comment-16998" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
@@ -452,6 +532,51 @@
 </div>
                              
 
+<div class="issue-data-block" id="changehistory-17687">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_17687">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_17687" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="21/Feb/04 6:38 AM"><time class="livestamp" datetime="2004-02-21T06:38-0600">21/Feb/04 6:38 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_17687" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Fixed
+                                                                                               <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Resolved
+                                                                                               <span class="hist-value">[    5
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
 
 <div id="comment-22725" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
@@ -483,6 +608,39 @@
 
     <a class="user-hover user-avatar" rel="mdub" id="commentauthor_22725_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
  added a comment  - <span class="commentdate_22725_concise subText"><span class="date user-tz" title="04/Aug/04 9:00 AM"><time class="livestamp" datetime="2004-08-04T09:00-0500">04/Aug/04 9:00 AM</time></span></span>                    Close old resolved issues.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-23795">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_23795">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_23795" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="04/Aug/04 9:00 AM"><time class="livestamp" datetime="2004-08-04T09:00-0500">04/Aug/04 9:00 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_23795" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Resolved
+                                                                                                <span class="hist-value">[    5
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Closed
+                                                                                               <span class="hist-value">[    6
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -620,7 +778,7 @@
 	          
 	               
 	                 
-	        CONCURRENT REQUESTS : 9
+	        CONCURRENT REQUESTS : 5
 
 
 

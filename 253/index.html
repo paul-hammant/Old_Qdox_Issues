@@ -343,7 +343,7 @@ Then a NPE exception is thrown.</p>
 
             </div>
 </div>
-</div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+</div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -360,12 +360,12 @@ Then a NPE exception is thrown.</p>
                             </div>
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-253">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/253"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-253">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-253">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-253">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/253"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-253">
@@ -417,6 +417,138 @@ Then a NPE exception is thrown.</p>
 
     <a class="user-hover user-avatar" rel="beuzozel" id="commentauthor_347368_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=beuzozel"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Iulian Zuzu</a>
  added a comment  - <span class="commentdate_347368_concise subText"><span class="date user-tz" title="02/Jun/14 4:09 AM"><time class="livestamp" datetime="2014-06-02T04:09-0500">02/Jun/14 4:09 AM</time></span></span>                    The above, makes classes described by the Gerkin statement be un-parseable.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-469407">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_469407">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_469407" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="21/Jun/14 1:41 PM"><time class="livestamp" datetime="2014-06-21T13:41-0500">21/Jun/14 1:41 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_469407" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Description
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Given a class is parsed.
+<br>
+Given that class has a constructor.
+<br>
+Given the constructor has parameters.
+<br>
+Given some parameters have an annotation.
+<br>
+When parsing the file.
+<br>
+Then a NPE exception is thrown.
+<br>
+
+<br>
+NPE stack is 
+<br>
+
+<br>
+Exception in thread "main" java.lang.NullPointerException
+<br>
+	at com.thoughtworks.qdox.model.impl.DefaultJavaParameter.getParentClass(DefaultJavaParameter.java:91)
+<br>
+	at com.thoughtworks.qdox.builder.impl.DefaultJavaAnnotationAssembler.createType(DefaultJavaAnnotationAssembler.java:145)
+<br>
+	at com.thoughtworks.qdox.builder.impl.DefaultJavaAnnotationAssembler.assemble(DefaultJavaAnnotationAssembler.java:123)
+<br>
+	at com.thoughtworks.qdox.builder.impl.ModelBuilder.setAnnotations(ModelBuilder.java:478)
+<br>
+	at com.thoughtworks.qdox.builder.impl.ModelBuilder.addParameter(ModelBuilder.java:465)
+<br>
+	at com.thoughtworks.qdox.parser.impl.Parser.yyparse(Parser.java:2312)
+<br>
+	at com.thoughtworks.qdox.parser.impl.Parser.parse(Parser.java:1575)
+<br>
+	at com.thoughtworks.qdox.library.SourceLibrary.parse(SourceLibrary.java:205)
+<br>
+	at com.thoughtworks.qdox.library.SourceLibrary.parse(SourceLibrary.java:181)
+<br>
+	at com.thoughtworks.qdox.library.SourceLibrary.addSource(SourceLibrary.java:138)
+<br>
+	at com.thoughtworks.qdox.library.SortedClassLibraryBuilder.addSource(SortedClassLibraryBuilder.java:173)
+<br>
+	at com.thoughtworks.qdox.JavaProjectBuilder.addSource(JavaProjectBuilder.java:150)
+<br>
+
+<br>
+
+<br>
+
+                                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Given a class is parsed.
+<br>
+Given that class has a constructor.
+<br>
+Given the constructor has parameters.
+<br>
+Given some parameters have an annotation.
+<br>
+When parsing the file.
+<br>
+Then a NPE exception is thrown.
+<br>
+
+<br>
+NPE stack is 
+<br>
+{noformat}
+<br>
+Exception in thread "main" java.lang.NullPointerException
+<br>
+	at com.thoughtworks.qdox.model.impl.DefaultJavaParameter.getParentClass(DefaultJavaParameter.java:91)
+<br>
+	at com.thoughtworks.qdox.builder.impl.DefaultJavaAnnotationAssembler.createType(DefaultJavaAnnotationAssembler.java:145)
+<br>
+	at com.thoughtworks.qdox.builder.impl.DefaultJavaAnnotationAssembler.assemble(DefaultJavaAnnotationAssembler.java:123)
+<br>
+	at com.thoughtworks.qdox.builder.impl.ModelBuilder.setAnnotations(ModelBuilder.java:478)
+<br>
+	at com.thoughtworks.qdox.builder.impl.ModelBuilder.addParameter(ModelBuilder.java:465)
+<br>
+	at com.thoughtworks.qdox.parser.impl.Parser.yyparse(Parser.java:2312)
+<br>
+	at com.thoughtworks.qdox.parser.impl.Parser.parse(Parser.java:1575)
+<br>
+	at com.thoughtworks.qdox.library.SourceLibrary.parse(SourceLibrary.java:205)
+<br>
+	at com.thoughtworks.qdox.library.SourceLibrary.parse(SourceLibrary.java:181)
+<br>
+	at com.thoughtworks.qdox.library.SourceLibrary.addSource(SourceLibrary.java:138)
+<br>
+	at com.thoughtworks.qdox.library.SortedClassLibraryBuilder.addSource(SortedClassLibraryBuilder.java:173)
+<br>
+	at com.thoughtworks.qdox.JavaProjectBuilder.addSource(JavaProjectBuilder.java:150)
+<br>
+{noformat}
+<br>
+
+<br>
+
+                                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -548,6 +680,63 @@ Nice catch, this exposed some other minor problems with constructors as well.</p
     <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_348765_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
  added a comment  - <span class="commentdate_348765_concise subText"><span class="date user-tz" title="25/Jun/14 2:57 PM"><time class="livestamp" datetime="2014-06-25T14:57-0500">25/Jun/14 2:57 PM</time></span></span>                    Fixed in  rev.1583  
 Nice catch, this exposed some other minor problems with constructors as well.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-469989">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_469989">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_469989" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="25/Jun/14 2:57 PM"><time class="livestamp" datetime="2014-06-25T14:57-0500">25/Jun/14 2:57 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_469989" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Fixed
+                                                                                               <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Assignee
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Robert Scholte
+                                                                                               <span class="hist-value">[    rfscholte
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Resolved
+                                                                                               <span class="hist-value">[    5
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>

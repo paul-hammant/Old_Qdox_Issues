@@ -386,7 +386,7 @@ com.thoughtworks.qdox.parser.ParseException: syntax error @<span class="error">[
                         </dl>
                                     </li>
                     </ol>
-        </div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+        </div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -403,12 +403,12 @@ com.thoughtworks.qdox.parser.ParseException: syntax error @<span class="error">[
                             </div>
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-131">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/131"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-131">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-131">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-131">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/131"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-131">
@@ -430,7 +430,7 @@ com.thoughtworks.qdox.parser.ParseException: syntax error @<span class="error">[
                                     
 
 
-<div id="comment-141143" class="issue-data-block activity-comment twixi-block  collapsed">
+<div id="comment-141143" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
         <div class="action-head">
             <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
@@ -463,9 +463,262 @@ com.thoughtworks.qdox.parser.ParseException: syntax error @<span class="error">[
         </div>
     </div>
 </div>
-                             <div class="message-container">
-    <a class="collapsed-comments" href="/Old_Qdox_Issues/131&amp;showAll=true"><span class="collapsed-comments-line"></span><span class="collapsed-comments-line"></span><span class="show-more-comments" data-collapsed-count="4">4 older comments</span></a>
-</div>                             
+                             
+
+
+<div id="comment-159284" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/131?focusedCommentId=159284&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-159284" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="brolund" id="commentauthor_159284_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=brolund"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Daniel Brolund</a>
+ added a comment  - <span class="commentdate_159284_verbose subText"><span class="date user-tz" title="27/Dec/08 4:41 PM"><time class="livestamp" datetime="2008-12-27T16:41-0600">27/Dec/08 4:41 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>The error is a bit more strange nowadays, since the first method of a class includes the comment before it if the constant declarations (above) are present as below:</p>
+
+<p>package com.acme.qdox;</p>
+
+<p>import static org.junit.Assert.assertEquals;<br>
+import java.io.StringReader;<br>
+import org.junit.Test;<br>
+import com.thoughtworks.qdox.JavaDocBuilder;<br>
+import com.thoughtworks.qdox.model.JavaClass;</p>
+
+<p>public class TestQDoxBug131 {<br>
+    @Test<br>
+    public void commentsBeforeMethodShouldNotAppearInSourceCode() throws Exception {<br>
+         String sourceCode = "package com.acme.qdox;\n" + <br>
+         		"\n" + <br>
+         		"public class QDoxBugClass {\n" + <br>
+         		"    final public static String C1 = \"C1\", C2 = \"C2\";\n" + <br>
+         		"    final public static String[] ALL = </p>
+{ C1, C2 }
+<p>;    \n" + <br>
+         		"    /*\n" + <br>
+         		"    Comment\n" + <br>
+         		"    */\n" + <br>
+         		"    public void method() </p>
+{\n" + 
+         		"        System.out.println(\"This should not contain the comment\");\n" + 
+         		"    }
+<p>\n" + <br>
+         		"}\n" + <br>
+         		"";<br>
+         JavaDocBuilder builder = new JavaDocBuilder();<br>
+        builder.addSource(new StringReader(sourceCode));<br>
+        JavaClass aClass = builder.getClassByName("com.acme.qdox.QDoxBugClass");<br>
+        assertEquals("\n        System.out.println(\"This should not contain the comment\");\n    ", <br>
+                aClass.getMethods()<span class="error">[0]</span>.getSourceCode());</p>
+
+<p>    }<br>
+}</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="brolund" id="commentauthor_159284_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=brolund"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Daniel Brolund</a>
+ added a comment  - <span class="commentdate_159284_concise subText"><span class="date user-tz" title="27/Dec/08 4:41 PM"><time class="livestamp" datetime="2008-12-27T16:41-0600">27/Dec/08 4:41 PM</time></span></span>                    The error is a bit more strange nowadays, since the first method of a class includes the comment before it if the constant declarations (above) are present as below: 
+
+ package com.acme.qdox; 
+
+ import static org.junit.Assert.assertEquals; 
+import java.io.StringReader; 
+import org.junit.Test; 
+import com.thoughtworks.qdox.JavaDocBuilder; 
+import com.thoughtworks.qdox.model.JavaClass; 
+
+ public class TestQDoxBug131 { 
+    @Test 
+    public void commentsBeforeMethodShouldNotAppearInSourceCode() throws Exception { 
+         String sourceCode = "package com.acme.qdox;\n" +  
+         		"\n" +  
+         		"public class QDoxBugClass {\n" +  
+         		"    final public static String C1 = \"C1\", C2 = \"C2\";\n" +  
+         		"    final public static String[] ALL =  
+{ C1, C2 }
+ ;    \n" +  
+         		"    /*\n" +  
+         		"    Comment\n" +  
+         		"    */\n" +  
+         		"    public void method()  
+{\n" + 
+         		"        System.out.println(\"This should not contain the comment\");\n" + 
+         		"    }
+ \n" +  
+         		"}\n" +  
+         		""; 
+         JavaDocBuilder builder = new JavaDocBuilder(); 
+        builder.addSource(new StringReader(sourceCode)); 
+        JavaClass aClass = builder.getClassByName("com.acme.qdox.QDoxBugClass"); 
+        assertEquals("\n        System.out.println(\"This should not contain the comment\");\n    ",  
+                aClass.getMethods() [0] .getSourceCode()); 
+
+     } 
+}              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-159285" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/131?focusedCommentId=159285&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-159285" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="brolund" id="commentauthor_159285_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=brolund"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Daniel Brolund</a>
+ added a comment  - <span class="commentdate_159285_verbose subText"><span class="date user-tz" title="27/Dec/08 4:44 PM"><time class="livestamp" datetime="2008-12-27T16:44-0600">27/Dec/08 4:44 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Testfile for bug described</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="brolund" id="commentauthor_159285_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=brolund"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Daniel Brolund</a>
+ added a comment  - <span class="commentdate_159285_concise subText"><span class="date user-tz" title="27/Dec/08 4:44 PM"><time class="livestamp" datetime="2008-12-27T16:44-0600">27/Dec/08 4:44 PM</time></span></span>                    Testfile for bug described              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-200562">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_200562">
+                                
+
+    <a class="user-hover user-avatar" rel="brolund" id="changehistoryauthor_200562" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=brolund"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Daniel Brolund</a>
+ made changes  - <span class="date" title="27/Dec/08 4:44 PM"><time class="livestamp" datetime="2008-12-27T16:44-0600">27/Dec/08 4:44 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_200562" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Attachment
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                                                        <a href="/Old_Qdox_Issues/attachment/39040/TestQDoxBug131.java">TestQDoxBug131.java</a>
+                                                                                                                       <span class="hist-value">[    39040
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-159286" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/131?focusedCommentId=159286&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-159286" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="brolund" id="commentauthor_159286_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=brolund"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Daniel Brolund</a>
+ added a comment  - <span class="commentdate_159286_verbose subText"><span class="date user-tz" title="27/Dec/08 4:45 PM"><time class="livestamp" datetime="2008-12-27T16:45-0600">27/Dec/08 4:45 PM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>I attached file TestQDoxBug131.java since the code got whitespace-trimmed. </p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="brolund" id="commentauthor_159286_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=brolund"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Daniel Brolund</a>
+ added a comment  - <span class="commentdate_159286_concise subText"><span class="date user-tz" title="27/Dec/08 4:45 PM"><time class="livestamp" datetime="2008-12-27T16:45-0600">27/Dec/08 4:45 PM</time></span></span>                    I attached file TestQDoxBug131.java since the code got whitespace-trimmed.               </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-160125" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/131?focusedCommentId=160125&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-160125" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_160125_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_160125_verbose subText"><span class="date user-tz" title="06/Jan/09 11:53 AM"><time class="livestamp" datetime="2009-01-06T11:53-0600">06/Jan/09 11:53 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>The javadoc isn't clear in what to expect when calling getSourceCode(). In this case it's the code between the method-brackets. I don't know if it's valid to expect the comments to be filtered out. Bug or feature-request?</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_160125_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ added a comment  - <span class="commentdate_160125_concise subText"><span class="date user-tz" title="06/Jan/09 11:53 AM"><time class="livestamp" datetime="2009-01-06T11:53-0600">06/Jan/09 11:53 AM</time></span></span>                    The javadoc isn't clear in what to expect when calling getSourceCode(). In this case it's the code between the method-brackets. I don't know if it's valid to expect the comments to be filtered out. Bug or feature-request?              </div>
+        </div>
+    </div>
+</div>
+                             
 
 
 <div id="comment-160257" class="issue-data-block activity-comment twixi-block  expanded">
@@ -597,6 +850,36 @@ Daniel                </div>
 </div>
                              
 
+<div class="issue-data-block" id="changehistory-203774">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_203774">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_203774" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="14/Jan/09 12:34 PM"><time class="livestamp" datetime="2009-01-14T12:34-0600">14/Jan/09 12:34 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_203774" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Attachment
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                                                        <a href="/Old_Qdox_Issues/attachment/39331/Qdox-131.patch">Qdox-131.patch</a>
+                                                                                                                       <span class="hist-value">[    39331
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
 
 <div id="comment-161505" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
@@ -664,6 +947,63 @@ Daniel                </div>
 
     <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_163330_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
  added a comment  - <span class="commentdate_163330_concise subText"><span class="date user-tz" title="30/Jan/09 3:36 PM"><time class="livestamp" datetime="2009-01-30T15:36-0600">30/Jan/09 3:36 PM</time></span></span>                    patch applied              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-207808">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_207808">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_207808" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="30/Jan/09 3:36 PM"><time class="livestamp" datetime="2009-01-30T15:36-0600">30/Jan/09 3:36 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_207808" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Closed
+                                                                                               <span class="hist-value">[    6
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Fix Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               1.8
+                                                                                               <span class="hist-value">[    14826
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Fixed
+                                                                                               <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>

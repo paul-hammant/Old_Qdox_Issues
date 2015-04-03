@@ -321,7 +321,7 @@
 <p>Let QDOX be more than one step ahead of other tools <img class="emoticon" src="index_files/smile.gif" alt="" height="16" align="absmiddle" border="0" width="16"></p>
             </div>
 </div>
-</div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+</div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -338,12 +338,12 @@
                             </div>
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-84">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/84"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-84">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-84">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-84">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/84"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-84">
@@ -365,7 +365,7 @@
                                     
 
 
-<div id="comment-31316" class="issue-data-block activity-comment twixi-block  collapsed">
+<div id="comment-31316" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
         <div class="action-head">
             <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
@@ -408,9 +408,329 @@
         </div>
     </div>
 </div>
-                             <div class="message-container">
-    <a class="collapsed-comments" href="/Old_Qdox_Issues/84&amp;showAll=true"><span class="collapsed-comments-line"></span><span class="collapsed-comments-line"></span><span class="show-more-comments" data-collapsed-count="5">5 older comments</span></a>
-</div>                             
+                             
+
+
+<div id="comment-31424" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/84?focusedCommentId=31424&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-31424" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="klausikm" id="commentauthor_31424_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=klausikm"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Klausi</a>
+ added a comment  - <span class="commentdate_31424_verbose subText"><span class="date user-tz" title="30/Mar/05 3:02 AM"><time class="livestamp" datetime="2005-03-30T03:02-0600">30/Mar/05 3:02 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Joe,</p>
+
+<p>for example, take a method that contains annotations:</p>
+
+<p>public void myMethod(...) </p>
+{
+...
+@annotation_here
+&lt;annotated_element&gt;
+...
+}
+
+<p>The &lt;annotated_element&gt; could be an field declaration, a statement, or even an inner class (whereas the latter is not that important as the former two).<br>
+Concretely, &lt;annotated_element&gt; could be (it follows a list of examples):<br>
+anObject.doSomething(...);<br>
+String myString;<br>
+Object result = anObject.aMethod();<br>
+toString();<br>
+return null;//in methods returning something</p>
+
+<p>Klaus</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="klausikm" id="commentauthor_31424_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=klausikm"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Klausi</a>
+ added a comment  - <span class="commentdate_31424_concise subText"><span class="date user-tz" title="30/Mar/05 3:02 AM"><time class="livestamp" datetime="2005-03-30T03:02-0600">30/Mar/05 3:02 AM</time></span></span>                    Joe, 
+
+ for example, take a method that contains annotations: 
+
+ public void myMethod(...)  
+{
+...
+@annotation_here
+&lt;annotated_element&gt;
+...
+}
+
+ The &lt;annotated_element&gt; could be an field declaration, a statement, or even an inner class (whereas the latter is not that important as the former two). 
+Concretely, &lt;annotated_element&gt; could be (it follows a list of examples): 
+anObject.doSomething(...); 
+String myString; 
+Object result = anObject.aMethod(); 
+toString(); 
+return null;//in methods returning something 
+
+ Klaus              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-31435" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/84?focusedCommentId=31435&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-31435" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="jwalnes1" id="commentauthor_31435_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=jwalnes1"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Joe Walnes</a>
+ added a comment  - <span class="commentdate_31435_verbose subText"><span class="date user-tz" title="30/Mar/05 7:17 AM"><time class="livestamp" datetime="2005-03-30T07:17-0600">30/Mar/05 7:17 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>I'm still confused. Could you give me a more concrete example filling in the blanks, or point me to some sample code that does this.</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="jwalnes1" id="commentauthor_31435_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=jwalnes1"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Joe Walnes</a>
+ added a comment  - <span class="commentdate_31435_concise subText"><span class="date user-tz" title="30/Mar/05 7:17 AM"><time class="livestamp" datetime="2005-03-30T07:17-0600">30/Mar/05 7:17 AM</time></span></span>                    I'm still confused. Could you give me a more concrete example filling in the blanks, or point me to some sample code that does this.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-31437" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/84?focusedCommentId=31437&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-31437" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="klausikm" id="commentauthor_31437_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=klausikm"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Klausi</a>
+ added a comment  - <span class="commentdate_31437_verbose subText"><span class="date user-tz" title="30/Mar/05 8:10 AM"><time class="livestamp" datetime="2005-03-30T08:10-0600">30/Mar/05 8:10 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Joe, OK here is a concrete example containing two in-method annotations:</p>
+
+<p>public void myMethod() </p>
+{
+  MyClass myObject = new MyClass();
+
+  @myAnnotation("a_parameter")
+  myObject.doSomething();
+
+  @objectcreation
+  Object result = myObject.aProducer();
+}
+
+<p>The first annotation "myAnnotation" is unspecific, it does not matter which custom annotation to use there; it only needs to make sense for a statement and is allowed for a statement (TARGET option of annotations, so to say).</p>
+
+<p>The second annotation "objectcreation" (self-defined, not Java-Standard, just meant as a more or less meaningful example) could be used to mark a statement as creating an object. With that an annotation parser could find out that the statement has similar characteristics as the object creation via "new" (as in "new Object(), e.g.).</p>
+
+<p>Klaus</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="klausikm" id="commentauthor_31437_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=klausikm"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Klausi</a>
+ added a comment  - <span class="commentdate_31437_concise subText"><span class="date user-tz" title="30/Mar/05 8:10 AM"><time class="livestamp" datetime="2005-03-30T08:10-0600">30/Mar/05 8:10 AM</time></span></span>                    Joe, OK here is a concrete example containing two in-method annotations: 
+
+ public void myMethod()  
+{
+  MyClass myObject = new MyClass();
+
+  @myAnnotation("a_parameter")
+  myObject.doSomething();
+
+  @objectcreation
+  Object result = myObject.aProducer();
+}
+
+ The first annotation "myAnnotation" is unspecific, it does not matter which custom annotation to use there; it only needs to make sense for a statement and is allowed for a statement (TARGET option of annotations, so to say). 
+
+ The second annotation "objectcreation" (self-defined, not Java-Standard, just meant as a more or less meaningful example) could be used to mark a statement as creating an object. With that an annotation parser could find out that the statement has similar characteristics as the object creation via "new" (as in "new Object(), e.g.). 
+
+ Klaus              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-31441" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/84?focusedCommentId=31441&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-31441" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rinkrank" id="commentauthor_31441_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rinkrank"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Aslak Hellesøy</a>
+ added a comment  - <span class="commentdate_31441_verbose subText"><span class="date user-tz" title="30/Mar/05 8:53 AM"><time class="livestamp" datetime="2005-03-30T08:53-0600">30/Mar/05 8:53 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Javac would choke on this. I suppose you also want to complie your sources?</p> </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="rinkrank" id="commentauthor_31441_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rinkrank"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Aslak Hellesøy</a>
+ added a comment  - <span class="commentdate_31441_concise subText"><span class="date user-tz" title="30/Mar/05 8:53 AM"><time class="livestamp" datetime="2005-03-30T08:53-0600">30/Mar/05 8:53 AM</time></span></span>                    Javac would choke on this. I suppose you also want to complie your sources?              </div>
+        </div>
+    </div>
+</div>
+                             
+
+
+<div id="comment-31442" class="issue-data-block activity-comment twixi-block  expanded">
+    <div class="twixi-wrap verbose actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-opened"><span>Hide</span></span></a>
+            <div class="action-links">
+                <a href="/Old_Qdox_Issues/84?focusedCommentId=31442&amp;page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-31442" title="A permanent link to this comment." class="icon icon-perma activitymodule-link"><span>Permalink</span></a>
+                                            </div>
+            <div class="action-details">        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="klausikm" id="commentauthor_31442_verbose" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=klausikm"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Klausi</a>
+ added a comment  - <span class="commentdate_31442_verbose subText"><span class="date user-tz" title="30/Mar/05 9:55 AM"><time class="livestamp" datetime="2005-03-30T09:55-0600">30/Mar/05 9:55 AM</time></span></span>  </div>
+        </div>
+        <div class="action-body flooded"><p>Aslak, you are right, of course!<br>
+My apologies, I mixed up tags with annotations (because I use tags - in an extended form - as if they were annotations to just avoid what you remarked correctly).</p>
+
+<p>So what I really meant (sorry again) was:<br>
+Is it possible to parse javadoc-like tags within a method with QDOX?</p>
+
+<p>Example:</p>
+
+<p>public void myMethod() </p>
+{
+  MyClass myClass;
+  /**@my_javadoc blabla*/
+  myClass.doSomething();
+}
+
+<p>Klaus</p>
+ </div>
+    </div>
+    <div class="twixi-wrap concise actionContainer">
+        <div class="action-head">
+            <a href="#" class="twixi"><span class="icon twixi-closed"><span>Show</span></span></a>
+            <div class="action-details flooded">
+                        
+    
+    
+    
+                
+
+    <a class="user-hover user-avatar" rel="klausikm" id="commentauthor_31442_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=klausikm"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Klausi</a>
+ added a comment  - <span class="commentdate_31442_concise subText"><span class="date user-tz" title="30/Mar/05 9:55 AM"><time class="livestamp" datetime="2005-03-30T09:55-0600">30/Mar/05 9:55 AM</time></span></span>                    Aslak, you are right, of course! 
+My apologies, I mixed up tags with annotations (because I use tags - in an extended form - as if they were annotations to just avoid what you remarked correctly). 
+
+ So what I really meant (sorry again) was: 
+Is it possible to parse javadoc-like tags within a method with QDOX? 
+
+ Example: 
+
+ public void myMethod()  
+{
+  MyClass myClass;
+  /**@my_javadoc blabla*/
+  myClass.doSomething();
+}
+
+ Klaus 
+             </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-34310">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_34310">
+                                
+
+    <a class="user-hover user-avatar" rel="rinkrank" id="changehistoryauthor_34310" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rinkrank"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Aslak Hellesøy</a>
+ made changes  - <span class="date" title="30/Mar/05 10:08 AM"><time class="livestamp" datetime="2005-03-30T10:08-0600">30/Mar/05 10:08 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_34310" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Comment
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                            <span class="hist-value">[    31443
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
 
 
 <div id="comment-31444" class="issue-data-block activity-comment twixi-block  expanded">
@@ -654,6 +974,51 @@ I meant JavaMethod, not MethodSummary!              </div>
         </div>
     </div>
 </div>
+                             
+
+<div class="issue-data-block" id="changehistory-80779">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_80779">
+                                
+
+    <a class="user-hover user-avatar" rel="jwalnes1" id="changehistoryauthor_80779" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=jwalnes1"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Joe Walnes</a>
+ made changes  - <span class="date" title="29/Apr/06 6:47 PM"><time class="livestamp" datetime="2006-04-29T18:47-0500">29/Apr/06 6:47 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_80779" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Resolved
+                                                                                               <span class="hist-value">[    5
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Won't Fix
+                                                                                               <span class="hist-value">[    2
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
                              </div>
     </div>
 </div></div></div><div id="viewissuesidebar" class="aui-item issue-side-column"><div id="peoplemodule" class="module toggle-wrap"><div id="peoplemodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">People</h2></div><div class="mod-content"><ul class="item-details" id="peopledetails">
@@ -786,7 +1151,7 @@ I meant JavaMethod, not MethodSummary!              </div>
 	          
 	               
 	                 
-	        CONCURRENT REQUESTS : 5
+	        CONCURRENT REQUESTS : 4
 
 
 

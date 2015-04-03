@@ -345,7 +345,7 @@ WinXP Pro
 <p>From this code block, QDOX only finds the BASIC_LATIN field, and only 4 fields from the entire class (BASIC_LATIN, SYRIAC, blockStarts and blocks).</p>
             </div>
 </div>
-</div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+</div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -362,12 +362,12 @@ WinXP Pro
                             </div>
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-39">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/39"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-39">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-39">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-39">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/39"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-39">
@@ -516,6 +516,114 @@ WinXP Pro
 </div>
                              
 
+<div class="issue-data-block" id="changehistory-15832">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_15832">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_15832" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="21/Dec/03 6:20 AM"><time class="livestamp" datetime="2003-12-21T06:20-0600">21/Dec/03 6:20 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_15832" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Assignee
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Mike Williams
+                                                                                               <span class="hist-value">[    mdub
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-15833">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_15833">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_15833" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="21/Dec/03 6:21 AM"><time class="livestamp" datetime="2003-12-21T06:21-0600">21/Dec/03 6:21 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_15833" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Fix Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               1.4
+                                                                                               <span class="hist-value">[    10304
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Description
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                JavaClassBuilder fails to successfully parse the UnicodeBlock java.lang.Character inner class.<br>
+<br>
+In this class, fields are not defined as usual but like this : <br>
+<br>
+        public static final UnicodeBlock<br>
+            BASIC_LATIN<br>
+                = new UnicodeBlock("BASIC_LATIN"),<br>
+            LATIN_1_SUPPLEMENT<br>
+                = new UnicodeBlock("LATIN_1_SUPPLEMENT"),<br>
+             /* cut */<br>
+            HALFWIDTH_AND_FULLWIDTH_FORMS<br>
+                = new UnicodeBlock("HALFWIDTH_AND_FULLWIDTH_FORMS"),<br>
+            SPECIALS<br>
+                = new UnicodeBlock("SPECIALS");<br>
+<br>
+From this code block, QDOX only finds the BASIC_LATIN field, and only 4 fields from the entire class (BASIC_LATIN, SYRIAC, blockStarts and blocks).
+                                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               JavaClassBuilder fails to successfully parse the UnicodeBlock java.lang.Character inner class.<br>
+<br>
+In this class, fields are not defined as usual but like this : <br>
+<br>
+        public static final UnicodeBlock<br>
+            BASIC_LATIN<br>
+                = new UnicodeBlock("BASIC_LATIN"),<br>
+            LATIN_1_SUPPLEMENT<br>
+                = new UnicodeBlock("LATIN_1_SUPPLEMENT"),<br>
+             /* cut */<br>
+            HALFWIDTH_AND_FULLWIDTH_FORMS<br>
+                = new UnicodeBlock("HALFWIDTH_AND_FULLWIDTH_FORMS"),<br>
+            SPECIALS<br>
+                = new UnicodeBlock("SPECIALS");<br>
+<br>
+From this code block, QDOX only finds the BASIC_LATIN field, and only 4 fields from the entire class (BASIC_LATIN, SYRIAC, blockStarts and blocks).
+                                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
 
 <div id="comment-15455" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
@@ -624,6 +732,51 @@ WinXP Pro
 </div>
                              
 
+<div class="issue-data-block" id="changehistory-15868">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_15868">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_15868" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="22/Dec/03 6:51 PM"><time class="livestamp" datetime="2003-12-22T18:51-0600">22/Dec/03 6:51 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_15868" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Resolved
+                                                                                               <span class="hist-value">[    5
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Fixed
+                                                                                               <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
+
 
 <div id="comment-15501" class="issue-data-block activity-comment twixi-block  expanded">
     <div class="twixi-wrap verbose actionContainer">
@@ -695,6 +848,39 @@ WinXP Pro
  added a comment  - <span class="commentdate_15533_concise subText"><span class="date user-tz" title="24/Dec/03 12:05 PM"><time class="livestamp" datetime="2003-12-24T12:05-0600">24/Dec/03 12:05 PM</time></span></span>                    I agree, great work   
 
  it works great                </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-23789">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_23789">
+                                
+
+    <a class="user-hover user-avatar" rel="mdub" id="changehistoryauthor_23789" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=mdub"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Mike Williams</a>
+ made changes  - <span class="date" title="04/Aug/04 8:23 AM"><time class="livestamp" datetime="2004-08-04T08:23-0500">04/Aug/04 8:23 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_23789" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Resolved
+                                                                                                <span class="hist-value">[    5
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Closed
+                                                                                               <span class="hist-value">[    6
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -832,7 +1018,7 @@ WinXP Pro
 	          
 	               
 	                 
-	        CONCURRENT REQUESTS : 6
+	        CONCURRENT REQUESTS : 5
 
 
 

@@ -407,7 +407,7 @@
         at com.thoughtworks.qdox.JavaDocBuilder.addSourceTree(JavaDocBuilder.java:366)</p>
             </div>
 </div>
-</div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+</div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -424,12 +424,12 @@
                             </div>
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-101">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/101"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-101">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-101">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-101">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/101"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-101">
@@ -449,6 +449,140 @@
         <div class="issuePanelProgress"></div>
         <div class="issuePanelContainer" id="issue_actions_container">
                                     
+
+<div class="issue-data-block" id="changehistory-87322">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_87322">
+                                
+
+    <a class="user-hover user-avatar" rel="dblevins" id="changehistoryauthor_87322" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=dblevins"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> David Blevins</a>
+ made changes  - <span class="date" title="15/Jul/06 8:11 PM"><time class="livestamp" datetime="2006-07-15T20:11-0500">15/Jul/06 8:11 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_87322" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Summary
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Multiple annotations on one field
+                                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Multiple annotations on one field and generics
+                                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Description
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                QDox cannot parse a Java 5 file that has more than one annotation on a field.
+                                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               It would seem QDox cannot parse a Java 5 file that has more than one annotation on a field and generics are present.  <br>
+<br>
+For example, this will parse fine:<br>
+<br>
+{code}<br>
+import javax.xml.bind.annotation.XmlID;<br>
+import java.util.List;<br>
+<br>
+public class Person {<br>
+<br>
+    protected List&lt;String&gt; address;<br>
+<br>
+    @XmlID<br>
+    protected String name;<br>
+<br>
+    public List&lt;String&gt; getAddress() {<br>
+        return address;<br>
+    }<br>
+<br>
+    public void setAddress(List&lt;String&gt; address) {<br>
+        this.address = address;<br>
+    }<br>
+<br>
+    public String getName() {<br>
+        return name;<br>
+    }<br>
+<br>
+    public void setName(String name) {<br>
+        this.name = name;<br>
+    }<br>
+}<br>
+{code}<br>
+<br>
+But this will fail:<br>
+<br>
+{code}<br>
+package org.openejb.alt.config.ejb;<br>
+<br>
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;<br>
+import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;<br>
+import javax.xml.bind.annotation.XmlID;<br>
+import java.util.List;<br>
+<br>
+public class Person {<br>
+<br>
+    protected List&lt;String&gt; address;<br>
+<br>
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)<br>
+    @XmlID<br>
+    protected String name;<br>
+<br>
+    public List&lt;String&gt; getAddress() {<br>
+        return address;<br>
+    }<br>
+<br>
+    public void setAddress(List&lt;String&gt; address) {<br>
+        this.address = address;<br>
+    }<br>
+<br>
+    public String getName() {<br>
+        return name;<br>
+    }<br>
+<br>
+    public void setName(String name) {<br>
+        this.name = name;<br>
+    }<br>
+}<br>
+{code}<br>
+<br>
+.. with this error:<br>
+<br>
+com.thoughtworks.qdox.parser.ParseException: syntax error @[16,38] in file:/Users/dblevins/work/openejb3/container/openejb-core/src/main/java/org/openejb/alt/config/ejb/Person.java<br>
+        at com.thoughtworks.qdox.parser.impl.Parser.yyerror(Parser.java:607)<br>
+        at com.thoughtworks.qdox.parser.impl.Parser.yyparse(Parser.java:715)<br>
+        at com.thoughtworks.qdox.parser.impl.Parser.parse(Parser.java:588)<br>
+        at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:300)<br>
+        at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:316)<br>
+        at com.thoughtworks.qdox.JavaDocBuilder.addSource(JavaDocBuilder.java:312)<br>
+        at com.thoughtworks.qdox.JavaDocBuilder$1.visitFile(JavaDocBuilder.java:369)<br>
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:43)<br>
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.walk(DirectoryScanner.java:34)<br>
+        at com.thoughtworks.qdox.directorywalker.DirectoryScanner.scan(DirectoryScanner.java:52)<br>
+        at com.thoughtworks.qdox.JavaDocBuilder.addSourceTree(JavaDocBuilder.java:366)
+                                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+                             
 
 
 <div id="comment-73871" class="issue-data-block activity-comment twixi-block  expanded">
@@ -565,6 +699,63 @@ together they make it barf.
  added a comment  - <span class="commentdate_163317_concise subText"><span class="date user-tz" title="30/Jan/09 2:27 PM"><time class="livestamp" datetime="2009-01-30T14:27-0600">30/Jan/09 2:27 PM</time></span></span>                    r517 | rfscholte | 2009-01-30 21:23:31 CET 
 
  activated test for qdox-101; doesn't seem to fail              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-207802">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_207802">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_207802" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="30/Jan/09 2:27 PM"><time class="livestamp" datetime="2009-01-30T14:27-0600">30/Jan/09 2:27 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_207802" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Fixed
+                                                                                               <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Fix Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               1.8
+                                                                                               <span class="hist-value">[    14826
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Closed
+                                                                                               <span class="hist-value">[    6
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -700,7 +891,7 @@ together they make it barf.
 	          
 	               
 	                 
-	        CONCURRENT REQUESTS : 7
+	        CONCURRENT REQUESTS : 4
 
 
 

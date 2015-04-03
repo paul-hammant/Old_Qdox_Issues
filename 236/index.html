@@ -339,7 +339,7 @@
 <p>this could be also wrong in other classes</p>
             </div>
 </div>
-</div></div><div id="activitymodule" class="module toggle-wrap collapsed"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
+</div></div><div id="activitymodule" class="module toggle-wrap"><div id="activitymodule_heading" class="mod-header"><ul class="ops"></ul><h2 class="toggle-title">Activity</h2></div><div class="mod-content">
 
 
 
@@ -356,12 +356,12 @@
                             </div>
                 <ul id="issue-tabs" class="tabs horizontal">
                                 
-            <li data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-236">
-                            <a class="ajax-activity-content" id="all-tabpanel" href="/Old_Qdox_Issues/236"><strong>All</strong></a>
+            <li class="active" id="all-tabpanel" data-id="all-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:all-tabpanel" data-label="All" data-href="/browse/QDOX-236">
+                            <strong>All</strong>
                         </li>
                                 
-            <li class="active" id="comment-tabpanel" data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-236">
-                            <strong>Comments</strong>
+            <li data-id="comment-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel" data-label="Comments" data-href="/browse/QDOX-236">
+                            <a class="ajax-activity-content" id="comment-tabpanel" href="/Old_Qdox_Issues/236"><strong>Comments</strong></a>
                         </li>
                                 
             <li data-id="worklog-tabpanel" data-key="com.atlassian.jira.plugin.system.issuetabpanels:worklog-tabpanel" data-label="Work Log" data-href="/browse/QDOX-236">
@@ -432,6 +432,118 @@
 }
  
                </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-362171">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_362171">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_362171" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="14/Aug/11 2:47 PM"><time class="livestamp" datetime="2011-08-14T14:47-0500">14/Aug/11 2:47 PM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_362171" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <thead>
+                    <tr>
+                        <th width="20%">Field</th>
+                        <th width="40%">Original Value</th>
+                        <th width="40%">New Value</th>
+                    </tr>
+                </thead>
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Description
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                at least in class JavaMethod
+<br>
+
+<br>
+{code]
+<br>
+public int hashCode() {
+<br>
+        int hashCode = name.hashCode();
+<br>
+        if (returns != null) hashCode *= returns.hashCode();
+<br>
+        hashCode *= getParameters().length;
+<br>
+        return hashCode;
+<br>
+    }
+<br>
+{code}
+<br>
+
+<br>
+when parameter.set has zero length, hashcode turns to be zero as well
+<br>
+
+<br>
+this affects usage in Maps
+<br>
+
+<br>
+improvement would be to use:
+<br>
+
+<br>
+<a href="http://commons.apache.org/lang/api-2.4/org/apache/commons/lang/builder/HashCodeBuilder.html">http://commons.apache.org/lang/api-2.4/org/apache/commons/lang/builder/HashCodeBuilder.html</a>
+<br>
+
+<br>
+this could be also wrong in other classes
+                                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               at least in class JavaMethod
+<br>
+
+<br>
+{code}
+<br>
+public int hashCode() {
+<br>
+        int hashCode = name.hashCode();
+<br>
+        if (returns != null) hashCode *= returns.hashCode();
+<br>
+        hashCode *= getParameters().length;
+<br>
+        return hashCode;
+<br>
+    }
+<br>
+{code}
+<br>
+
+<br>
+when parameter.set has zero length, hashcode turns to be zero as well
+<br>
+
+<br>
+this affects usage in Maps
+<br>
+
+<br>
+improvement would be to use:
+<br>
+
+<br>
+<a href="http://commons.apache.org/lang/api-2.4/org/apache/commons/lang/builder/HashCodeBuilder.html">http://commons.apache.org/lang/api-2.4/org/apache/commons/lang/builder/HashCodeBuilder.html</a>
+<br>
+
+<br>
+this could be also wrong in other classes
+                                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -552,6 +664,75 @@ Please verify it and close the issue if it is valid.</p> </div>
     <a class="user-hover user-avatar" rel="rfscholte" id="commentauthor_275849_concise" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
  added a comment  - <span class="commentdate_275849_concise subText"><span class="date user-tz" title="15/Aug/11 3:55 AM"><time class="livestamp" datetime="2011-08-15T03:55-0500">15/Aug/11 3:55 AM</time></span></span>                    Fixed in  rev. 1293  
 Please verify it and close the issue if it is valid.              </div>
+        </div>
+    </div>
+</div>
+                             
+
+<div class="issue-data-block" id="changehistory-362187">
+    <div class="actionContainer">
+        <div class="action-details" id="changehistorydetails_362187">
+                                
+
+    <a class="user-hover user-avatar" rel="rfscholte" id="changehistoryauthor_362187" href="https://jira.codehaus.org/secure/ViewProfile.jspa?name=rfscholte"><span class="aui-avatar aui-avatar-xsmall"><span class="aui-avatar-inner"><img src="index_files/useravatar.png"></span></span> Robert Scholte</a>
+ made changes  - <span class="date" title="15/Aug/11 3:55 AM"><time class="livestamp" datetime="2011-08-15T03:55-0500">15/Aug/11 3:55 AM</time></span>
+        </div>
+        <div class="changehistory action-body">
+            <table id="changehistory_362187" border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Status
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                                Open
+                                                                                                <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                <td class="activity-new-val" width="40%">
+                                                               Resolved
+                                                                                               <span class="hist-value">[    5
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Assignee
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Robert Scholte
+                                                                                               <span class="hist-value">[    rfscholte
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Fix Version/s
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               2.0
+                                                                                               <span class="hist-value">[    15636
+]</span>
+                                                    </td>
+                </tr>
+                            <tr>
+                <td class="activity-name" width="20%">
+                                    Resolution
+                                </td>
+                <td class="activity-old-val" width="40%">
+                                                </td>
+                <td class="activity-new-val" width="40%">
+                                                               Fixed
+                                                                                               <span class="hist-value">[    1
+]</span>
+                                                    </td>
+                </tr>
+                            </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -771,7 +952,7 @@ Just made me realize that I have to review all the equals() as well.            
 	          
 	               
 	                 
-	        CONCURRENT REQUESTS : 7
+	        CONCURRENT REQUESTS : 4
 
 
 
